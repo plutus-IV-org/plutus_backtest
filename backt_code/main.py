@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
+from pipreqs import pipreqs
+
 
 class backtest:
     def __init__(self, comp, b_day, s_day):
