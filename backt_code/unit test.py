@@ -9,3 +9,4 @@ bt = backtest(["FDX", "APA", "MSFT"],
 print(bt.consolidated())
 print(bt.consolidated_detailed())
 
+#Lube
