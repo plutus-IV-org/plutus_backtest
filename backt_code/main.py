@@ -19,7 +19,7 @@ class backtest:
                            "buy day": self.b_day,
                            "sell day": self.s_day})
         self.company_list = df
-
+# Adding one day to the latest
     def max_date(self):
         str_date = max(self.s_day)
         date = datetime.strptime(str_date, "%Y-%m-%d")
@@ -84,6 +84,10 @@ class backtest:
         self.detailed_return = df_daily_returns
         return self.detailed_return
 
+    def equal_weightining(self):
+        binar_weights = self.detailed_return/self.detailed_return
+        self.binar_weights = binar_weights
+        return self.binar_weights
 
     def ploting (self):
         backtest.consolidated_detailed(self)
