@@ -2,6 +2,7 @@ import pandas as pd
 import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 
 
 
@@ -18,17 +19,24 @@ class backtest:
                            "sell day": self.s_day})
         self.company_list = df
 
+# Adding one day to the latest
+    def end_date(self):
+        str_date = max(self.s_day)
+        date = datetime.strptime(str_date, "%Y-%m-%d")
+        modified_date = date + timedelta(days=1)
+        back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+        self.end_date = back_to_str
 
     def pricing(self):
-        backtest.company_list(self)
+        backtest.end_date(self)
         symbols = self.company_list['company'].values.tolist()
-        data = yf.download(symbols, start=min(self.b_day), end=max(self.s_day))
+        data = yf.download(symbols, start=min(self.b_day), end=self.end_date, prepost = True)
         price = data[["Open", 'Adj Close']]
         price.index = price.index.strftime('%Y-%m-%d')
         self.price = price
 
-
-    def consolidated(self):
+    def consolidated_table_general(self):
+        backtest.company_list(self)
         backtest.pricing(self)
         df_1 = self.company_list
         df_2 = self.price
@@ -36,60 +44,71 @@ class backtest:
         buy_list = []
         sell_list = []
 
-        for com, b_d, s_d in zip (df_1["company"], df_1["buy day"], df_1["sell day"]):
+        for com, b_d, s_d in zip(df_1["company"], df_1["buy day"], df_1["sell day"]):
             buy_list.append(df_2.loc[b_d, df_2.columns.get_level_values(1) == com]["Open"][0])
-            sell_list.append(df_2.loc[b_d, df_2.columns.get_level_values(1) == com]["Adj Close"][0])
+            sell_list.append(df_2.loc[s_d, df_2.columns.get_level_values(1) == com]["Adj Close"][0])
 
         df_1["buy price"] = buy_list
         df_1["sell price"] = sell_list
-        self.table = df_1
-        return self.table
+        self.general_return = df_1
+        return self.general_return
 
-
-    def consolidated_detailed(self):
-        backtest.consolidated(self)
+    def consolidated_table_detailed(self):
+        backtest.company_list(self)
+        df_1 = self.company_list
         initial_df = pd.DataFrame()
 
-        for com, b_d, s_d in zip(self.table["company"], self.table["buy day"], self.table["sell day"]):
+        for com, b_d, s_d in zip(df_1["company"], df_1["buy day"], df_1["sell day"]):
             data = yf.download(com, start=b_d, end=s_d)
             data["Ticker"] = com
             initial_df = pd.concat([initial_df, data])
 
-        df = initial_df[["Ticker", "Adj Close"]]
-        df.columns = ['ticker', 'price']
-        df1 = df.pivot_table(index=df.index, columns='ticker', values=['price'])
+        df_close = initial_df[["Ticker", "Adj Close"]]
+        df_close.columns = ['ticker', 'close_price']
+        df_close_pivot = df_close.pivot_table(index=df_close.index, columns='ticker', values=['close_price'])
+        df_close_pivot = df_close_pivot.replace([np.inf, -np.inf], np.nan)
+        #df_close_pivot = df_close_pivot.fillna(method ="ffill")
+        df_close_pivot = df_close_pivot.fillna(0)
+        df_close_pivot = df_close_pivot.apply(pd.to_numeric)
+        df_close_first_row = df_close_pivot.iloc[:1,:].values.tolist()
 
-        df1 = df1.replace([np.inf, -np.inf], np.nan)
-        df1 = df1.fillna(method = "ffill")
-        df1 = df1.fillna(0)
-        df1 = df1.apply(pd.to_numeric)
 
-        df_daily_returns = df1.pct_change()
+        df_open = initial_df[["Ticker", "Open"]]
+        df_open.columns = ['ticker', 'open_price']
+        df_open_pivot = df_open.pivot_table(index=df_open.index, columns='ticker', values=['open_price'])
+        df_open_pivot = df_open_pivot.replace([np.inf, -np.inf], np.nan)
+        #df_open_pivot = df_open_pivot.fillna(method="ffill")
+        df_open_pivot = df_open_pivot.fillna(0)
+        df_open_pivot = df_open_pivot.apply(pd.to_numeric)
+        df_open_first_row = df_open_pivot.iloc[:1,:].values.tolist()
 
+        df_daily_returns = df_close_pivot.pct_change()
+
+        df_first_row_values = []
+        for x, y in zip(df_close_first_row[0], df_open_first_row[0]):
+            if y == 0:
+                df_first_row_values.append(0)
+            else:
+                df_first_row_values.append((x / y) - 1)
+
+        df_daily_returns.iloc[:1, :] = df_first_row_values
         df_daily_returns = df_daily_returns.replace([np.inf, -np.inf], np.nan)
         df_daily_returns = df_daily_returns.fillna(0)
         df_daily_returns = df_daily_returns.apply(pd.to_numeric)
 
         df_daily_returns["Total"] = df_daily_returns.sum(axis=1)
-
-
-        #df_daily_returns = df_daily_returns.replace([np.inf, -np.inf], np.nan)
-        #df_daily_returns = df_daily_returns.fillna(0)
-
-        #df_daily_returns = df_daily_returns.apply(pd.to_numeric) * 100
-
-        df_daily_returns = df_daily_returns.iloc[1: , :]
-
         df_daily_returns["Cumulative return"] = (1 + df_daily_returns["Total"]).cumprod()
 
-
-        #cum_prod = (1+df_daily_returns).cumprod()
         self.detailed_return = df_daily_returns
         return self.detailed_return
 
+    def equal_weightining(self):
+        binar_weights = self.detailed_return/self.detailed_return
+        self.binar_weights = binar_weights
+        return self.binar_weights
 
     def ploting (self):
-        backtest.consolidated_detailed(self)
+        backtest.consolidated_table_detailed(self)
 
         fig2 = plt.figure(figsize=(15, 7))
         ax2 = fig2.add_subplot(1, 1, 1)
@@ -100,11 +119,3 @@ class backtest:
         plt.show()
 
 
-
-bt = backtest(["FDX", "APA"],
-              ["2017-01-03", "2021-03-02"],
-              ["2021-02-12", "2021-05-12"])
-
-
-print(bt.consolidated_detailed())
-print(bt.ploting())
