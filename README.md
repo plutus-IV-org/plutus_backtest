@@ -1,6 +1,11 @@
 # backt
 # CEO WIlliam observation
 
+1. We start form 15 why we got 14 as the begining? its going in the all dfs in the code
+
+
+
+
 --------------------Illia--------------------
 1. def max_date ... perhaps it's more convenient to get a self.end_date and not to run each time function while downloading yahoo (row 33)
 2. Rows 71 & 72 are the same perhaps u wanna fill 0 only if the 1st row is nan, right?

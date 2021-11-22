@@ -96,16 +96,26 @@ class backtest:
         df_daily_returns = df_daily_returns.fillna(0)
         df_daily_returns = df_daily_returns.apply(pd.to_numeric)
 
-        df_daily_returns["Total"] = df_daily_returns.sum(axis=1)
-        df_daily_returns["Cumulative return"] = (1 + df_daily_returns["Total"]).cumprod()
 
+        #Df for counting equal distributed weights
+        self.auxiliar_df = df_close_pivot
         self.detailed_return = df_daily_returns
         return self.detailed_return
 
     def equal_weightining(self):
-        binar_weights = self.detailed_return/self.detailed_return
-        self.binar_weights = binar_weights
-        return self.binar_weights
+        binar_weights = self.auxiliar_df/self.auxiliar_df
+        binar_weights.fillna(value=0, inplace = True)
+        sum_of_binars = binar_weights.sum(axis=1)
+        equal_distribution = binar_weights.div(sum_of_binars, axis = 0)
+        self.equal_distribution = equal_distribution
+
+    def portfolio_return_equal_wieghts(self):
+        port_performance =self.equal_distribution * self.detailed_return
+        port_performance['Sum'] = port_performance.sum(axis =1)
+        port_performance['Sum'] = port_performance['Sum'] +1
+        port_performance['Accumulation'] = port_performance['Sum'].cumprod()
+        self.final_portfolio_frame = port_performance
+        return self.final_portfolio_frame
 
     def ploting (self):
         backtest.consolidated_table_detailed(self)
