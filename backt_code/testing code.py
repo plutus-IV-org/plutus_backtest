@@ -8,5 +8,5 @@ bt = backtest(["ATVI", "DXC", "APA"],
 
 print(bt.consolidated_table_detailed())
 print(bt.equal_weightining())
-print(bt.portfolio_return_equal_wieghts())
-print(bt.equal_weightining())
+print(bt.portfolio_return_equal_weights())
+#print(bt.equal_weightining())

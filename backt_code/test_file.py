@@ -19,7 +19,7 @@ class backtest:
                            "sell day": self.s_day})
         self.company_list = df
 
-# Adding one day to the latest
+# FOR GENERAL VIEW Adding one day to last sell date
     def end_date(self):
         str_date = max(self.s_day)
         date = datetime.strptime(str_date, "%Y-%m-%d")
@@ -27,10 +27,27 @@ class backtest:
         back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
         self.end_date = back_to_str
 
+# FOR GENERAL VIEW Adding one day to first buy date
+    def start_date(self):
+        str_date = min(self.b_day)
+        date = datetime.strptime(str_date, "%Y-%m-%d")
+        modified_date = date + timedelta(days=1)
+        back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+        self.start_date = back_to_str
+
+# FOR DETAILED VIEW Adding one day to first buy and last sell dates
+    def date_plus_one (self, d):
+        str_date = d
+        date = datetime.strptime(str_date, "%Y-%m-%d")
+        modified_date = date + timedelta(days=1)
+        back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+        return back_to_str
+
     def pricing(self):
+        backtest.start_date(self)
         backtest.end_date(self)
         symbols = self.company_list['company'].values.tolist()
-        data = yf.download(symbols, start=min(self.b_day), end=self.end_date, prepost = True)
+        data = yf.download(symbols, start=self.start_date, end=self.end_date, prepost = True)
         price = data[["Open", 'Adj Close']]
         price.index = price.index.strftime('%Y-%m-%d')
         self.price = price
@@ -59,7 +76,7 @@ class backtest:
         initial_df = pd.DataFrame()
 
         for com, b_d, s_d in zip(df_1["company"], df_1["buy day"], df_1["sell day"]):
-            data = yf.download(com, start=b_d, end=s_d)
+            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d))
             data["Ticker"] = com
             initial_df = pd.concat([initial_df, data])
 
@@ -109,7 +126,7 @@ class backtest:
         equal_distribution = binar_weights.div(sum_of_binars, axis = 0)
         self.equal_distribution = equal_distribution
 
-    def portfolio_return_equal_wieghts(self):
+    def portfolio_return_equal_weights(self):
         port_performance =self.equal_distribution * self.detailed_return
         port_performance['Sum'] = port_performance.sum(axis =1)
         port_performance['Sum'] = port_performance['Sum'] +1
