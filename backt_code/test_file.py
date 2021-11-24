@@ -7,11 +7,11 @@ from datetime import datetime, timedelta
 
 
 class backtest:
-    def __init__(self, comp, b_day, s_day):
+    def __init__(self, comp, b_day, s_day, weights_factor= None):
         self.comp = comp
         self.b_day = b_day
         self.s_day = s_day
-
+        self.w_factor = weights_factor if weights_factor is not None else np.ones(len(comp))
 
     def company_list(self):
         df = pd.DataFrame({"company": self.comp,
@@ -83,6 +83,8 @@ class backtest:
         df_close = initial_df[["Ticker", "Adj Close"]]
         df_close.columns = ['ticker', 'close_price']
         df_close_pivot = df_close.pivot_table(index=df_close.index, columns='ticker', values=['close_price'])
+        df_close_pivot.columns = df_close_pivot.columns.droplevel()
+        df_close_pivot = df_close_pivot[self.comp]
         df_close_pivot = df_close_pivot.replace([np.inf, -np.inf], np.nan)
         #df_close_pivot = df_close_pivot.fillna(method ="ffill")
         df_close_pivot = df_close_pivot.fillna(0)
@@ -93,6 +95,8 @@ class backtest:
         df_open = initial_df[["Ticker", "Open"]]
         df_open.columns = ['ticker', 'open_price']
         df_open_pivot = df_open.pivot_table(index=df_open.index, columns='ticker', values=['open_price'])
+        df_open_pivot.columns = df_open_pivot.columns.droplevel()
+        df_open_pivot = df_open_pivot[self.comp]
         df_open_pivot = df_open_pivot.replace([np.inf, -np.inf], np.nan)
         #df_open_pivot = df_open_pivot.fillna(method="ffill")
         df_open_pivot = df_open_pivot.fillna(0)
@@ -114,25 +118,25 @@ class backtest:
         df_daily_returns = df_daily_returns.apply(pd.to_numeric)
 
 
-        #Df for counting equal distributed weights
+        #Df for counting weights
         self.auxiliar_df = df_close_pivot
         self.detailed_return = df_daily_returns
         return self.detailed_return
 
-    def equal_weightining(self):
-        binar_weights = self.auxiliar_df/self.auxiliar_df
-        binar_weights.fillna(value=0, inplace = True)
-        sum_of_binars = binar_weights.sum(axis=1)
-        equal_distribution = binar_weights.div(sum_of_binars, axis = 0)
-        self.equal_distribution = equal_distribution
 
-    def portfolio_return_equal_weights(self):
-        port_performance =self.equal_distribution * self.detailed_return
-        port_performance['Sum'] = port_performance.sum(axis =1)
-        port_performance['Sum'] = port_performance['Sum'] +1
+    def portfolio_weights(self):
+        binar_weights = self.auxiliar_df / self.auxiliar_df
+        binar_weights.fillna(value=0, inplace=True)
+        fac_summing = np.sum(abs(np.array(self.w_factor)))
+        dist = np.array(self.w_factor)/fac_summing
+        weights_df = binar_weights * dist
+        port_performance = weights_df * self.detailed_return
+        port_performance['Sum'] = port_performance.sum(axis=1)
+        port_performance['Sum'] = port_performance['Sum'] + 1
         port_performance['Accumulation'] = port_performance['Sum'].cumprod()
-        self.final_portfolio_frame = port_performance
-        return self.final_portfolio_frame
+
+        self.final_portfolio = port_performance
+        return self.final_portfolio
 
     def ploting (self):
         backtest.consolidated_table_detailed(self)
