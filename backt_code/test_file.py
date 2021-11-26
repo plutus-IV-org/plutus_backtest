@@ -19,22 +19,6 @@ class backtest:
                            "sell day": self.s_day})
         self.company_list = df
 
-# FOR GENERAL VIEW Adding one day to last sell date
-    def end_date(self):
-        str_date = max(self.s_day)
-        date = datetime.strptime(str_date, "%Y-%m-%d")
-        modified_date = date + timedelta(days=1)
-        back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
-        self.end_date = back_to_str
-
-# FOR GENERAL VIEW Adding one day to first buy date
-    def start_date(self):
-        str_date = min(self.b_day)
-        date = datetime.strptime(str_date, "%Y-%m-%d")
-        modified_date = date + timedelta(days=1)
-        back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
-        self.start_date = back_to_str
-
 # FOR DETAILED VIEW Adding one day to first buy and last sell dates
     def date_plus_one (self, d):
         str_date = d
@@ -42,33 +26,6 @@ class backtest:
         modified_date = date + timedelta(days=1)
         back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
         return back_to_str
-
-    def pricing(self):
-        backtest.start_date(self)
-        backtest.end_date(self)
-        symbols = self.company_list['company'].values.tolist()
-        data = yf.download(symbols, start=self.start_date, end=self.end_date, prepost = True)
-        price = data[["Open", 'Adj Close']]
-        price.index = price.index.strftime('%Y-%m-%d')
-        self.price = price
-
-    def consolidated_table_general(self):
-        backtest.company_list(self)
-        backtest.pricing(self)
-        df_1 = self.company_list
-        df_2 = self.price
-
-        buy_list = []
-        sell_list = []
-
-        for com, b_d, s_d in zip(df_1["company"], df_1["buy day"], df_1["sell day"]):
-            buy_list.append(df_2.loc[b_d, df_2.columns.get_level_values(1) == com]["Open"][0])
-            sell_list.append(df_2.loc[s_d, df_2.columns.get_level_values(1) == com]["Adj Close"][0])
-
-        df_1["buy price"] = buy_list
-        df_1["sell price"] = sell_list
-        self.general_return = df_1
-        return self.general_return
 
     def consolidated_table_detailed(self):
         backtest.company_list(self)
@@ -141,4 +98,3 @@ class backtest:
         plt.show()
 
 
-##
