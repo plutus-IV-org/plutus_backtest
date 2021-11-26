@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4a972dd2-f9ba-434a-b3da-c613e4b723df" name="Changes" comment="24/11/21 Weightings performed - fitted in one block only.">
-      <change beforePath="$PROJECT_DIR$/backt_code/test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/backt_code/test_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backt_code/testing code.py" beforeDir="false" afterPath="$PROJECT_DIR$/backt_code/testing code.py" afterDir="false" />
-    </list>
+    <list default="true" id="4a972dd2-f9ba-434a-b3da-c613e4b723df" name="Changes" comment="26/11/21 Fixed close/open for 1st day relationship, shorten the code." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -140,7 +137,21 @@
       <option name="project" value="LOCAL" />
       <updated>1637751799239</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="26/11/21 Fixed close/open for 1st day relationship, shorten the code">
+      <created>1637924470443</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1637924470443</updated>
+    </task>
+    <task id="LOCAL-00006" summary="26/11/21 Fixed close/open for 1st day relationship, shorten the code.">
+      <created>1637924586468</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1637924586468</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -172,17 +183,12 @@
     <MESSAGE value="19/11/21 Bolotik" />
     <MESSAGE value="22/11/21 Illia: equal weights distribution + portfoliop erformance" />
     <MESSAGE value="24/11/21 Weightings performed - fitted in one block only." />
-    <option name="LAST_COMMIT_MESSAGE" value="24/11/21 Weightings performed - fitted in one block only." />
+    <MESSAGE value="26/11/21 Fixed close/open for 1st day relationship, shorten the code" />
+    <MESSAGE value="26/11/21 Fixed close/open for 1st day relationship, shorten the code." />
+    <option name="LAST_COMMIT_MESSAGE" value="26/11/21 Fixed close/open for 1st day relationship, shorten the code." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/backt_code/test_file.py</url>
-          <line>128</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
