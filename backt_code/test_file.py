@@ -79,52 +79,43 @@ class backtest:
             data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d))
             data["Ticker"] = com
             initial_df = pd.concat([initial_df, data])
-
         df_close = initial_df[["Ticker", "Adj Close"]]
         df_close.columns = ['ticker', 'close_price']
-        df_close_pivot = df_close.pivot_table(index=df_close.index, columns='ticker', values=['close_price'])
-        df_close_pivot.columns = df_close_pivot.columns.droplevel()
-        df_close_pivot = df_close_pivot[self.comp]
-        df_close_pivot = df_close_pivot.replace([np.inf, -np.inf], np.nan)
-        #df_close_pivot = df_close_pivot.fillna(method ="ffill")
-        df_close_pivot = df_close_pivot.fillna(0)
-        df_close_pivot = df_close_pivot.apply(pd.to_numeric)
-        df_close_first_row = df_close_pivot.iloc[:1,:].values.tolist()
-
-
         df_open = initial_df[["Ticker", "Open"]]
-        df_open.columns = ['ticker', 'open_price']
-        df_open_pivot = df_open.pivot_table(index=df_open.index, columns='ticker', values=['open_price'])
-        df_open_pivot.columns = df_open_pivot.columns.droplevel()
-        df_open_pivot = df_open_pivot[self.comp]
-        df_open_pivot = df_open_pivot.replace([np.inf, -np.inf], np.nan)
-        #df_open_pivot = df_open_pivot.fillna(method="ffill")
-        df_open_pivot = df_open_pivot.fillna(0)
-        df_open_pivot = df_open_pivot.apply(pd.to_numeric)
-        df_open_first_row = df_open_pivot.iloc[:1,:].values.tolist()
-
-        df_daily_returns = df_close_pivot.pct_change()
-
-        df_first_row_values = []
-        for x, y in zip(df_close_first_row[0], df_open_first_row[0]):
-            if y == 0:
-                df_first_row_values.append(0)
-            else:
-                df_first_row_values.append((x / y) - 1)
-
-        df_daily_returns.iloc[:1, :] = df_first_row_values
-        df_daily_returns = df_daily_returns.replace([np.inf, -np.inf], np.nan)
-        df_daily_returns = df_daily_returns.fillna(0)
-        df_daily_returns = df_daily_returns.apply(pd.to_numeric)
-
-
-        #Df for counting weights
-        self.auxiliar_df = df_close_pivot
-        self.detailed_return = df_daily_returns
+        df_open.columns = ['ticker', 'open']
+        open_price = df_open.groupby('ticker').first()
+        em1 = pd.DataFrame()
+        em2 =pd.DataFrame()
+        for x in open_price.index:
+            get_open = open_price.loc[x]
+            get_end = df_close[df_close['ticker']==x]
+            fake_df = pd.DataFrame(index=get_end.index, columns=['ticker', 'close_price'])
+            fake_df = pd.DataFrame(fake_df.iloc[0]).T
+            fake_df.iloc[0, 0] = x
+            fake_df.iloc[0, 1] = get_open.values[0]
+            merged_df = fake_df.append(get_end)
+            merged_df['daily_change']=merged_df['close_price'].pct_change()
+            merged_df = merged_df.iloc[1:]
+            aux_df = merged_df[['ticker', 'close_price']]
+            work_df = merged_df[['ticker', 'daily_change']]
+            em1 = em1.append(aux_df)
+            em2 = em2.append(work_df)
+        dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
+        dc = dc[self.comp]
+        dc = dc.replace([np.inf, -np.inf], np.nan)
+        dc = dc.fillna(0)
+        dc = dc.apply(pd.to_numeric)
+        aux = em1.pivot_table(index=em2.index, columns='ticker', values='close_price')
+        aux = aux[self.comp]
+        aux = aux.replace([np.inf, -np.inf], np.nan)
+        aux = aux.fillna(0)
+        aux = aux.apply(pd.to_numeric)
+        self.auxiliar_df = aux
+        self.detailed_return = dc
         return self.detailed_return
 
 
-    def portfolio_weights(self):
+    def portfolio_construction(self):
         binar_weights = self.auxiliar_df / self.auxiliar_df
         binar_weights.fillna(value=0, inplace=True)
         fac_summing = np.sum(abs(np.array(self.w_factor)))
