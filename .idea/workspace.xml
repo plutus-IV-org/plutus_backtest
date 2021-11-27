@@ -18,12 +18,35 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/backt_code/main.py" root0="SKIP_INSPECTION" />
   </component>
+  <component name="ProjectId" id="21Us7x0u3TfKQD58H4HquNshkFu" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4a972dd2-f9ba-434a-b3da-c613e4b723df" name="Changes" comment="26/11/21 Fixed close/open for 1st day relationship, shorten the code." />
+      <created>1638006843547</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1638006843547</updated>
+    </task>
+    <task id="LOCAL-00001" summary="26/11/21 Fixed close/open for 1st day relationship, shorten the code.">
+      <created>1638007140590</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1638007140590</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -37,5 +60,9 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="26/11/21 Fixed close/open for 1st day relationship, shorten the code." />
+    <option name="LAST_COMMIT_MESSAGE" value="26/11/21 Fixed close/open for 1st day relationship, shorten the code." />
   </component>
 </project>
