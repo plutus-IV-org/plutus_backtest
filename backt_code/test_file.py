@@ -97,4 +97,29 @@ class backtest:
         ax2.set_title('Portfolio Cumulative Returns')
         plt.show()
 
+    def general_statistic(self):
+        obj = self.final_portfolio
+        pdr = obj['Sum'] -1
+        self.port_mean = pdr.mean()
+        self.port_mean_pct = self.port_mean * 100
+        self.port_std = pdr.std()
+        self.LPM_0 = len(pdr[pdr<0])/len(pdr)
+        self.LPM_1 = pdr.clip(upper=0).mean()
+        self.LPM_2 = pdr.clip(upper=0).std()
+        topless_pdr = pdr[pdr<self.port_std]
+        botless_prd = topless_pdr[topless_pdr>-self.port_std]
+        self.inner_mean = botless_prd.mean()
+        obj_only_stocks =obj.drop(columns=['Sum', 'Accumulation'])
+        self.stocks_mean = obj_only_stocks.mean()
+        self.top_per = self.stocks_mean.nlargest(1)
+        self.worst_per = self.stocks_mean.nsmallest(1)
+        self.trade_length = len(pdr)
+
+    def Var_and_CVaR(self):
+        VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
+        VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
+        CVaR = self.LPM_1/self.LPM_0
+        print(f'There is 95% confidence that we will not lose more than {round(100*VaR_95,2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'There is 99% confidence that we will not lose more than {round(100*VaR_99,2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'Expected loss that occur beyond the shortfall is {round(CVaR,4)}.')
 

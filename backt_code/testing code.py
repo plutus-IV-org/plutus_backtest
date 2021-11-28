@@ -8,4 +8,6 @@ bt = backtest(["ATVI", "DXC", "APA"],
 
 print(bt.consolidated_table_detailed())
 print(bt.portfolio_construction())
+print(bt.general_statistic())
+print(bt.Var_and_CVaR())
 ##
