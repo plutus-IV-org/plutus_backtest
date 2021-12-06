@@ -122,66 +122,51 @@ class backtest:
                 new_dist_frame = pd.DataFrame(columns=act.index, data=new_dist).T
                 for i in new_dist_frame.index:
                     weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
-
         port_performance = weights_df * self.detailed_return
-        port_performance_drawdown = port_performance.copy()
-
         port_performance['Sum'] = port_performance.sum(axis=1)
         port_performance['Sum'] = port_performance['Sum'] + 1
         port_performance['Accumulation'] = port_performance['Sum'].cumprod()
 
-        port_performance_drawdown = port_performance_drawdown.clip(upper = 0)
-        port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
-        port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
-        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
-
-        self.drawdown = port_performance_drawdown
         self.final_portfolio = port_performance
+
         return self.final_portfolio
 
     def ploting (self):
         df = backtest.portfolio_construction(self)
-        df = df.round(decimals = 3)
-
+        df = df.round(decimals=3)
+        port_performance_drawdown = self.final_portfolio.copy()
+        port_performance_drawdown = port_performance_drawdown.clip(upper=0)
+        port_performance_drawdown = port_performance_drawdown.drop(columns = ['Sum', 'Accumulation'])
+        port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
+        port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
+        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
+        self.drawdown = port_performance_drawdown
         df_drawdown = self.drawdown
         df_drawdown = df_drawdown.round(decimals=3)
-
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"],
                        hover_data=df.columns[:-2]) #show all columns values excluding last 2
-
         fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
                        hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
-
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
         figure1_traces = []
         figure2_traces = []
-
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
-
         for trace in range(len(fig2["data"])):
             figure2_traces.append(fig2["data"][trace])
-
         # Create a 1x2 subplot
         this_figure = sp.make_subplots(rows=2, cols=1)
-
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
-
         for traces in figure2_traces:
             this_figure.append_trace(traces, row=2, col=1)
-
-
-
-
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
     def general_statistic(self):
         backtest.portfolio_construction(self)
-
         obj = self.final_portfolio
         pdr = obj['Sum'] -1
         self.port_mean = pdr.mean()
@@ -207,5 +192,41 @@ class backtest:
         print(f'There is 99% confidence that we will not lose more than {round(100*VaR_99,2)} % of your portfolio in a given {self.trade_length} period.')
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR,4)}.')
     def puzzle_assembly(self, dic):
-        return
+        names = dic.keys()
+        empty_frame = pd.DataFrame()
+        for x in names:
+            q1 = dic[x].drop(columns=['Accumulation'])
+            empty_frame = empty_frame.append(q1)
+            empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
+        df = empty_frame
+        df = df.round(decimals=3)
+        port_performance_drawdown = df.copy()
+        port_performance_drawdown = port_performance_drawdown.clip(upper=0)
+        port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
+        port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
+        port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
+        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
+        port_performance_drawdown = port_performance_drawdown.round(decimals=3)
+        df_drawdown = port_performance_drawdown
+        # Create figures in Express
+        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
+                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
+        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
+                       hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
+        # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
+        # This is essentially breaking down the Express fig1 into it's traces
+        figure1_traces = []
+        figure2_traces = []
+        for trace in range(len(fig1["data"])):
+            figure1_traces.append(fig1["data"][trace])
+        for trace in range(len(fig2["data"])):
+            figure2_traces.append(fig2["data"][trace])
+        # Create a 1x2 subplot
+        this_figure = sp.make_subplots(rows=2, cols=1)
+        for traces in figure1_traces:
+            this_figure.append_trace(traces, row=1, col=1)
+        for traces in figure2_traces:
+            this_figure.append_trace(traces, row=2, col=1)
+        this_figure.update_layout(hovermode='x')
+        this_figure.show()
 
