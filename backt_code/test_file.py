@@ -133,6 +133,22 @@ class backtest:
 
     def ploting (self):
         df = backtest.portfolio_construction(self)
+        # Monthly prod
+        mon = []
+        for x in self.final_portfolio.index:
+            mon.append(x.strftime("%Y-%m"))
+        months = set(mon)
+        d = []
+        v = []
+        for x in months:
+            n = self.final_portfolio.loc[x, 'Sum'].prod()
+            d.append(x)
+            v.append(n)
+        com_frame = pd.DataFrame(index=d, data=v)
+        com_frame = com_frame.sort_index()
+        com_frame.index = pd.to_datetime(com_frame.index)
+        #Need only to plot com_frame
+
         df = df.round(decimals=3)
         port_performance_drawdown = self.final_portfolio.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
@@ -183,13 +199,15 @@ class backtest:
         self.top_per = self.stocks_mean.nlargest(1)
         self.worst_per = self.stocks_mean.nsmallest(1)
         self.trade_length = len(pdr)
-
-    def Var_and_CVaR(self):
         VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1/self.LPM_0
-        print(f'There is 95% confidence that we will not lose more than {round(100*VaR_95,2)} % of your portfolio in a given {self.trade_length} period.')
-        print(f'There is 99% confidence that we will not lose more than {round(100*VaR_99,2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'Portfolio daily average return is {round(self.port_mean,2)}.')
+        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
+        print(f'Daily average return for approximately 90% population is {round(self.inner_mean,2)}.')
+        print(f'Downside daily probability is {round(self.LPM_0,2)}.')
+        print(f'There is 95% confidence that you will not lose more than {round(100*VaR_95,2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'There is 99% confidence that you will not lose more than {round(100*VaR_99,2)} % of your portfolio in a given {self.trade_length} period.')
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR,4)}.')
 
     def puzzle_assembly(self, dic):
@@ -198,14 +216,12 @@ class backtest:
         for x in names:
             q1 = dic[x][dic[x].columns[:-2]]
             empty_frame = empty_frame.append(q1)
-
         empty_frame = empty_frame.sort_index(ascending=True)
         empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
         empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
         df = empty_frame.copy()
         df = df.round(decimals=3)
         df = df.fillna(0)
-
         port_performance_drawdown = df.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
@@ -214,6 +230,24 @@ class backtest:
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
         port_performance_drawdown = port_performance_drawdown.round(decimals=3)
         df_drawdown = port_performance_drawdown
+
+        # Monthly prod
+        mon = []
+        for x in empty_frame.index:
+            mon.append(x.strftime("%Y-%m"))
+        months = set(mon)
+        d = []
+        v = []
+        for x in months:
+            n = empty_frame.loc[x, 'Sum'].prod()
+            d.append(x)
+            v.append(n)
+        com_frame = pd.DataFrame(index=d, data=v)
+        com_frame = com_frame.sort_index()
+        com_frame.index = pd.to_datetime(com_frame.index)
+
+        com_frame
+        # Need only to plot com_frame
 
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"], hover_data=df.columns[:-2])  # show all columns values excluding last 2
@@ -235,3 +269,40 @@ class backtest:
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
+    def puzzle_statistic(self, dic):
+        names = dic.keys()
+        empty_frame = pd.DataFrame()
+        for x in names:
+            q1 = dic[x][dic[x].columns[:-2]]
+            empty_frame = empty_frame.append(q1)
+
+        empty_frame = empty_frame.sort_index(ascending=True)
+        empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
+        empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
+        pdr = empty_frame['Sum'] - 1
+        port_mean = pdr.mean()
+        port_mean_pct = port_mean * 100
+        port_std = pdr.std()
+        LPM_0 = len(pdr[pdr < 0]) / len(pdr)
+        LPM_1 = pdr.clip(upper=0).mean()
+        LPM_2 = pdr.clip(upper=0).std()
+        topless_pdr = pdr[pdr < port_std]
+        botless_prd = topless_pdr[topless_pdr > -port_std]
+        inner_mean = botless_prd.mean()
+        obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
+        stocks_mean = obj_only_stocks.mean()
+        top_per = stocks_mean.nlargest(1)
+        worst_per = stocks_mean.nsmallest(1)
+        trade_length = len(pdr)
+        VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
+        VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
+        CVaR = LPM_1 / LPM_0
+        print(f'Portfolio daily average return is {round(port_mean, 2)}.')
+        print(f'Portfolio standard deviation is {round(port_std, 2)}.')
+        print(f'Daily average return for approximately 90% population is {round(inner_mean, 2)}.')
+        print(f'Downside daily probability is {round(LPM_0, 2)}.')
+        print(
+            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {trade_length} period.')
+        print(
+            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {trade_length} period.')
+        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')

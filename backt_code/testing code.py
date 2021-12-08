@@ -13,9 +13,11 @@ bt2 = backtest(["NAVI", "SF", "DXC"],
               ["2021-11-17", "2021-11-17", "2021-11-17"])
 bt.portfolio_construction()
 bt2.portfolio_construction()
+bt.general_statistic()
 in_1 = bt.final_portfolio
 in_2 = bt2.final_portfolio
 dic[1]= in_1
 dic[2]= in_2
 
 bt.puzzle_assembly(dic)
+bt.puzzle_statistic(dic)
