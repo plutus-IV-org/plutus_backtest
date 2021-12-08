@@ -191,15 +191,21 @@ class backtest:
         print(f'There is 95% confidence that we will not lose more than {round(100*VaR_95,2)} % of your portfolio in a given {self.trade_length} period.')
         print(f'There is 99% confidence that we will not lose more than {round(100*VaR_99,2)} % of your portfolio in a given {self.trade_length} period.')
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR,4)}.')
+
     def puzzle_assembly(self, dic):
         names = dic.keys()
         empty_frame = pd.DataFrame()
         for x in names:
-            q1 = dic[x].drop(columns=['Accumulation'])
+            q1 = dic[x][dic[x].columns[:-2]]
             empty_frame = empty_frame.append(q1)
-            empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
-        df = empty_frame
+
+        empty_frame = empty_frame.sort_index(ascending=True)
+        empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
+        empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
+        df = empty_frame.copy()
         df = df.round(decimals=3)
+        df = df.fillna(0)
+
         port_performance_drawdown = df.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
@@ -208,11 +214,10 @@ class backtest:
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
         port_performance_drawdown = port_performance_drawdown.round(decimals=3)
         df_drawdown = port_performance_drawdown
+
         # Create figures in Express
-        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
-                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
-        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
-                       hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
+        fig1 = px.line(df, x=df.index, y=df["Accumulation"], hover_data=df.columns[:-2])  # show all columns values excluding last 2
+        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"], hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
         figure1_traces = []

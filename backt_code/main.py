@@ -90,7 +90,8 @@ class backtest:
         return self.binar_weights
 
     def ploting (self):
-        backtest.consolidated_detailed(self)
+        backtest.consolidated_detailed()
+
 
         fig2 = plt.figure(figsize=(15, 7))
         ax2 = fig2.add_subplot(1, 1, 1)
