@@ -107,7 +107,6 @@ class backtest:
 
         return self.detailed_return
 
-
     def portfolio_construction(self):
         """
         :return:
