@@ -9,15 +9,36 @@ from datetime import datetime, timedelta
 
 
 class backtest:
-    def __init__(self, comp, b_day, s_day, weights_factor= None , take_profit=None, stop_loss=None):
+    """ :Parameters:
+
+            comp: str or list
+                Companies taken into the consideration for the backtest.
+            o_day: list of str or timestamps
+                Day/Days of the position opening.
+            c_day: list of str or timestamps
+                Day/Days of the position closing.
+            weights_factor: int or float or array-like default None
+                Optional list of factors which will be considered to define the weights for taken companies. By default
+                all weights are distributed equally, however if the list of factors provided the backtest will maximize
+                the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
+            take_profit: float or int default None
+                List of values determining the level till a particular stock shall be traded.
+            stop_loss: float or int default None
+                List of values determining the level till a particular stock shall be traded.
+            """
+    def __init__(self, comp, o_day, c_day, weights_factor= None , take_profit=None, stop_loss=None):
         self.comp = comp
-        self.b_day = b_day
-        self.s_day = s_day
+        self.b_day = o_day
+        self.s_day = c_day
         self.w_factor = weights_factor if weights_factor is not None else np.ones(len(comp))
         self.tp = take_profit if take_profit is not None else 100 * np.ones(len(comp))
         self.sl = stop_loss if stop_loss is not None else np.zeros(len(comp))
 
     def company_list(self):
+        """
+        :return:
+            DataFrame with all input data.
+        """
         df = pd.DataFrame({"company": self.comp,"start day": self.b_day,"end day": self.s_day,"weights factor": self.w_factor,
                            "take profit": self.tp,"stop loss": self.sl})
         df = df.set_index(df['company'])
@@ -32,10 +53,14 @@ class backtest:
 # FOR DETAILED VIEW Adding one day to first buy and last sell dates
     def date_plus_one (self, d):
         str_date = d
-        date = datetime.strptime(str_date, "%Y-%m-%d")
-        modified_date = date + timedelta(days=1)
-        back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
-        return back_to_str
+        if type(str_date)== str:
+            date = datetime.strptime(str_date, "%Y-%m-%d")
+            modified_date = date + timedelta(days=1)
+            back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+        else:
+            modified_date = str_date + timedelta(days=1)
+            back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+            return back_to_str
 
     def consolidated_table_detailed(self):
         backtest.company_list(self)
@@ -84,8 +109,11 @@ class backtest:
 
 
     def portfolio_construction(self):
+        """
+        :return:
+            Full constructed portfolio, including position length, weights factor, stop loss & take profit.
+        """
         backtest.consolidated_table_detailed(self)
-
         binary_weights = self.auxiliar_df / self.auxiliar_df
         binary_weights.fillna(value=0, inplace=True)
         fac_summing = np.sum(abs(np.array(self.w_factor)))
@@ -100,8 +128,6 @@ class backtest:
                 new_dist_frame = pd.DataFrame(columns = act.index, data = new_dist).T
                 for i in new_dist_frame.index:
                     weights_df.loc[z,i] =float(new_dist_frame.loc[i].values)
-
-
         accu = (self.detailed_return + 1).cumprod()
         for x in accu.columns:
             q1 = accu[x]
@@ -131,7 +157,11 @@ class backtest:
 
         return self.final_portfolio
 
-    def ploting (self):
+    def plotting(self):
+        """
+        :return:
+            Graphical repsresentaion of portfolio performance over given period.
+        """
         df = backtest.portfolio_construction(self)
         # Monthly prod
         mon = []
@@ -211,6 +241,12 @@ class backtest:
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR,4)}.')
 
     def puzzle_assembly(self, dic):
+        """
+        :param dic:
+            dic: aggregated dictionary containing several constructed portfolios
+        :return:
+            Combines several backtests results into one graphical presentation.
+        """
         names = dic.keys()
         empty_frame = pd.DataFrame()
         for x in names:
