@@ -42,12 +42,12 @@ class backtest:
         df = pd.DataFrame({"company": self.comp,"start day": self.b_day,"end day": self.s_day,"weights factor": self.w_factor,
                            "take profit": self.tp,"stop loss": self.sl})
         df = df.set_index(df['company'])
-        for x in df.index:
-            if df.loc[x, "weights factor"] < 0:
-                a = df.loc[x, "stop loss"]
-                b = df.loc[x, "take profit"]
-                df.loc[x,"take profit"] = (1-a) + 1
-                df.loc[x,"stop loss"] = 1 - (b-1)
+        for x in range(len(df.index)):
+            if df.iloc[x, 3] < 0:
+                a = df.iloc[x, 5]
+                b = df.iloc[x, 4]
+                df.iloc[x, 4] = (1 - a) + 1
+                df.iloc[x, 5] = 1 - (b - 1)
         self.company_list = df
 
 # FOR DETAILED VIEW Adding one day to first buy and last sell dates
@@ -57,6 +57,7 @@ class backtest:
             date = datetime.strptime(str_date, "%Y-%m-%d")
             modified_date = date + timedelta(days=1)
             back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+            return back_to_str
         else:
             modified_date = str_date + timedelta(days=1)
             back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
@@ -66,10 +67,21 @@ class backtest:
         backtest.company_list(self)
         df_1 = self.company_list
         initial_df = pd.DataFrame()
+        fq = pd.DataFrame(index=self.comp, data=self.b_day)
+        v = fq.groupby(fq.index) \
+            .cumcount()
+        list_new = []
+        for x in range(len(v.values)):
+            if v.iloc[x] != 0:
+                a2 = v.index[x] + str(v.iloc[x])
+                list_new.append(a2)
+            else:
+                list_new.append(v.index[x])
 
-        for com, b_d, s_d in zip(df_1["company"], df_1["start day"], df_1["end day"]):
-            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d))
-            data["Ticker"] = com
+        for com, b_d, s_d,new_com in zip(df_1["company"], df_1["start day"], df_1["end day"], list_new):
+            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d),
+                               progress=False)
+            data["Ticker"] = new_com
             initial_df = pd.concat([initial_df, data])
         df_close = initial_df[["Ticker", "Adj Close"]]
         df_close.columns = ['ticker', 'close_price']
@@ -93,6 +105,8 @@ class backtest:
             em1 = em1.append(aux_df)
             em2 = em2.append(work_df)
         dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
+        self.comp = list_new
+        backtest.company_list(self)
         dc = dc[self.comp]
         dc = dc.replace([np.inf, -np.inf], np.nan)
         dc = dc.fillna(0)
@@ -176,8 +190,6 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
-        #Need only to plot com_frame
-
         df = df.round(decimals=3)
         port_performance_drawdown = self.final_portfolio.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
@@ -280,10 +292,6 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
-
-        com_frame
-        # Need only to plot com_frame
-
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"], hover_data=df.columns[:-2])  # show all columns values excluding last 2
         fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"], hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
