@@ -68,7 +68,7 @@ class backtest:
         initial_df = pd.DataFrame()
 
         for com, b_d, s_d in zip(df_1["company"], df_1["start day"], df_1["end day"]):
-            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d))
+            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d), progress = False)
             data["Ticker"] = com
             initial_df = pd.concat([initial_df, data])
         df_close = initial_df[["Ticker", "Adj Close"]]
