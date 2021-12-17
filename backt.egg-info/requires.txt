@@ -1,5 +1,4 @@
-pandas
-yfinance
-numpy
-matplotlib.pyplot
-datetime
+numpy==1.21.2
+pandas==1.3.3
+plotly==5.4.0
+yfinance==0.1.63
