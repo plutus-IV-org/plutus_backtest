@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='backt',
-    version='0.0.1',
+    version='0.0.8',
     author="Example Author",
     author_email="author@example.com",
     packages= find_packages(),
@@ -13,8 +13,8 @@ setup(
     install_requires=[
         'pandas',
         'yfinance',
-        'numpy',
-        'matplotlib.pyplot',
-        'datetime'
+        'plotly',
+        'numpy'
     ],
+    python_requires=">=3.9",
 )

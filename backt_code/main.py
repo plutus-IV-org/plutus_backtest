@@ -1,6 +1,7 @@
 import pandas as pd
 import yfinance as yf
 import numpy as np
+import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 from datetime import datetime, timedelta
@@ -41,13 +42,14 @@ class backtest:
         df = pd.DataFrame({"company": self.comp,"start day": self.b_day,"end day": self.s_day,"weights factor": self.w_factor,
                            "take profit": self.tp,"stop loss": self.sl})
         df = df.set_index(df['company'])
-        for x in df.index:
-            if df.loc[x, "weights factor"] < 0:
-                a = df.loc[x, "stop loss"]
-                b = df.loc[x, "take profit"]
-                df.loc[x,"take profit"] = (1-a) + 1
-                df.loc[x,"stop loss"] = 1 - (b-1)
+        for x in range(len(df.index)):
+            if df.iloc[x, 3] < 0:
+                a = df.iloc[x, 5]
+                b = df.iloc[x, 4]
+                df.iloc[x, 4] = (1 - a) + 1
+                df.iloc[x, 5] = 1 - (b - 1)
         self.company_list = df
+        return self.company_list
 
 # FOR DETAILED VIEW Adding one day to first buy and last sell dates
     def date_plus_one (self, d):
@@ -56,20 +58,31 @@ class backtest:
             date = datetime.strptime(str_date, "%Y-%m-%d")
             modified_date = date + timedelta(days=1)
             back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
+            return back_to_str
         else:
             modified_date = str_date + timedelta(days=1)
             back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
-
-        return back_to_str
+            return back_to_str
 
     def consolidated_table_detailed(self):
         backtest.company_list(self)
         df_1 = self.company_list
         initial_df = pd.DataFrame()
+        fq = pd.DataFrame(index=self.comp, data=self.b_day)
+        v = fq.groupby(fq.index) \
+            .cumcount()
+        list_new = []
+        for x in range(len(v.values)):
+            if v.iloc[x] != 0:
+                a2 = v.index[x] + str(v.iloc[x])
+                list_new.append(a2)
+            else:
+                list_new.append(v.index[x])
 
-        for com, b_d, s_d in zip(df_1["company"], df_1["start day"], df_1["end day"]):
-            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d), progress = False)
-            data["Ticker"] = com
+        for com, b_d, s_d,new_com in zip(df_1["company"], df_1["start day"], df_1["end day"], list_new):
+            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d),
+                               progress=False)
+            data["Ticker"] = new_com
             initial_df = pd.concat([initial_df, data])
         df_close = initial_df[["Ticker", "Adj Close"]]
         df_close.columns = ['ticker', 'close_price']
@@ -93,6 +106,8 @@ class backtest:
             em1 = em1.append(aux_df)
             em2 = em2.append(work_df)
         dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
+        self.comp = list_new
+        backtest.company_list(self)
         dc = dc[self.comp]
         dc = dc.replace([np.inf, -np.inf], np.nan)
         dc = dc.fillna(0)
@@ -176,10 +191,6 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
-        com_frame.columns = ["Result"]
-
-        #Need only to plot com_frame
-
         df = df.round(decimals=3)
         port_performance_drawdown = self.final_portfolio.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
@@ -190,38 +201,25 @@ class backtest:
         self.drawdown = port_performance_drawdown
         df_drawdown = self.drawdown
         df_drawdown = df_drawdown.round(decimals=3)
-
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"],
                        hover_data=df.columns[:-2]) #show all columns values excluding last 2
         fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
-                       hover_data=df_drawdown.columns[:-2])
-
-        fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
-
+                       hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
-
         figure1_traces = []
         figure2_traces = []
-        figure3_traces = []
-
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
         for trace in range(len(fig2["data"])):
             figure2_traces.append(fig2["data"][trace])
-        for trace in range(len(fig3["data"])):
-            figure3_traces.append(fig3["data"][trace])
-        #Create a 1x3 subplot
-        this_figure = sp.make_subplots(rows=3, cols=1)
-
+        # Create a 1x2 subplot
+        this_figure = sp.make_subplots(rows=2, cols=1)
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
         for traces in figure2_traces:
             this_figure.append_trace(traces, row=2, col=1)
-        for traces in figure3_traces:
-            this_figure.append_trace(traces, row=3, col=1)
-
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
@@ -261,12 +259,8 @@ class backtest:
         :return:
             Combines several backtests results into one graphical presentation.
         """
-
-
         names = dic.keys()
         empty_frame = pd.DataFrame()
-
-
         for x in names:
             q1 = dic[x][dic[x].columns[:-2]]
             empty_frame = empty_frame.append(q1)
@@ -299,40 +293,23 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
-        com_frame.columns = ["Result"]
-        # Need only to plot com_frame
-
         # Create figures in Express
-        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
-                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
-        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
-                       hover_data=df_drawdown.columns[:-2])
-
-        fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
-
+        fig1 = px.line(df, x=df.index, y=df["Accumulation"], hover_data=df.columns[:-2])  # show all columns values excluding last 2
+        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"], hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
-
         figure1_traces = []
         figure2_traces = []
-        figure3_traces = []
-
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
         for trace in range(len(fig2["data"])):
             figure2_traces.append(fig2["data"][trace])
-        for trace in range(len(fig3["data"])):
-            figure3_traces.append(fig3["data"][trace])
-        # Create a 1x3 subplot
-        this_figure = sp.make_subplots(rows=3, cols=1)
-
+        # Create a 1x2 subplot
+        this_figure = sp.make_subplots(rows=2, cols=1)
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
         for traces in figure2_traces:
             this_figure.append_trace(traces, row=2, col=1)
-        for traces in figure3_traces:
-            this_figure.append_trace(traces, row=3, col=1)
-
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
