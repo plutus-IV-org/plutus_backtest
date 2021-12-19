@@ -191,6 +191,8 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
+        com_frame.columns = ["Result"]
+
         df = df.round(decimals=3)
         port_performance_drawdown = self.final_portfolio.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
@@ -201,25 +203,35 @@ class backtest:
         self.drawdown = port_performance_drawdown
         df_drawdown = self.drawdown
         df_drawdown = df_drawdown.round(decimals=3)
+
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"],
                        hover_data=df.columns[:-2]) #show all columns values excluding last 2
         fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
                        hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
+        fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
         figure1_traces = []
         figure2_traces = []
+        figure3_traces = []
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
         for trace in range(len(fig2["data"])):
             figure2_traces.append(fig2["data"][trace])
-        # Create a 1x2 subplot
-        this_figure = sp.make_subplots(rows=2, cols=1)
+        for trace in range(len(fig3["data"])):
+            figure3_traces.append(fig3["data"][trace])
+
+        #Create a 1x3 subplot
+        this_figure = sp.make_subplots(rows=3, cols=1)
+
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
         for traces in figure2_traces:
             this_figure.append_trace(traces, row=2, col=1)
+        for traces in figure3_traces:
+            this_figure.append_trace(traces, row=3, col=1)
+
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
@@ -293,23 +305,35 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
+        com_frame.columns = ["Result"]
         # Create figures in Express
-        fig1 = px.line(df, x=df.index, y=df["Accumulation"], hover_data=df.columns[:-2])  # show all columns values excluding last 2
-        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"], hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
+        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
+                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
+        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
+                       hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
+        fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
         figure1_traces = []
         figure2_traces = []
+        figure3_traces = []
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
         for trace in range(len(fig2["data"])):
             figure2_traces.append(fig2["data"][trace])
-        # Create a 1x2 subplot
-        this_figure = sp.make_subplots(rows=2, cols=1)
+        for trace in range(len(fig3["data"])):
+            figure3_traces.append(fig3["data"][trace])
+
+        # Create a 1x3 subplot
+        this_figure = sp.make_subplots(rows=3, cols=1)
+
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
         for traces in figure2_traces:
             this_figure.append_trace(traces, row=2, col=1)
+        for traces in figure3_traces:
+            this_figure.append_trace(traces, row=3, col=1)
+
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
@@ -350,3 +374,5 @@ class backtest:
         print(
             f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {trade_length} period.')
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
+
+
