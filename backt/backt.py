@@ -313,7 +313,7 @@ class backtest:
 
     def puzzle_assembly(dic):
         """
-        :param dic:
+        :param:
             dic: aggregated dictionary containing several constructed portfolios
         :return:
             Combines several backtests results into one dataframe
@@ -330,12 +330,14 @@ class backtest:
 
     def puzzle_execution(data):
         """
-        :param data:
+        :param:
             data: aggregated dataframe from several backtests
         :return:
             Combined backtests statistic and cumulative return of the portfolio
         """
         empty_frame = data
+        empty_frame = empty_frame.round(decimals=3)
+        empty_frame = empty_frame.fillna(0)
         pdr = empty_frame['Sum'] - 1
         port_mean = pdr.mean()
         port_mean_pct = port_mean * 100
@@ -369,7 +371,7 @@ class backtest:
 
     def puzzle_plotting(data):
         """
-        :param data:
+        :param:
             data: aggregated dataframe from several backtests
         :return:
             Combines several backtests results into graphical representations
