@@ -4,12 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='backt',
+    name='showel-responsibility',
 
-    version='1.0.1',
+    version='0.0.6',
 
     description="backt is a python library \
     for backtesting your investment decisions using Python 3.9 and above.",
+
+    long_description_content_type='text/markdown',
 
     license="MIT",
 

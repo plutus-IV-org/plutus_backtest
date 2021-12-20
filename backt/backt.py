@@ -203,8 +203,9 @@ class backtest:
         self.stat_frame = frame
         frame = frame.to_string(index=False)
         print (frame)
-        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
+        fig1 = px.line(df, x=df.index, y=df["Accumulation"], title = "Accumulated return",
                        hover_data=df.columns[:-2])  # show all columns values excluding last 2
+        fig1.update_layout(xaxis_title="Date")
         fig1.show()
 
     def plotting(self):
@@ -279,11 +280,13 @@ class backtest:
         fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
                        hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
         fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
+
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
         figure1_traces = []
         figure2_traces = []
         figure3_traces = []
+
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
         for trace in range(len(fig2["data"])):
@@ -292,7 +295,10 @@ class backtest:
             figure3_traces.append(fig3["data"][trace])
 
         #Create a 1x3 subplot
-        this_figure = sp.make_subplots(rows=3, cols=1)
+        this_figure = sp.make_subplots(rows=3, cols=1, vertical_spacing=0.1, shared_xaxes=False,
+                                       subplot_titles=("Accumulative return",
+                                                       "Drawdown",
+                                                       "Monthly return"))
 
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
@@ -302,6 +308,7 @@ class backtest:
             this_figure.append_trace(traces, row=3, col=1)
 
         this_figure.update_layout(hovermode='x')
+        this_figure['layout'].update(height=1400, title='Plotting results')
         this_figure.show()
 
     def puzzle_assembly(dic):
@@ -355,8 +362,9 @@ class backtest:
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         frame = frame.to_string(index=False)
         print(frame)
-        fig1 = px.line(empty_frame, x=empty_frame.index, y=empty_frame["Accumulation"],
+        fig1 = px.line(empty_frame, x=empty_frame.index, y=empty_frame["Accumulation"], title = "Accumulated return",
                        hover_data=empty_frame.columns[:-2])  # show all columns values excluding last 2
+        fig1.update_layout(xaxis_title="Date")
         fig1.show()
 
     def puzzle_plotting(data):
@@ -432,11 +440,13 @@ class backtest:
         fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
                        hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
         fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
+
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
         figure1_traces = []
         figure2_traces = []
         figure3_traces = []
+
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
         for trace in range(len(fig2["data"])):
@@ -445,7 +455,10 @@ class backtest:
             figure3_traces.append(fig3["data"][trace])
 
         # Create a 1x3 subplot
-        this_figure = sp.make_subplots(rows=3, cols=1)
+        this_figure = sp.make_subplots(rows=3, cols=1, vertical_spacing=0.1, shared_xaxes=True,
+                                       subplot_titles=("Accumulative return",
+                                                       "Drawdown",
+                                                       "Monthly return"))
 
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
@@ -455,6 +468,13 @@ class backtest:
             this_figure.append_trace(traces, row=3, col=1)
 
         this_figure.update_layout(hovermode='x')
+        this_figure['layout'].update(height=1200, width=1700, title='Plotting results')
         this_figure.show()
 
 
+
+bt = backtest(["NAVI", "BTC-USD"],
+              ["2021-09-01", "2021-08-01", ],
+              ["2021-10-15", "2021-12-01"])
+
+bt.execution()
