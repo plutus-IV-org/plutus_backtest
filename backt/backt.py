@@ -12,7 +12,7 @@ class backtest:
     """ :Parameters:
 
             asset: str or list
-                Companies taken into the consideration for the backtest.
+                Instruments taken into the consideration for the backtest.
             o_day: list of str or timestamps
                 Day/Days of the position opening.
             c_day: list of str or timestamps
