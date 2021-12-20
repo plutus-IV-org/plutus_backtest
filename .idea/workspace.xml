@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4a972dd2-f9ba-434a-b3da-c613e4b723df" name="Changes" comment="14/12/21 Issue with doubling resolved">
+    <list default="true" id="4a972dd2-f9ba-434a-b3da-c613e4b723df" name="Changes" comment="19/12/21 Mock Readme">
+      <change afterPath="$PROJECT_DIR$/dist/backt-0.0.5-py3-none-any.whl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/backt-0.0.5.tar.gz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/backt-0.0.6-py3-none-any.whl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/backt-0.0.6.tar.gz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/backt-0.0.8-py3-none-any.whl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/backt-0.0.8.tar.gz" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backt/backt.py" beforeDir="false" afterPath="$PROJECT_DIR$/backt/backt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -26,9 +40,6 @@
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
   </component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/backt_code/main.py" root0="SKIP_INSPECTION" />
-  </component>
   <component name="ProjectId" id="216JL3HutqcMZ2a13WSjE3R9A1C" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -39,7 +50,49 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
   </component>
-  <component name="RunManager" selected="Python.testing code">
+  <component name="RunManager" selected="Python.bbb">
+    <configuration name="bbb" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\ilsbo\PycharmProjects\backt\venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backt" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backt/bbb.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fffff" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="backt" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backt_code" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backt_code/fffff.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="test_file" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="backt" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -82,7 +135,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="unit test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="testing" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="backt" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -94,7 +147,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backt_code/unit test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backt_code/testing.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -105,9 +158,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.bbb" />
+        <item itemvalue="Python.testing" />
+        <item itemvalue="Python.fffff" />
         <item itemvalue="Python.testing code" />
         <item itemvalue="Python.test_file" />
-        <item itemvalue="Python.unit test" />
       </list>
     </recent_temporary>
   </component>
@@ -211,7 +266,21 @@
       <option name="project" value="LOCAL" />
       <updated>1639490863228</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="15/12/21 Mock Readme">
+      <created>1639585149216</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1639585149216</updated>
+    </task>
+    <task id="LOCAL-00015" summary="15/12/21 Mock Readme">
+      <created>1639585193966</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1639585193966</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -251,7 +320,8 @@
     <MESSAGE value="06/12/21 Structured statistic + add formula for monthly income" />
     <MESSAGE value="10/12/21 Docstring added." />
     <MESSAGE value="14/12/21 Issue with doubling resolved" />
-    <option name="LAST_COMMIT_MESSAGE" value="14/12/21 Issue with doubling resolved" />
+    <MESSAGE value="15/12/21 Mock Readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="15/12/21 Mock Readme" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

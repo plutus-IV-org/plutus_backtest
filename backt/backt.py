@@ -166,17 +166,73 @@ class backtest:
         port_performance['Sum'] = port_performance.sum(axis=1)
         port_performance['Sum'] = port_performance['Sum'] + 1
         port_performance['Accumulation'] = port_performance['Sum'].cumprod()
-
+        port_performance.columns.name  = None
         self.final_portfolio = port_performance
 
         return self.final_portfolio
 
+    def execution(self):
+        """
+        :return:
+            Backtest statistic and cumulative return of the portfolio
+        """
+        df = backtest.portfolio_construction(self)
+        df = df.round(decimals=3)
+        obj = self.final_portfolio
+        pdr = obj['Sum'] - 1
+        self.port_mean = pdr.mean()
+        self.port_mean_pct = self.port_mean * 100
+        self.port_std = pdr.std()
+        self.LPM_0 = len(pdr[pdr < 0]) / len(pdr)
+        self.LPM_1 = pdr.clip(upper=0).mean()
+        self.LPM_2 = pdr.clip(upper=0).std()
+        topless_pdr = pdr[pdr < self.port_std]
+        botless_prd = topless_pdr[topless_pdr > -self.port_std]
+        self.inner_mean = botless_prd.mean()
+        obj_only_stocks = obj.drop(columns=['Sum', 'Accumulation'])
+        self.stocks_mean = obj_only_stocks.mean()
+        self.top_per = self.stocks_mean.nlargest(1)
+        self.worst_per = self.stocks_mean.nsmallest(1)
+        self.trade_length = len(pdr)
+        VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
+        VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
+        CVaR = self.LPM_1 / self.LPM_0
+        list_1 = ['Mean', 'Std', 'Downside prob', 'Downside mean', 'Downside std', 'Investment period', 'VaR_95', 'VaR_99', 'CVaR']
+        list_2 = [self.port_mean, self.port_std , self.LPM_0, self.LPM_1, self.LPM_2,self.trade_length ,  VaR_95, VaR_99, CVaR ]
+        frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
+        self.stat_frame = frame
+        frame = frame.to_string(index=False)
+        print (frame)
+        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
+                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
+        fig1.show()
+
     def plotting(self):
         """
         :return:
-            Graphical repsresentaion of portfolio performance over given period.
+            Graphical repsresentaion of portfolio performance over the given period.
         """
         df = backtest.portfolio_construction(self)
+        df = df.round(decimals=3)
+        obj = self.final_portfolio
+        pdr = obj['Sum'] - 1
+        self.port_mean = pdr.mean()
+        self.port_mean_pct = self.port_mean * 100
+        self.port_std = pdr.std()
+        self.LPM_0 = len(pdr[pdr < 0]) / len(pdr)
+        self.LPM_1 = pdr.clip(upper=0).mean()
+        self.LPM_2 = pdr.clip(upper=0).std()
+        topless_pdr = pdr[pdr < self.port_std]
+        botless_prd = topless_pdr[topless_pdr > -self.port_std]
+        self.inner_mean = botless_prd.mean()
+        obj_only_stocks = obj.drop(columns=['Sum', 'Accumulation'])
+        self.stocks_mean = obj_only_stocks.mean()
+        self.top_per = self.stocks_mean.nlargest(1)
+        self.worst_per = self.stocks_mean.nsmallest(1)
+        self.trade_length = len(pdr)
+        VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
+        VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
+        CVaR = self.LPM_1 / self.LPM_0
         # Monthly prod
         mon = []
         for x in self.final_portfolio.index:
@@ -197,12 +253,25 @@ class backtest:
         port_performance_drawdown = self.final_portfolio.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns = ['Sum', 'Accumulation'])
+        port_performance_drawdown = abs(port_performance_drawdown)
         port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
         port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
+        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Accumulation'] - 1
+        port_performance_drawdown = port_performance_drawdown * (-1)
         self.drawdown = port_performance_drawdown
         df_drawdown = self.drawdown
         df_drawdown = df_drawdown.round(decimals=3)
+
+        print(f'Portfolio daily average return is {round(self.port_mean, 2)}.')
+        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
+        print(f'Daily average return for approximately 90% population is {round(self.inner_mean, 2)}.')
+        print(f'Downside daily probability is {round(self.LPM_0, 2)}.')
+        print(
+            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
+        print(
+            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
 
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"],
@@ -235,41 +304,12 @@ class backtest:
         this_figure.update_layout(hovermode='x')
         this_figure.show()
 
-    def general_statistic(self):
-        backtest.portfolio_construction(self)
-        obj = self.final_portfolio
-        pdr = obj['Sum'] -1
-        self.port_mean = pdr.mean()
-        self.port_mean_pct = self.port_mean * 100
-        self.port_std = pdr.std()
-        self.LPM_0 = len(pdr[pdr<0])/len(pdr)
-        self.LPM_1 = pdr.clip(upper=0).mean()
-        self.LPM_2 = pdr.clip(upper=0).std()
-        topless_pdr = pdr[pdr<self.port_std]
-        botless_prd = topless_pdr[topless_pdr>-self.port_std]
-        self.inner_mean = botless_prd.mean()
-        obj_only_stocks =obj.drop(columns=['Sum', 'Accumulation'])
-        self.stocks_mean = obj_only_stocks.mean()
-        self.top_per = self.stocks_mean.nlargest(1)
-        self.worst_per = self.stocks_mean.nsmallest(1)
-        self.trade_length = len(pdr)
-        VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
-        VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
-        CVaR = self.LPM_1/self.LPM_0
-        print(f'Portfolio daily average return is {round(self.port_mean,2)}.')
-        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
-        print(f'Daily average return for approximately 90% population is {round(self.inner_mean,2)}.')
-        print(f'Downside daily probability is {round(self.LPM_0,2)}.')
-        print(f'There is 95% confidence that you will not lose more than {round(100*VaR_95,2)} % of your portfolio in a given {self.trade_length} period.')
-        print(f'There is 99% confidence that you will not lose more than {round(100*VaR_99,2)} % of your portfolio in a given {self.trade_length} period.')
-        print(f'Expected loss that occur beyond the shortfall is {round(CVaR,4)}.')
-
-    def puzzle_assembly(self, dic):
+    def puzzle_assembly(dic):
         """
         :param dic:
             dic: aggregated dictionary containing several constructed portfolios
         :return:
-            Combines several backtests results into one graphical presentation.
+            Combines several backtests results into one dataframe
         """
         names = dic.keys()
         empty_frame = pd.DataFrame()
@@ -279,33 +319,113 @@ class backtest:
         empty_frame = empty_frame.sort_index(ascending=True)
         empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
         empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
-        df = empty_frame.copy()
+        return empty_frame
+
+    def puzzle_execution(data):
+        """
+        :param data:
+            data: aggregated dataframe from several backtests
+        :return:
+            Combined backtests statistic and cumulative return of the portfolio
+        """
+        empty_frame = data
+        pdr = empty_frame['Sum'] - 1
+        port_mean = pdr.mean()
+        port_mean_pct = port_mean * 100
+        port_std = pdr.std()
+        LPM_0 = len(pdr[pdr < 0]) / len(pdr)
+        LPM_1 = pdr.clip(upper=0).mean()
+        LPM_2 = pdr.clip(upper=0).std()
+        topless_pdr = pdr[pdr < port_std]
+        botless_prd = topless_pdr[topless_pdr > -port_std]
+        inner_mean = botless_prd.mean()
+        obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
+        stocks_mean = obj_only_stocks.mean()
+        top_per = stocks_mean.nlargest(1)
+        worst_per = stocks_mean.nsmallest(1)
+        trade_length = len(pdr)
+        VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
+        VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
+        CVaR = LPM_1 / LPM_0
+
+        list_1 = ['Mean', 'Std', 'Downside prob', 'Downside mean', 'Downside std', 'Investment period', 'VaR_95',
+                  'VaR_99', 'CVaR']
+        list_2 = [port_mean, port_std, LPM_0, LPM_1, LPM_2, trade_length, VaR_95, VaR_99,
+                  CVaR]
+        frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
+        frame = frame.to_string(index=False)
+        print(frame)
+        fig1 = px.line(empty_frame, x=empty_frame.index, y=empty_frame["Accumulation"],
+                       hover_data=empty_frame.columns[:-2])  # show all columns values excluding last 2
+        fig1.show()
+
+    def puzzle_plotting(data):
+        """
+        :param data:
+            data: aggregated dataframe from several backtests
+        :return:
+            Combines several backtests results into graphical representations
+        """
+        df = data
         df = df.round(decimals=3)
         df = df.fillna(0)
         port_performance_drawdown = df.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
+        port_performance_drawdown = abs(port_performance_drawdown)
         port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
         port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
+        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Accumulation'] -1
+        port_performance_drawdown = port_performance_drawdown * (-1)
         port_performance_drawdown = port_performance_drawdown.round(decimals=3)
         df_drawdown = port_performance_drawdown
 
         # Monthly prod
         mon = []
-        for x in empty_frame.index:
+        for x in df.index:
             mon.append(x.strftime("%Y-%m"))
         months = set(mon)
         d = []
         v = []
         for x in months:
-            n = empty_frame.loc[x, 'Sum'].prod()
+            n = df.loc[x, 'Sum'].prod()
             d.append(x)
             v.append(n)
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = pd.to_datetime(com_frame.index)
         com_frame.columns = ["Result"]
+
+        empty_frame = df
+        pdr = empty_frame['Sum'] - 1
+        port_mean = pdr.mean()
+        port_mean_pct = port_mean * 100
+        port_std = pdr.std()
+        LPM_0 = len(pdr[pdr < 0]) / len(pdr)
+        LPM_1 = pdr.clip(upper=0).mean()
+        LPM_2 = pdr.clip(upper=0).std()
+        topless_pdr = pdr[pdr < port_std]
+        botless_prd = topless_pdr[topless_pdr > -port_std]
+        inner_mean = botless_prd.mean()
+        obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
+        stocks_mean = obj_only_stocks.mean()
+        top_per = stocks_mean.nlargest(1)
+        worst_per = stocks_mean.nsmallest(1)
+        trade_length = len(pdr)
+        VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
+        VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
+        CVaR = LPM_1 / LPM_0
+        print(f'Portfolio daily average return is {round(port_mean, 2)}.')
+        print(f'Portfolio standard deviation is {round(port_std, 2)}.')
+        print(f'Daily average return for approximately 90% population is {round(inner_mean, 2)}.')
+        print(f'Downside daily probability is {round(LPM_0, 2)}.')
+        print(
+            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {trade_length} period.')
+        print(
+            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {trade_length} period.')
+        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
+
         # Create figures in Express
         fig1 = px.line(df, x=df.index, y=df["Accumulation"],
                        hover_data=df.columns[:-2])  # show all columns values excluding last 2
@@ -336,43 +456,5 @@ class backtest:
 
         this_figure.update_layout(hovermode='x')
         this_figure.show()
-
-    def puzzle_statistic(self, dic):
-        names = dic.keys()
-        empty_frame = pd.DataFrame()
-        for x in names:
-            q1 = dic[x][dic[x].columns[:-2]]
-            empty_frame = empty_frame.append(q1)
-
-        empty_frame = empty_frame.sort_index(ascending=True)
-        empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
-        empty_frame['Accumulation'] = empty_frame['Sum'].cumprod()
-        pdr = empty_frame['Sum'] - 1
-        port_mean = pdr.mean()
-        port_mean_pct = port_mean * 100
-        port_std = pdr.std()
-        LPM_0 = len(pdr[pdr < 0]) / len(pdr)
-        LPM_1 = pdr.clip(upper=0).mean()
-        LPM_2 = pdr.clip(upper=0).std()
-        topless_pdr = pdr[pdr < port_std]
-        botless_prd = topless_pdr[topless_pdr > -port_std]
-        inner_mean = botless_prd.mean()
-        obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
-        stocks_mean = obj_only_stocks.mean()
-        top_per = stocks_mean.nlargest(1)
-        worst_per = stocks_mean.nsmallest(1)
-        trade_length = len(pdr)
-        VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
-        VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
-        CVaR = LPM_1 / LPM_0
-        print(f'Portfolio daily average return is {round(port_mean, 2)}.')
-        print(f'Portfolio standard deviation is {round(port_std, 2)}.')
-        print(f'Daily average return for approximately 90% population is {round(inner_mean, 2)}.')
-        print(f'Downside daily probability is {round(LPM_0, 2)}.')
-        print(
-            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {trade_length} period.')
-        print(
-            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {trade_length} period.')
-        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
 
 
