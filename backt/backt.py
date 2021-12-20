@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 class backtest:
     """ :Parameters:
 
-            comp: str or list
+            asset: str or list
                 Companies taken into the consideration for the backtest.
             o_day: list of str or timestamps
                 Day/Days of the position opening.
@@ -26,20 +26,20 @@ class backtest:
             stop_loss: float or int default None
                 List of values determining the level till a particular stock shall be traded.
             """
-    def __init__(self, comp, o_day, c_day, weights_factor= None , take_profit=None, stop_loss=None):
-        self.comp = comp
+    def __init__(self, asset, o_day, c_day, weights_factor= None , take_profit=None, stop_loss=None):
+        self.asset = asset
         self.b_day = o_day
         self.s_day = c_day
-        self.w_factor = weights_factor if weights_factor is not None else np.ones(len(comp))
-        self.tp = take_profit if take_profit is not None else 100 * np.ones(len(comp))
-        self.sl = stop_loss if stop_loss is not None else np.zeros(len(comp))
+        self.w_factor = weights_factor if weights_factor is not None else np.ones(len(asset))
+        self.tp = take_profit if take_profit is not None else 100 * np.ones(len(asset))
+        self.sl = stop_loss if stop_loss is not None else np.zeros(len(asset))
 
-    def company_list(self):
+    def security_list(self):
         """
         :return:
             DataFrame with all input data.
         """
-        df = pd.DataFrame({"company": self.comp,"start day": self.b_day,"end day": self.s_day,"weights factor": self.w_factor,
+        df = pd.DataFrame({"company": self.asset, "start day": self.b_day, "end day": self.s_day, "weights factor": self.w_factor,
                            "take profit": self.tp,"stop loss": self.sl})
         df = df.set_index(df['company'])
         for x in range(len(df.index)):
@@ -48,8 +48,8 @@ class backtest:
                 b = df.iloc[x, 4]
                 df.iloc[x, 4] = (1 - a) + 1
                 df.iloc[x, 5] = 1 - (b - 1)
-        self.company_list = df
-        return self.company_list
+        self.security_list = df
+        return self.security_list
 
 # FOR DETAILED VIEW Adding one day to first buy and last sell dates
     def date_plus_one (self, d):
@@ -65,10 +65,10 @@ class backtest:
             return back_to_str
 
     def consolidated_table_detailed(self):
-        backtest.company_list(self)
-        df_1 = self.company_list
+        backtest.security_list(self)
+        df_1 = self.security_list
         initial_df = pd.DataFrame()
-        fq = pd.DataFrame(index=self.comp, data=self.b_day)
+        fq = pd.DataFrame(index=self.asset, data=self.b_day)
         v = fq.groupby(fq.index) \
             .cumcount()
         list_new = []
@@ -106,14 +106,14 @@ class backtest:
             em1 = em1.append(aux_df)
             em2 = em2.append(work_df)
         dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
-        self.comp = list_new
-        backtest.company_list(self)
-        dc = dc[self.comp]
+        self.asset = list_new
+        backtest.security_list(self)
+        dc = dc[self.asset]
         dc = dc.replace([np.inf, -np.inf], np.nan)
         dc = dc.fillna(0)
         dc = dc.apply(pd.to_numeric)
         aux = em1.pivot_table(index=em2.index, columns='ticker', values='close_price')
-        aux = aux[self.comp]
+        aux = aux[self.asset]
         aux = aux.replace([np.inf, -np.inf], np.nan)
         aux = aux.fillna(0)
         aux = aux.apply(pd.to_numeric)
@@ -132,7 +132,7 @@ class backtest:
         binary_weights.fillna(value=0, inplace=True)
         fac_summing = np.sum(abs(np.array(self.w_factor)))
         dist = np.array(self.w_factor) / fac_summing
-        dist_df = pd.DataFrame(index= self.comp, data = self.w_factor).T
+        dist_df = pd.DataFrame(index= self.asset, data = self.w_factor).T
         weights_df = binary_weights * dist
         for z in weights_df.index:
             if abs(weights_df.loc[z]).sum()!=1:
@@ -146,9 +146,9 @@ class backtest:
         for x in accu.columns:
             q1 = accu[x]
             for y in q1:
-                if y> self.company_list.loc[x, 'take profit']:
+                if y> self.security_list.loc[x, 'take profit']:
                     q1.iloc[q1.values.tolist().index(y)+1:] =0
-                if y< self.company_list.loc[x, 'stop loss']:
+                if y< self.security_list.loc[x, 'stop loss']:
                     q1.iloc[q1.values.tolist().index(y) + 1:] = 0
         aux_table_2 = accu* binary_weights
         new_binary_weights = aux_table_2/aux_table_2
@@ -470,11 +470,3 @@ class backtest:
         this_figure.update_layout(hovermode='x')
         this_figure['layout'].update(height=1200, width=1700, title='Plotting results')
         this_figure.show()
-
-
-
-bt = backtest(["NAVI", "BTC-USD"],
-              ["2021-09-01", "2021-08-01", ],
-              ["2021-10-15", "2021-12-01"])
-
-bt.execution()
