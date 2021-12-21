@@ -41,6 +41,18 @@ The result will appear as following:
 
 ![2](https://user-images.githubusercontent.com/83161286/146903435-f88144f7-adbb-447d-92ce-a9f5f35723b7.png)
 
+
+Additional "plotting" fuction  will enable users to observe additional graphs such as drawdown and monthly income plots:
+```
+bt.plotting()
+```
+
+![3 1](https://user-images.githubusercontent.com/83161286/146904414-5fd9d562-ff74-4401-9cdf-9d281a64664d.png)
+![3 2](https://user-images.githubusercontent.com/83161286/146904423-7ad8b9f9-e2e2-47b0-b9ee-786b92ab6a35.png)
+
+
+
+
 Next example will generate graphical representation of the portfolio change together with
 drawdown and monthly income plots:
 
