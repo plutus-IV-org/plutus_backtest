@@ -75,6 +75,40 @@ bt.execution()
 bt.final_portfolio.head(15)
 ```
 ![5](https://user-images.githubusercontent.com/83161286/146916428-a9bd2839-26cf-4044-b792-bedcebf1365c.png)
+
 Each time when one asset is repeating the library will assign additional number to it to track required periods. 
+It's worth to mention that due to data limitation the code will use only close price for the analysis of the securities. Only the first trading day has relationship open/close, since it's assumed that the tradingstarts with open price and finishes with close one.
+
+
+Ultimately in addition if the users would like to perform several backtest and combine them into one to see the full picture then there is few functions related to that, namely
+```
+bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
+              c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
+bt2 = backtest(asset = ["AMZN", "EURUSD=X"], o_day = ["2021-06-01", "2021-06-15"],
+              c_day = ["2021-06-30", "2021-07-05"])
+
+p1 = bt1.execution()
+p2 = bt2.execution()
+q1 = bt1.final_portfolio
+q2 = bt2.final_portfolio
+
+dic ={}
+dic[0] = q1
+dic[1]= q2
+
+combined_frame =backtest.puzzle_assembly(dic)
+```
+First of all each backtest shall be executed in order to obtain final portfolio of each one. Then they shall be assigned to an empty dictionary. Thereafter 
+function "puzzle_assembly" takes the data from diffirent backtest and unite it into one dataframe.
+
+![6](https://user-images.githubusercontent.com/83161286/146918856-ede46b8a-830c-42ad-9e63-b80063d80460.png)
+
+In order to visualize data functions "puzzle_execution" or "puzzle_plotting" shall be called. Which work exactly in the same way as it was explained previously.
+```
+backtest.puzzle_execution(combined_frame)
+```
+![7](https://user-images.githubusercontent.com/83161286/146919316-c2176568-ccc1-459d-be08-d8155073baea.png)
+
+
 
 
