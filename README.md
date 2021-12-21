@@ -1,12 +1,12 @@
 # Project_name
 ## Project description
 
-This library was created for the purpose of local tests of financial strategies. The library contains various indicators and tools 
+This package was created for the purpose of local tests of financial strategies. The package contains various indicators and tools 
 allowing users obtaining exact results of their strategies over a certain period of time. The users are also able to pick 
 endless amount of trading instruments and set criteria such as long or short positioning. Beside that optional stop loss and take profit
 signals are available not only as general limit level for entire portfolio but can be also applied for each instrument individually.
 Another optional tool available is weights factor distribution which is oriented to assign weights according to the provided values. 
-In addition, the library allows to create several backtests and combine them all together into one to see the full picture of the investment 
+In addition, the package allows to create several backtests and combine them all together into one to see the full picture of the investment 
 strategy.
 
 ## Installation: 
