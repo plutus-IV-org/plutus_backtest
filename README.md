@@ -1,7 +1,7 @@
 # Project_name
 ## Project description
 
-This package was created for the purpose of local tests of financial strategies. The package contains various indicators and tools 
+This project has been performed for the purpose of local backtests of financial strategies. The package contains various indicators and tools 
 allowing users obtaining exact results of their strategies over a certain period of time. The users are also able to pick 
 endless amount of trading instruments and set criteria such as long or short positioning. Beside that optional stop loss and take profit
 signals are available not only as general limit level for entire portfolio but can be also applied for each instrument individually.
@@ -61,13 +61,17 @@ bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-0
 bt.execution()
 ```
 
-In this case all parameters are used. The weights will not distributed equally. "AAPL"  will have 20% of the total portoflio BTC-USD - 10% and 
+In this case all parameters are used. The weights will not be distributed equally. "AAPL"  will have 20% of the total portoflio BTC-USD - 10% and 
 "GC=F" will have 70%. The negative sign in the weights factor will mean short selling, therefore first "AAPL" and "GC=F" instruments are in long position and 
-"BTC-USD" is in the short. Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss and 10% of take profit, "BTC-USD" has 10% of stop loss and 20% of take profit, "GC=F" 5% of stop loss and 5% of take profit. As result accumulative graph will look as:
+"BTC-USD" is in the short.
+
+Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss and 10% of take profit, "BTC-USD" has 10% of stop loss and 20% of take profit, "GC=F" 5% of stop loss and 5% of take profit. As result accumulative graph will look as:
 
 ![4](https://user-images.githubusercontent.com/83161286/146915546-113db7ce-99d8-4c92-90d5-f0f556499b57.png)
 
-In case of users have a need to test one instrument but several times with different timelines, the library will interpret it as
+In the moment when one of the securities reaching its stop loss or take profit, the trade will automatically stopped and the weights will be reassigned respectively to the left assets.
+
+In case of users need to test one instrument but several times with different timelines, the package will interpret it as
 ```
 bt = backtest(asset = ["AMZN", "AMZN","AMZN"], o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
@@ -76,11 +80,11 @@ bt.final_portfolio.head(15)
 ```
 ![5](https://user-images.githubusercontent.com/83161286/146916428-a9bd2839-26cf-4044-b792-bedcebf1365c.png)
 
-Each time when one asset is repeating the library will assign additional number to it to track required periods. 
+Each time when one asset is repeating the package will assign additional number to it to track required periods. 
 It's worth to mention that due to data limitation the code will use only close price for the analysis of the securities. Only the first trading day has relationship open/close, since it's assumed that the tradingstarts with open price and finishes with close one.
 
 
-Ultimately in addition if the users would like to perform several backtest and combine them into one to see the full picture then there is few functions related to that, namely:
+Ultimately, if the users would like to perform several backtest and combine them into one to see the full picture then there are few functions related to that, namely:
 ```
 bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
@@ -98,7 +102,7 @@ dic[1]= q2
 
 combined_frame =backtest.puzzle_assembly(dic)
 ```
-First of all each backtest shall be executed in order to obtain final portfolio of each one. Then they shall be assigned to an empty dictionary. Thereafter 
+First of all all backtest shall be executed in order to obtain final portfolio of the each one. Then they shall be assigned to an empty dictionary. Thereafter 
 function "puzzle_assembly" takes the data from diffirent backtest and unite it into one dataframe.
 
 ![6](https://user-images.githubusercontent.com/83161286/146918856-ede46b8a-830c-42ad-9e63-b80063d80460.png)
