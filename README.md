@@ -24,11 +24,11 @@ A short and fast way to run a single backtest would be:
 
 ```python
 from backt.backt import backtest
-bt = backtest(["NAVI", "SF"],
-              ["2021-09-01", "2021-08-01", ],
-              ["2021-10-15", "2021-09-01"])
-bt.portfolio_construction()
+bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
+              c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
+bt.execution()
 ```
+![1](https://user-images.githubusercontent.com/83161286/146902663-33525a28-d62e-45b1-9561-cbf0ce1b559a.png)
 
 As a result you will see a dataframe which shows accumulated daily return.
 
