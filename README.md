@@ -52,33 +52,17 @@ bt.plotting()
 
 
 
-
-Next example will generate graphical representation of the portfolio change together with
-drawdown and monthly income plots:
-
-```python
-from backt.backt import backtest
-bt = backtest(["NAVI", "BTC-USD"],
-              ["2021-09-01", "2021-08-01", ],
-              ["2021-10-15", "2021-12-01"])
-bt.plotting()
-```
-
 More complex approach would be assigning weights factor/stop loss/ take profit indicators:
 
-```python
-from backt.backt import backtest
-bt = backtest(comp = ["AAPL", "NAVI","BTC-USD"], 
-              o_day = ["2021-08-01", "2021-06-15", "2021-09-01"],
-              c_day =  ["2021-09-01", "2021-09-01", "2021-09-15"],
-              weights_factor = [10, 20, -20], 
-              take_profit = [1.2,1.1,1.05], 
-              stop_loss = [0.9, 0.8, 0.95])
-bt.portfolio_construction()
+```
+bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
+              c_day = ["2021-09-01", "2021-09-01","2021-09-15"], weights_factor = [10, -5, 35], 
+              stop_loss = [0.8, 0.9, 0.95], take_profit = [1.1, 1.2, 1.05])
 ```
 
-In this case we are using all parameters. The weights will not distributed equally. "AAPL"  will have 20% of the total portoflio NAVI - 40% and 
-"BTC-USD" will have 40%. The negative sign in the weights factor will mean short selling, therefore first 2 instruments are in long and 
-the last is in the short.
+In this case all parameters are used. The weights will not distributed equally. "AAPL"  will have 20% of the total portoflio BTC-USD - 10% and 
+"GC=F" will have 70%. The negative sign in the weights factor will mean short selling, therefore first "AAPL" and "GC=F" instruments are in long position and 
+"BTC-USD" is in the short. Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss and 10% of take profit, "BTC-USD" has 10% of stop loss and 20% of take profit, "GC=F" 5% of stop loss and 5% of take profit. 
+
 
 
