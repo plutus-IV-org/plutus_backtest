@@ -58,11 +58,23 @@ More complex approach would be assigning weights factor/stop loss/ take profit i
 bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"], weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], take_profit = [1.1, 1.2, 1.05])
+bt.execution()
 ```
 
 In this case all parameters are used. The weights will not distributed equally. "AAPL"  will have 20% of the total portoflio BTC-USD - 10% and 
 "GC=F" will have 70%. The negative sign in the weights factor will mean short selling, therefore first "AAPL" and "GC=F" instruments are in long position and 
-"BTC-USD" is in the short. Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss and 10% of take profit, "BTC-USD" has 10% of stop loss and 20% of take profit, "GC=F" 5% of stop loss and 5% of take profit. 
+"BTC-USD" is in the short. Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss and 10% of take profit, "BTC-USD" has 10% of stop loss and 20% of take profit, "GC=F" 5% of stop loss and 5% of take profit. As result accumulative graph will look as:
 
+![4](https://user-images.githubusercontent.com/83161286/146915546-113db7ce-99d8-4c92-90d5-f0f556499b57.png)
+
+In case of users have a need to test one instrument but sevral times with different timelines, the library will interpretate it as
+```
+bt = backtest(asset = ["AMZN", "AMZN","AMZN"], o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
+              c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
+bt.execution()
+bt.final_portfolio.head(15)
+```
+![5](https://user-images.githubusercontent.com/83161286/146916428-a9bd2839-26cf-4044-b792-bedcebf1365c.png)
+Each time when one asset is repeating the library will assign additional number to it to track required periods. 
 
 
