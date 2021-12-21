@@ -1,4 +1,4 @@
-# Project_name
+# plutus_backtest
 ## Project description
 
 This project has been performed for the purpose of local backtests of financial strategies. The package contains various indicators and tools 
@@ -13,19 +13,21 @@ strategy.
 * Dependency: pandas, numpy, plotly, yfinance
 * Install from pypi:
 ```
-pip install project_name 
+pip install plutus_backtest
 ```
 * Verified in Python:
+
 ```python
-from backt.backt import backtest
+import plutus_backtest
 ```
 ## Examples: 
 A short and fast way to run a single backtest would be:
 
 ```python
-from backt.backt import backtest
-bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-              c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
+import plutus_backtest
+
+bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"], o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
+              c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
 bt.execution()
 ```
 
@@ -118,5 +120,5 @@ backtest.puzzle_execution(combined_frame)
 Please [open an issue](https://github.com/witmul/backt/issues/new) for support.<br />
 With additional questions please reachout to autors directly:
 - [witmul](mailto:witalijmulawa@gmail.com)
-- [IlliaBoloto](ils.boloto96@gmail.com)
+- [IlliaBoloto](mailto:ils.boloto96@gmail.com)
 

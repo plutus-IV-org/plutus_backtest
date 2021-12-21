@@ -4,18 +4,18 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='showel-responsibility',
+    name='plutus_backtest',
 
-    version='0.0.6',
+    version='0.0.1',
 
-    description="backt is a python library \
-    for backtesting your investment decisions using Python 3.9 and above.",
+    description="plutus_backtest is a python library \
+    for backtesting investment decisions using Python 3.9 and above.",
 
     long_description_content_type='text/markdown',
 
     license="MIT",
 
-    keywords="backtest",
+    keywords="backtest python stock portfolio trade daytrading finance ",
 
     author="IlliaBoloto",
 
@@ -43,9 +43,9 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
 
-    packages=find_packages(include=['backt', 'backt.*']),
+    packages=find_packages(include=['plutus_backtest', 'plutus_backtest.*']),
 
-    url="https://github.com/witmul/backt/tree/main",
+    url="https://github.com/witmul/plutus_backtest",
 
     python_requires=">=3.9.0",
 

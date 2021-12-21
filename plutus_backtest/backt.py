@@ -7,7 +7,6 @@ import plotly.express as px
 from datetime import datetime, timedelta
 
 
-
 class backtest:
     """ :Parameters:
 
@@ -472,3 +471,6 @@ class backtest:
         this_figure.update_layout(hovermode='x')
         this_figure['layout'].update(height=1200, width=1700, title='Plotting results')
         this_figure.show()
+
+if __name__ == "__main__":
+    backtest
