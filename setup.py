@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='plutus_backtest',
 
-    version='0.0.1',
+    version='0.0.2',
 
     description="plutus_backtest is a python library \
     for backtesting investment decisions using Python 3.9 and above.",
@@ -15,7 +15,7 @@ setup(
 
     license="MIT",
 
-    keywords="backtest python stock portfolio trade daytrading finance ",
+    keywords="backtest python stock portfolio trade daytrading finance downside risk management accumulation return profit loss optimization asset security currency crypto futures derivatives test",
 
     author="IlliaBoloto",
 
