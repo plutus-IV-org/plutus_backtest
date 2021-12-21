@@ -114,5 +114,9 @@ backtest.puzzle_execution(combined_frame)
 ![7](https://user-images.githubusercontent.com/83161286/146919316-c2176568-ccc1-459d-be08-d8155073baea.png)
 
 
-
+## Support:
+Please [open an issue](https://github.com/witmul/backt/issues/new) for support.<br />
+With additional questions please reachout to autors directly:
+- [witmul](mailto:witalijmulawa@gmail.com)
+- [IlliaBoloto](ils.boloto96@gmail.com)
 
