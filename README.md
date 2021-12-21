@@ -28,9 +28,18 @@ bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-0
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
 bt.execution()
 ```
+
+As a result you will see a statistical table as well as graphical representation of the portfolio which shows accumulated return.
+
 ![1](https://user-images.githubusercontent.com/83161286/146902663-33525a28-d62e-45b1-9561-cbf0ce1b559a.png)
 
-As a result you will see a dataframe which shows accumulated daily return.
+In order to access dataframe with daily changes, use:
+```
+bt.final_portfolio.head()
+```
+The result will appear as following:
+
+![2](https://user-images.githubusercontent.com/83161286/146903435-f88144f7-adbb-447d-92ce-a9f5f35723b7.png)
 
 Next example will generate graphical representation of the portfolio change together with
 drawdown and monthly income plots:
