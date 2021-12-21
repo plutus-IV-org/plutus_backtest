@@ -1,5 +1,4 @@
 # plutus_backtest
-## Project description
 
 This project has been performed for the purpose of local backtests of financial strategies. The package contains various indicators and tools 
 allowing users obtaining exact results of their strategies over a certain period of time. The users are also able to pick 
