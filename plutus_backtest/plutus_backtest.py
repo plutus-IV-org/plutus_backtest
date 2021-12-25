@@ -16,13 +16,13 @@ class backtest:
                 Day/Days of the position opening.
             c_day: list of str or timestamps
                 Day/Days of the position closing.
-            weights_factor: int or float or array-like default None
+            weights_factor: list of int or float or array-like default None
                 Optional list of factors which will be considered to define the weights for taken companies. By default
                 all weights are distributed equally, however if the list of factors provided the backtest will maximize
                 the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
-            take_profit: float or int default None
+            take_profit: list of float or int default None
                 List of values determining the level till a particular stock shall be traded.
-            stop_loss: float or int default None
+            stop_loss: list of float or int default None
                 List of values determining the level till a particular stock shall be traded.
             """
     def __init__(self, asset, o_day, c_day, weights_factor= None , take_profit=None, stop_loss=None):

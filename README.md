@@ -20,6 +20,32 @@ pip install plutus_backtest
 from plutus_backtest import backtest
 ```
 ## Examples: 
+
+Class backtest contains below parameters:<br />
+```
+asset: str or list
+    Instruments taken into the consideration for the backtest.
+
+o_day: list of str or timestamps
+    Day/Days of the position opening.
+
+c_day: list of str or timestamps
+    Day/Days of the position closing.
+
+weights_factor: list of int or float or array-like default None
+    Optional list of factors which will be considered to define the weights for taken companies. By default
+    all weights are distributed equally, however if the list of factors provided the backtest will maximize
+    the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
+
+take_profit: list of float or int default None
+    List of values determining the level till a particular stock shall be traded.
+
+stop_loss: list of float or int default None
+    List of values determining the level till a particular stock shall be traded.
+```
+
+
+
 A short and fast way to run a single backtest would be:
 
 ```python
@@ -35,7 +61,7 @@ As a result you will see a statistical table as well as graphical representation
 ![1](https://user-images.githubusercontent.com/83161286/146902663-33525a28-d62e-45b1-9561-cbf0ce1b559a.png)
 
 In order to access dataframe with daily changes, use:
-```
+```python
 bt.final_portfolio.head()
 ```
 The result will appear as following:
