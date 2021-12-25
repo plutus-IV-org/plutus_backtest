@@ -17,13 +17,13 @@ pip install plutus_backtest
 * Verified in Python:
 
 ```python
-import plutus_backtest
+from plutus_backtest import backtest
 ```
 ## Examples: 
 A short and fast way to run a single backtest would be:
 
 ```python
-import plutus_backtest
+from plutus_backtest import backtest
 
 bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"], o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
@@ -44,7 +44,7 @@ The result will appear as following:
 
 
 Additional "plotting" function will enable users to observe additional graphs such as drawdown and monthly income plots:
-```
+```python
 bt.plotting()
 ```
 
@@ -55,7 +55,7 @@ bt.plotting()
 
 More complex approach would be assigning weights factor/stop loss/ take profit indicators:
 
-```
+```python
 bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"], weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], take_profit = [1.1, 1.2, 1.05])
@@ -73,7 +73,7 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 In the moment when one of the securities reaching its stop loss or take profit, the trade will automatically stopped and the weights will be reassigned respectively to the left assets.
 
 In case of users need to test one instrument but several times with different timelines, the package will interpret it as
-```
+```python
 bt = backtest(asset = ["AMZN", "AMZN","AMZN"], o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 bt.execution()
@@ -86,7 +86,7 @@ It's worth to mention that due to data limitation the code will use only close p
 
 
 Ultimately, if the users would like to perform several backtest and combine them into one to see the full picture then there are few functions related to that, namely:
-```
+```python
 bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
 bt2 = backtest(asset = ["AMZN", "EURUSD=X"], o_day = ["2021-06-01", "2021-06-15"],
@@ -109,7 +109,7 @@ function "puzzle_assembly" takes the data from diffirent backtest and unite it i
 ![6](https://user-images.githubusercontent.com/83161286/146918856-ede46b8a-830c-42ad-9e63-b80063d80460.png)
 
 In order to visualize data functions "puzzle_execution" or "puzzle_plotting" shall be called. Which work exactly in the same way as it was explained previously.
-```
+```python
 backtest.puzzle_execution(combined_frame)
 ```
 ![7](https://user-images.githubusercontent.com/83161286/146919316-c2176568-ccc1-459d-be08-d8155073baea.png)

@@ -6,10 +6,10 @@ with open("README.md", "r") as fh:
 setup(
     name='plutus_backtest',
 
-    version='0.0.2',
+    version='0.0.4',
 
     description="plutus_backtest is a python library \
-    for backtesting investment decisions using Python 3.9 and above.",
+    for backtesting investment decisions using Python 3.7 and above.",
 
     long_description_content_type='text/markdown',
 
@@ -40,6 +40,8 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         'Programming Language :: Python :: 3.9',
     ],
 
@@ -47,7 +49,7 @@ setup(
 
     url="https://github.com/witmul/plutus_backtest",
 
-    python_requires=">=3.9.0",
+    python_requires=">=3.7.0",
 
     install_requires=[
         "numpy>=1.21.2",
