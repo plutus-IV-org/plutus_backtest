@@ -1,5 +1,9 @@
 # plutus_backtest
 
+[![PyPI](https://img.shields.io/pypi/v/plutus-backtest)](https://pypi.org/project/plutus-backtest/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oanda-backtest)](https://pypi.org/project/plutus-backtest/)
+[![Downloads](https://pepy.tech/badge/plutus-backtest)](https://pepy.tech/project/plutus-backtest)
+
 This project has been performed for the purpose of local backtests of financial strategies. The package contains various indicators and tools 
 allowing users obtaining exact results of their strategies over a certain period of time. The users are also able to pick 
 endless amount of trading instruments and set criteria such as long or short positioning. Beside that optional stop loss and take profit
