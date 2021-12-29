@@ -185,6 +185,8 @@ class backtest:
         self.LPM_0 = len(pdr[pdr < 0]) / len(pdr)
         self.LPM_1 = pdr.clip(upper=0).mean()
         self.LPM_2 = pdr.clip(upper=0).std()
+        if self.LPM_0 == 0:
+            self.LPM_0 = 0.01
         topless_pdr = pdr[pdr < self.port_std]
         botless_prd = topless_pdr[topless_pdr > -self.port_std]
         self.inner_mean = botless_prd.mean()
@@ -222,6 +224,8 @@ class backtest:
         self.LPM_0 = len(pdr[pdr < 0]) / len(pdr)
         self.LPM_1 = pdr.clip(upper=0).mean()
         self.LPM_2 = pdr.clip(upper=0).std()
+        if self.LPM_0 == 0:
+            self.LPM_0 = 0.01
         topless_pdr = pdr[pdr < self.port_std]
         botless_prd = topless_pdr[topless_pdr > -self.port_std]
         self.inner_mean = botless_prd.mean()
@@ -344,6 +348,8 @@ class backtest:
         LPM_0 = len(pdr[pdr < 0]) / len(pdr)
         LPM_1 = pdr.clip(upper=0).mean()
         LPM_2 = pdr.clip(upper=0).std()
+        if LPM_0 == 0:
+            LPM_0 = 0.01
         topless_pdr = pdr[pdr < port_std]
         botless_prd = topless_pdr[topless_pdr > -port_std]
         inner_mean = botless_prd.mean()
