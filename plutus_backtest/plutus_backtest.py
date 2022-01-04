@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 from datetime import datetime, timedelta
-
+pd.options.mode.chained_assignment = None
 
 class backtest:
     """ :Parameters:
@@ -77,12 +77,21 @@ class backtest:
                 list_new.append(a2)
             else:
                 list_new.append(v.index[x])
-
-        for com, b_d, s_d,new_com in zip(df_1["company"], df_1["start day"], df_1["end day"], list_new):
-            data = yf.download(com, start=backtest.date_plus_one(self, b_d), end=backtest.date_plus_one(self, s_d),
-                               progress=False)
-            data["Ticker"] = new_com
-            initial_df = pd.concat([initial_df, data])
+        min_date = min(self.security_list['start day'])
+        max_date = max(self.security_list['end day'])
+        ydata = yf.download(self.asset, start = backtest.date_plus_one(self,min_date), end = backtest.date_plus_one(self,max_date), progress = False)
+        if not isinstance(ydata.columns, pd.MultiIndex):
+            for  b_d, s_d, new_com in zip(df_1["start day"], df_1["end day"], list_new):
+                data = ydata.loc[b_d:s_d]
+                data['Ticker'] = new_com
+                initial_df = pd.concat([initial_df, data])
+        else:
+            for com, b_d, s_d,new_com in zip(df_1["company"], df_1["start day"], df_1["end day"], list_new):
+                q1 = ydata.iloc[:, ydata.columns.get_level_values(1) == com]
+                q1.columns = q1.columns.droplevel(1)
+                data = q1.loc[b_d:s_d]
+                data['Ticker'] = new_com
+                initial_df = pd.concat([initial_df, data])
         df_close = initial_df[["Ticker", "Adj Close"]]
         df_close.columns = ['ticker', 'close_price']
         df_open = initial_df[["Ticker", "Open"]]
