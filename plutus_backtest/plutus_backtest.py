@@ -24,14 +24,60 @@ class backtest:
                 List of values determining the level till a particular stock shall be traded.
             stop_loss: list of float or int default None
                 List of values determining the level till a particular stock shall be traded.
+            benchmark: str default None
+                A benckmark ticker for comparison with portfolio performance
             """
-    def __init__(self, asset, o_day, c_day, weights_factor= None , take_profit=None, stop_loss=None):
+    def __init__(self, asset, o_day, c_day, weights_factor= None , take_profit=None, stop_loss=None, benchmark=None):
         self.asset = asset
         self.b_day = o_day
         self.s_day = c_day
         self.w_factor = weights_factor if weights_factor is not None else np.ones(len(asset))
         self.tp = take_profit if take_profit is not None else 100 * np.ones(len(asset))
         self.sl = stop_loss if stop_loss is not None else np.zeros(len(asset))
+        self.bench = benchmark
+
+
+    def benchmark_construction(self):
+        backtest.security_list(self)
+        min_date = min(self.security_list['start day'])
+        max_date = max(self.security_list['end day'])
+        df = yf.download(self.bench, start = backtest.date_plus_one(self,min_date), end = backtest.date_plus_one(self,max_date), progress = False)
+        df['Ticker'] = self.bench
+        df_close = df[["Ticker", "Adj Close"]]
+        df_close.columns = ['ticker', 'close_price']
+        df_open = df[["Ticker", "Open"]]
+        df_open.columns = ['ticker', 'open']
+        open_price = df_open.groupby('ticker').first()
+        em1 = pd.DataFrame()
+        em2 = pd.DataFrame()
+        for x in open_price.index:
+            get_open = open_price.loc[x]
+            get_end = df_close[df_close['ticker'] == x]
+            fake_df = pd.DataFrame(index=get_end.index, columns=['ticker', 'close_price'])
+            fake_df = pd.DataFrame(fake_df.iloc[0]).T
+            fake_df.iloc[0, 0] = x
+            fake_df.iloc[0, 1] = get_open.values[0]
+            merged_df = fake_df.append(get_end)
+            merged_df['daily_change'] = merged_df['close_price'].pct_change()
+            merged_df = merged_df.iloc[1:]
+            aux_df = merged_df[['ticker', 'close_price']]
+            work_df = merged_df[['ticker', 'daily_change']]
+            em1 = em1.append(aux_df)
+            em2 = em2.append(work_df)
+        dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
+        dc = dc.replace([np.inf, -np.inf], np.nan)
+        dc = dc.fillna(0)
+        dc = dc.apply(pd.to_numeric)
+
+        performance = dc
+        performance['Bench_Sum'] = performance.sum(axis=1)
+        performance['Bench_Sum'] = performance['Bench_Sum'] + 1
+        performance['Bench_Accumulation'] = performance['Bench_Sum'].cumprod()
+        performance.columns.name = None
+        self.benchmark_performance = performance
+
+        return self.benchmark_performance
+
 
     def security_list(self):
         """
@@ -213,10 +259,22 @@ class backtest:
         self.stat_frame = frame
         frame = frame.to_string(index=False)
         print (frame)
-        fig1 = px.line(df, x=df.index, y=df["Accumulation"], title = "Accumulated return",
-                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
-        fig1.update_layout(xaxis_title="Date")
-        fig1.show()
+
+        if self.bench is not None:
+            df_bench = backtest.benchmark_construction(self)
+            df = pd.merge(df, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
+            df["Bench_Accumulation"] = df["Bench_Accumulation"].fillna(method='ffill')
+            fig1 = px.line(df, x=df.index, y=df["Accumulation"], title="Accumulated return",
+                           hover_data=df.columns[:-3])  # show all columns values excluding last 2
+            fig1.update_layout(xaxis_title="Date")
+            fig1.update_traces(name='Portfolio', showlegend=True)
+            fig1.add_scatter(x=df.index, y=df["Bench_Accumulation"], mode='lines', name="Benchmark")
+            fig1.show()
+        else:
+            fig1 = px.line(df, x=df.index, y=df["Accumulation"], title = "Accumulated return",
+                           hover_data=df.columns[:-2])  # show all columns values excluding last 2
+            fig1.update_layout(xaxis_title="Date")
+            fig1.show()
 
     def plotting(self):
         """
