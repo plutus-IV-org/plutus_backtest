@@ -245,9 +245,9 @@ class backtest:
         df = backtest.portfolio_construction(self)
         df = df.round(decimals=3)
         obj = self.final_portfolio
-        pdr = obj['Sum'] - 1
+        pdr = obj['Sum']
         self.port_mean = pdr.mean()
-        self.port_mean_pct = self.port_mean * 100
+        self.port_mean_pct = self.port_mean
         self.port_std = pdr.std()
         self.LPM_0 = len(pdr[pdr < 0]) / len(pdr)
         self.LPM_1 = pdr.clip(upper=0).mean()
@@ -296,9 +296,9 @@ class backtest:
         df = backtest.portfolio_construction(self)
         df = df.round(decimals=3)
         obj = self.final_portfolio
-        pdr = obj['Sum'] - 1
+        pdr = obj['Sum']
         self.port_mean = pdr.mean()
-        self.port_mean_pct = self.port_mean * 100
+        self.port_mean_pct = self.port_mean
         self.port_std = pdr.std()
         self.LPM_0 = len(pdr[pdr < 0]) / len(pdr)
         self.LPM_1 = pdr.clip(upper=0).mean()
@@ -316,32 +316,52 @@ class backtest:
         VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1 / self.LPM_0
+
         # Monthly prod
-        mon = []
-        for x in self.final_portfolio.index:
-            mon.append(x.strftime("%Y-%m"))
-        months = set(mon)
-        d = []
-        v = []
-        for x in months:
-            n = self.final_portfolio.loc[x, 'Sum'].prod()
-            d.append(x)
-            v.append(n)
-        com_frame = pd.DataFrame(index=d, data=v)
-        com_frame = com_frame.sort_index()
-        com_frame.index = pd.to_datetime(com_frame.index)
+        # mon = []
+        # for x in self.final_portfolio.index:
+        #     mon.append(x.strftime("%Y-%m"))
+        # months = set(mon)
+
+        #########
+        df_copy = df.copy()
+        df_copy = df_copy / 100
+        df_copy = df_copy + 1
+        df_copy["month"] = df_copy.index.strftime("%Y-%m")
+        monthly_total = df_copy[["month", "Sum"]]
+        monthly_total = monthly_total.groupby('month').prod()
+        com_frame = (monthly_total - 1) * 100
         com_frame.columns = ["Result"]
+        #########
+
+
+
+        # d = []
+        # v = []
+        # for x in months:
+        #     n = self.final_portfolio.loc[x, 'Sum'].prod()
+        #     n = n.prod()
+        #     d.append(x)
+        #     v.append(n)
+        # com_frame = pd.DataFrame(index=d, data=v)
+        # com_frame = com_frame.sort_index()
+        # com_frame.index = pd.to_datetime(com_frame.index)
+        # com_frame.columns = ["Result"]
 
         df = df.round(decimals=3)
-        port_performance_drawdown = self.final_portfolio.copy()
+        port_performance_drawdown = self.final_portfolio.copy() /100
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns = ['Sum', 'Accumulation'])
         port_performance_drawdown = abs(port_performance_drawdown)
         port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
         port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Sum'].cumprod()
+
+        port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] - 1
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Accumulation'] - 1
         port_performance_drawdown = port_performance_drawdown * (-1)
+        port_performance_drawdown = port_performance_drawdown * 100
+
         self.drawdown = port_performance_drawdown
         df_drawdown = self.drawdown
         df_drawdown = df_drawdown.round(decimals=3)
@@ -351,9 +371,9 @@ class backtest:
         print(f'Daily average return for approximately 90% population is {round(self.inner_mean, 2)}.')
         print(f'Downside daily probability is {round(self.LPM_0, 2)}.')
         print(
-            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
+            f'There is 95% confidence that you will not lose more than {round(VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
         print(
-            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
+            f'There is 99% confidence that you will not lose more than {round(VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
 
         # Create figures in Express
