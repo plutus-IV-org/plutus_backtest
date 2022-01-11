@@ -73,6 +73,12 @@ class backtest:
         performance['Bench_Sum'] = performance.sum(axis=1)
         performance['Bench_Sum'] = performance['Bench_Sum'] + 1
         performance['Bench_Accumulation'] = performance['Bench_Sum'].cumprod()
+
+        performance['Bench_Sum'] = performance['Bench_Sum'] - 1
+        performance['Bench_Accumulation'] = performance['Bench_Accumulation'] - 1
+
+        performance = performance * 100
+
         performance.columns.name = None
         self.benchmark_performance = performance
 
@@ -220,6 +226,12 @@ class backtest:
         port_performance['Sum'] = port_performance.sum(axis=1)
         port_performance['Sum'] = port_performance['Sum'] + 1
         port_performance['Accumulation'] = port_performance['Sum'].cumprod()
+
+        port_performance['Sum'] = port_performance['Sum'] - 1
+        port_performance['Accumulation'] = port_performance['Accumulation'] - 1
+
+        port_performance = port_performance * 100
+
         port_performance.columns.name  = None
         self.final_portfolio = port_performance
 
