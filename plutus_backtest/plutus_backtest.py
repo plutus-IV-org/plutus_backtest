@@ -1,7 +1,6 @@
 import pandas as pd
 import yfinance as yf
 import numpy as np
-import plotly.graph_objects as go
 import plotly.subplots as sp
 import plotly.express as px
 from datetime import datetime, timedelta
@@ -12,22 +11,22 @@ pd.options.mode.chained_assignment = None
 class backtest:
     """ :Parameters:
 
-            asset: str or list
+            asset: str or list or series
                 Instruments taken into the consideration for the backtest.
-            o_day: list of str or timestamps
+            o_day: list of str or timestamps or series
                 Day/Days of the position opening.
-            c_day: list of str or timestamps
+            c_day: list of str or timestamps or series
                 Day/Days of the position closing.
-            weights_factor: list of int or float or array-like default None
+            weights_factor: list of int or float or array-like or series default None
                 Optional list of factors which will be considered to define the weights for taken companies. By default
                 all weights are distributed equally, however if the list of factors provided the backtest will maximize
                 the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
-            take_profit: list of float or int default None
+            take_profit: list of float or int or series default None
                 List of values determining the level till a particular stock shall be traded.
-            stop_loss: list of float or int default None
+            stop_loss: list of float or int or series default None
                 List of values determining the level till a particular stock shall be traded.
             benchmark: str default None
-                A benckmark ticker for comparison with portfolio performance
+                A benchmark ticker for comparison with portfolio performance
             """
 
     def __init__(self, asset, o_day, c_day, weights_factor=None, take_profit=None, stop_loss=None, benchmark=None):
@@ -86,6 +85,21 @@ class backtest:
         :return:
             DataFrame with all input data.
         """
+
+        if isinstance(self.w_factor, pd.core.series.Series):
+            self.w_factor = self.w_factor.values
+        if isinstance(self.b_day, pd.core.series.Series):
+            self.b_day = self.b_day.values
+        if isinstance(self.s_day, pd.core.series.Series):
+            self.s_day = self.s_day.values
+        if isinstance(self.asset, pd.core.series.Series):
+            self.asset = self.asset.values
+        if isinstance(self.tp, pd.core.series.Series):
+            self.tp = self.tp.values
+        if isinstance(self.sl, pd.core.series.Series):
+            self.sl = self.sl.values
+
+
         df = pd.DataFrame(
             {"company": self.asset, "start day": self.b_day, "end day": self.s_day, "weights factor": self.w_factor,
              "take profit": self.tp, "stop loss": self.sl})
@@ -235,17 +249,20 @@ class backtest:
     def multiple_executions(self):
         """
         :return:
-            Backtest statistic and cumulative return of the portfolio
+            Backtest statistic and cumulative return of the portfolio based on multiple inputs.
+            To be used only with puzzle functions.
         """
         df_execution = backtest.portfolio_construction(self)
         df_execution = df_execution.round(decimals=3)
 
-
     def single_execution(self):
         """
         :return:
-            Backtest statistic and cumulative return of the portfolio
+            Backtest statistic and cumulative return of the portfolio based on only single input.
         """
+
+        # ----------------------------------------------------------------------- #
+        # Stats
         df_execution = backtest.portfolio_construction(self)
         df_execution = df_execution.round(decimals=3)
         obj = self.final_portfolio
@@ -278,12 +295,15 @@ class backtest:
         frame = frame.to_string(index=False)
         print(frame)
 
+        # ----------------------------------------------------------------------- #
+        # Execution plot - 2 ways
+
         if self.bench is not None:
             df_bench = backtest.benchmark_construction(self)
             df_execution = pd.merge(df_execution, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
             df_execution["Bench_Accumulation"] = df_execution["Bench_Accumulation"].fillna(method='ffill')
 
-            # Execution plot - with benchmark
+            # Execution plot - Accumulation with benchmark
             df_execution_fig1 = df_execution.astype(float)
             df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
             df_execution_fig1 = df_execution_fig1.round(2)
@@ -309,7 +329,7 @@ class backtest:
 
         else:
 
-            # Execution plot - no benchmark
+            # Execution plot - Accumulation no benchmark
             df_execution_fig1 = df_execution.astype(float)
             df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
             df_execution_fig1 = df_execution_fig1.round(2)
@@ -327,8 +347,9 @@ class backtest:
         :return:
             Graphical repsresentaion of portfolio performance over the given period.
         """
-        backtest.portfolio_construction(self)
 
+
+        backtest.portfolio_construction(self)
         df_accum = self.final_portfolio.copy()
 
         # ----------------------------------------------------------------------- #
@@ -357,6 +378,27 @@ class backtest:
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1 / self.LPM_0
 
+        print(f'Portfolio daily average return is {round(self.port_mean, 2)}.')
+        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
+        print(f'Daily average return for approximately 90% population is {round(self.inner_mean, 2)}.')
+        print(f'Downside daily probability is {round(self.LPM_0, 2)}.')
+        print(
+            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
+        print(
+            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
+
+        # ----------------------------------------------------------------------- #
+        # Drawdown
+        port_performance_drawdown = self.final_portfolio.copy()
+        port_performance_drawdown = port_performance_drawdown.clip(upper=0)
+        port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
+        # port_performance_drawdown = abs(port_performance_drawdown)
+        port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
+        port_performance_drawdown['Accumulation'] = (port_performance_drawdown['Sum'].cumsum()) * 100
+        df_drawdown = port_performance_drawdown
+        df_drawdown = df_drawdown.round(decimals=3)
+
         # ----------------------------------------------------------------------- #
         # Monthly prod
         mon = []
@@ -380,29 +422,6 @@ class backtest:
         df_montly.columns = ["Result"]
 
         # ----------------------------------------------------------------------- #
-        # Drawdown
-        port_performance_drawdown = self.final_portfolio.copy()
-        port_performance_drawdown = port_performance_drawdown.clip(upper=0)
-        port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
-        port_performance_drawdown = abs(port_performance_drawdown)
-        port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
-        port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
-        port_performance_drawdown['Accumulation'] = (port_performance_drawdown['Sum'].cumprod() - 1) * 100
-        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Accumulation'] * (-1)
-        df_drawdown = port_performance_drawdown
-        df_drawdown = df_drawdown.round(decimals=3)
-
-        print(f'Portfolio daily average return is {round(self.port_mean, 2)}.')
-        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
-        print(f'Daily average return for approximately 90% population is {round(self.inner_mean, 2)}.')
-        print(f'Downside daily probability is {round(self.LPM_0, 2)}.')
-        print(
-            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
-        print(
-            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
-        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
-
-        # ----------------------------------------------------------------------- #
         # Create figures in Express
 
         df_accum_fig1 = df_accum.astype(float)
@@ -414,7 +433,7 @@ class backtest:
                        hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
 
         df_drawdown_fig2 = df_drawdown.astype(float)
-        df_drawdown_fig2.iloc[:,:-2] = (df_drawdown_fig2.iloc[:,:-2] * 100) * (-1)
+        df_drawdown_fig2.iloc[:,:-2] = (df_drawdown_fig2.iloc[:,:-2] * 100)
         df_drawdown_fig2 = df_drawdown_fig2.round(2)
         fig2 = px.line(df_drawdown_fig2,
                        x=df_drawdown_fig2.index,
@@ -475,6 +494,7 @@ class backtest:
         :return:
             Combines several backrests results into one dataframe
         """
+
         names = dic.keys()
         empty_frame = pd.DataFrame()
         for x in names:
@@ -496,27 +516,22 @@ class backtest:
         empty_frame = data
         empty_frame = empty_frame.round(decimals=3)
         empty_frame = empty_frame.fillna(0)
+
+        # ----------------------------------------------------------------------- #
+        # Stats
         pdr = empty_frame['Sum'] - 1
         port_mean = pdr.mean()
-        port_mean_pct = port_mean * 100
         port_std = pdr.std()
         LPM_0 = len(pdr[pdr < 0]) / len(pdr)
         LPM_1 = pdr.clip(upper=0).mean()
         LPM_2 = pdr.clip(upper=0).std()
         if LPM_0 == 0:
             LPM_0 = 0.01
-        topless_pdr = pdr[pdr < port_std]
-        botless_prd = topless_pdr[topless_pdr > -port_std]
-        inner_mean = botless_prd.mean()
         obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
-        stocks_mean = obj_only_stocks.mean()
-        top_per = stocks_mean.nlargest(1)
-        worst_per = stocks_mean.nsmallest(1)
         trade_length = len(pdr)
         VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
         VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
         CVaR = LPM_1 / LPM_0
-
         list_1 = ['Mean', 'Std', 'Downside prob', 'Downside mean', 'Downside std', 'Investment period', 'VaR_95',
                   'VaR_99', 'CVaR']
         list_2 = [port_mean, port_std, LPM_0, LPM_1, LPM_2, trade_length, VaR_95, VaR_99,
@@ -525,38 +540,8 @@ class backtest:
         frame = frame.to_string(index=False)
         print(frame)
 
-        # if benchmark is not None:
-        #     df_bench = backtest.benchmark_construction(benchmark)
-        #     df_execution = pd.merge(empty_frame, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
-        #     df_execution["Bench_Accumulation"] = df_execution["Bench_Accumulation"].fillna(method='ffill')
-        #
-        #     # Execution plot - with benchmark
-        #     df_execution_fig1 = df_execution.astype(float)
-        #     df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
-        #     df_execution_fig1 = df_execution_fig1.round(2)
-        #     df_execution_fig1 = df_execution_fig1.fillna(0)
-        #
-        #     fig1 = px.line(df_execution_fig1,
-        #                    x=df_execution_fig1.index,
-        #                    y=df_execution_fig1["Accumulation"],
-        #                    title="Accumulated return",
-        #                    hover_data=df_execution_fig1.columns[:-3])  # show all columns values excluding last 2
-        #
-        #     fig1.update_layout(xaxis_title="Date")
-        #     fig1.update_traces(name='Portfolio',
-        #                        showlegend=True)
-        #
-        #     fig1.add_scatter(x=df_execution_fig1.index,
-        #                      y=df_execution_fig1["Bench_Accumulation"],
-        #                      mode='lines',
-        #                      name="Benchmark")
-        #
-        #     fig1.update_yaxes(tickprefix="%")
-        #     fig1.show()
-        #
-        # else:
-
-        # Execution plot - no benchmark
+        # ----------------------------------------------------------------------- #
+        # Execution plot - Accumulation
         df_execution_fig1 = empty_frame.astype(float)
         df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
         df_execution_fig1 = df_execution_fig1.round(2)
@@ -569,7 +554,6 @@ class backtest:
         fig1.update_yaxes(tickprefix="%")
         fig1.show()
 
-
     def puzzle_plotting(data):
         """
         :param:
@@ -577,9 +561,33 @@ class backtest:
         :return:
             Combines several backtests results into graphical representations
         """
+
         df = data
         df = df.round(decimals=3)
         df = df.fillna(0)
+
+        # ----------------------------------------------------------------------- #
+        # Stats
+        empty_frame = df
+        pdr = empty_frame['Sum'] - 1
+        port_mean = pdr.mean()
+        port_std = pdr.std()
+        LPM_0 = len(pdr[pdr < 0]) / len(pdr)
+        LPM_1 = pdr.clip(upper=0).mean()
+        LPM_2 = pdr.clip(upper=0).std()
+        if LPM_0 == 0:
+            LPM_0 = 0.01
+        trade_length = len(pdr)
+        VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
+        VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
+        CVaR = LPM_1 / LPM_0
+        list_1 = ['Mean', 'Std', 'Downside prob', 'Downside mean', 'Downside std', 'Investment period', 'VaR_95',
+                  'VaR_99', 'CVaR']
+        list_2 = [port_mean, port_std, LPM_0, LPM_1, LPM_2, trade_length, VaR_95, VaR_99,
+                  CVaR]
+        frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
+        frame = frame.to_string(index=False)
+        print(frame)
 
         # ----------------------------------------------------------------------- #
         # Drawdown
@@ -616,37 +624,6 @@ class backtest:
         #com_frame.index = pd.to_datetime(com_frame.index)
         df_montly = com_frame
         df_montly.columns = ["Result"]
-
-        # ----------------------------------------------------------------------- #
-        # Stats
-        empty_frame = df
-        pdr = empty_frame['Sum'] - 1
-        port_mean = pdr.mean()
-        port_mean_pct = port_mean * 100
-        port_std = pdr.std()
-        LPM_0 = len(pdr[pdr < 0]) / len(pdr)
-        LPM_1 = pdr.clip(upper=0).mean()
-        LPM_2 = pdr.clip(upper=0).std()
-        topless_pdr = pdr[pdr < port_std]
-        botless_prd = topless_pdr[topless_pdr > -port_std]
-        inner_mean = botless_prd.mean()
-        obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
-        stocks_mean = obj_only_stocks.mean()
-        top_per = stocks_mean.nlargest(1)
-        worst_per = stocks_mean.nsmallest(1)
-        trade_length = len(pdr)
-        VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
-        VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
-        CVaR = LPM_1 / LPM_0
-        print(f'Portfolio daily average return is {round(port_mean, 2)}.')
-        print(f'Portfolio standard deviation is {round(port_std, 2)}.')
-        print(f'Daily average return for approximately 90% population is {round(inner_mean, 2)}.')
-        print(f'Downside daily probability is {round(LPM_0, 2)}.')
-        print(
-            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {trade_length} period.')
-        print(
-            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {trade_length} period.')
-        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
 
         # ----------------------------------------------------------------------- #
         # Create figures in Express
@@ -711,7 +688,6 @@ class backtest:
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Puzzle plotting results')
         this_figure.show()
-
 
 if __name__ == "__main__":
     backtest
