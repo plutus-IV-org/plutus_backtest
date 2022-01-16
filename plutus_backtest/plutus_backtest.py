@@ -244,6 +244,12 @@ class backtest:
 
         self.final_portfolio = port_performance
 
+        # small addition to be able to show a table
+        execution_table = self.final_portfolio.astype(float)
+        execution_table.iloc[:,:-2] = (execution_table.iloc[:,:-2] * 100)
+        execution_table.drop('Sum', axis=1, inplace=True)
+        self.execution_table = execution_table.round(2)
+
         return self.final_portfolio
 
     def multiple_executions(self):
@@ -341,6 +347,8 @@ class backtest:
             fig1.update_layout(xaxis_title="Date")
             fig1.update_yaxes(tickprefix="%")
             fig1.show()
+
+
 
     def plotting(self):
         """
@@ -503,6 +511,10 @@ class backtest:
         empty_frame = empty_frame.sort_index(ascending=True)
         empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
         empty_frame['Accumulation'] = (empty_frame['Sum'].cumprod() - 1) * 100
+        empty_frame = empty_frame.fillna(0)
+        empty_frame = empty_frame.astype(float)
+        empty_frame = empty_frame.round(4)
+
 
         return empty_frame
 
@@ -527,7 +539,6 @@ class backtest:
         LPM_2 = pdr.clip(upper=0).std()
         if LPM_0 == 0:
             LPM_0 = 0.01
-        obj_only_stocks = empty_frame.drop(columns=['Sum', 'Accumulation'])
         trade_length = len(pdr)
         VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
         VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
