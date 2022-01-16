@@ -99,7 +99,6 @@ class backtest:
         self.security_list = df
         return self.security_list
 
-    # FOR DETAILED VIEW Adding one day to first buy and last sell dates
     def date_plus_one(self, d):
         str_date = d
         if type(str_date) == str:
@@ -233,7 +232,16 @@ class backtest:
 
         return self.final_portfolio
 
-    def execution(self):
+    def multiple_executions(self):
+        """
+        :return:
+            Backtest statistic and cumulative return of the portfolio
+        """
+        df_execution = backtest.portfolio_construction(self)
+        df_execution = df_execution.round(decimals=3)
+
+
+    def single_execution(self):
         """
         :return:
             Backtest statistic and cumulative return of the portfolio
@@ -352,16 +360,16 @@ class backtest:
         # ----------------------------------------------------------------------- #
         # Monthly prod
         mon = []
-        df_drawdown = self.final_portfolio.copy()
-        df_drawdown = df_drawdown.drop(index=df_drawdown.index[0], axis=0)  # drop first row
+        df_monthly = self.final_portfolio.copy()
+        df_monthly = df_monthly.drop(index=df_monthly.index[0], axis=0)  # drop first row
 
-        for x in df_drawdown.index:
+        for x in df_monthly.index:
             mon.append(x.strftime("%Y-%m"))
         months = set(mon)
         d = []
         v = []
         for x in months:
-            n = (df_drawdown.loc[x, 'Sum'].prod() - 1) * 100
+            n = (df_monthly.loc[x, 'Sum'].prod() - 1) * 100
             d.append(x)
             v.append(n)
         com_frame = pd.DataFrame(index=d, data=v)
@@ -465,7 +473,7 @@ class backtest:
         :param:
             dic: aggregated dictionary containing several constructed portfolios
         :return:
-            Combines several backtests results into one dataframe
+            Combines several backrests results into one dataframe
         """
         names = dic.keys()
         empty_frame = pd.DataFrame()
@@ -475,6 +483,7 @@ class backtest:
         empty_frame = empty_frame.sort_index(ascending=True)
         empty_frame['Sum'] = (empty_frame.sum(axis=1)) + 1
         empty_frame['Accumulation'] = (empty_frame['Sum'].cumprod() - 1) * 100
+
         return empty_frame
 
     def puzzle_execution(data):
@@ -515,10 +524,51 @@ class backtest:
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         frame = frame.to_string(index=False)
         print(frame)
-        fig1 = px.line(empty_frame, x=empty_frame.index, y=empty_frame["Accumulation"], title="Accumulated return",
-                       hover_data=empty_frame.columns[:-2])  # show all columns values excluding last 2
+
+        # if benchmark is not None:
+        #     df_bench = backtest.benchmark_construction(benchmark)
+        #     df_execution = pd.merge(empty_frame, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
+        #     df_execution["Bench_Accumulation"] = df_execution["Bench_Accumulation"].fillna(method='ffill')
+        #
+        #     # Execution plot - with benchmark
+        #     df_execution_fig1 = df_execution.astype(float)
+        #     df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
+        #     df_execution_fig1 = df_execution_fig1.round(2)
+        #     df_execution_fig1 = df_execution_fig1.fillna(0)
+        #
+        #     fig1 = px.line(df_execution_fig1,
+        #                    x=df_execution_fig1.index,
+        #                    y=df_execution_fig1["Accumulation"],
+        #                    title="Accumulated return",
+        #                    hover_data=df_execution_fig1.columns[:-3])  # show all columns values excluding last 2
+        #
+        #     fig1.update_layout(xaxis_title="Date")
+        #     fig1.update_traces(name='Portfolio',
+        #                        showlegend=True)
+        #
+        #     fig1.add_scatter(x=df_execution_fig1.index,
+        #                      y=df_execution_fig1["Bench_Accumulation"],
+        #                      mode='lines',
+        #                      name="Benchmark")
+        #
+        #     fig1.update_yaxes(tickprefix="%")
+        #     fig1.show()
+        #
+        # else:
+
+        # Execution plot - no benchmark
+        df_execution_fig1 = empty_frame.astype(float)
+        df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
+        df_execution_fig1 = df_execution_fig1.round(2)
+        fig1 = px.line(df_execution_fig1,
+                       x=df_execution_fig1.index,
+                       y=df_execution_fig1["Accumulation"],
+                       title="Puzzle accumulated return",
+                       hover_data=df_execution_fig1.columns[:-2])  # show all columns values excluding last 2
         fig1.update_layout(xaxis_title="Date")
+        fig1.update_yaxes(tickprefix="%")
         fig1.show()
+
 
     def puzzle_plotting(data):
         """
@@ -530,6 +580,9 @@ class backtest:
         df = data
         df = df.round(decimals=3)
         df = df.fillna(0)
+
+        # ----------------------------------------------------------------------- #
+        # Drawdown
         port_performance_drawdown = df.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
@@ -540,27 +593,32 @@ class backtest:
         port_performance_drawdown['Accumulation'] = port_performance_drawdown['Accumulation'] * (-1)
         port_performance_drawdown = port_performance_drawdown.round(decimals=3)
         df_drawdown = port_performance_drawdown
+        df_drawdown = df_drawdown.round(decimals=3)
 
+        # ----------------------------------------------------------------------- #
         # Monthly prod
         mon = []
+        df_monthly = df.copy()
+        df_monthly = df_monthly.drop(index=df.index[0], axis=0)  # drop first row
 
-        df_copy = df.copy()
-        df_copy = df_copy.drop(index=df.index[0], axis=0)  # drop first row
-
-        for x in df.index:
+        for x in df_monthly.index:
             mon.append(x.strftime("%Y-%m"))
         months = set(mon)
         d = []
         v = []
         for x in months:
-            n = (df_copy.loc[x, 'Sum'].prod() - 1) * 100
+            n = (df_monthly.loc[x, 'Sum'].prod() - 1) * 100
             d.append(x)
             v.append(n)
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
-        com_frame.index = pd.to_datetime(com_frame.index)
-        com_frame.columns = ["Result"]
+        com_frame.index = com_frame.index.map(str)
+        #com_frame.index = pd.to_datetime(com_frame.index)
+        df_montly = com_frame
+        df_montly.columns = ["Result"]
 
+        # ----------------------------------------------------------------------- #
+        # Stats
         empty_frame = df
         pdr = empty_frame['Sum'] - 1
         port_mean = pdr.mean()
@@ -590,12 +648,31 @@ class backtest:
             f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {trade_length} period.')
         print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
 
+        # ----------------------------------------------------------------------- #
         # Create figures in Express
-        fig1 = px.line(df, x=df.index, y=df["Accumulation"],
-                       hover_data=df.columns[:-2])  # show all columns values excluding last 2
-        fig2 = px.line(df_drawdown, x=df_drawdown.index, y=df_drawdown["Accumulation"],
-                       hover_data=df_drawdown.columns[:-2])  # show all columns values excluding last 2
-        fig3 = px.line(com_frame, x=com_frame.index, y=com_frame["Result"])
+
+        df_accum_fig1 = df.astype(float)
+        df_accum_fig1.iloc[:,:-2] = (df_accum_fig1.iloc[:,:-2] * 100)
+        df_accum_fig1 = df_accum_fig1.round(2)
+        fig1 = px.line(df_accum_fig1,
+                       x=df_accum_fig1.index,
+                       y=df_accum_fig1["Accumulation"],
+                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
+
+
+        df_drawdown_fig2 = df_drawdown.astype(float)
+        df_drawdown_fig2.iloc[:,:-2] = (df_drawdown_fig2.iloc[:,:-2] * 100) * (-1)
+        df_drawdown_fig2 = df_drawdown_fig2.round(2)
+        fig2 = px.line(df_drawdown_fig2,
+                       x=df_drawdown_fig2.index,
+                       y=df_drawdown_fig2["Accumulation"],
+                       hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
+
+        df_montly_fig3 = df_montly.astype(float)
+        df_montly_fig3 = df_montly_fig3.round(2)
+        fig3 = px.bar(df_montly_fig3,
+                      x=df_montly_fig3.index,
+                      y=df_montly_fig3["Result"])
 
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
@@ -605,26 +682,34 @@ class backtest:
 
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
+
         for trace in range(len(fig2["data"])):
             figure2_traces.append(fig2["data"][trace])
+
         for trace in range(len(fig3["data"])):
             figure3_traces.append(fig3["data"][trace])
 
         # Create a 1x3 subplot
-        this_figure = sp.make_subplots(rows=3, cols=1, vertical_spacing=0.1, shared_xaxes=True,
-                                       subplot_titles=("Accumulative return",
-                                                       "Drawdown",
-                                                       "Monthly return"))
+        this_figure = sp.make_subplots(rows=3, cols=1,
+                                       vertical_spacing=0.1,
+                                       shared_xaxes=True,
+                                       subplot_titles=("Puzzle accumulative return",
+                                                       "Puzzle Drawdown",
+                                                       "Puzzle monthly return"))
 
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
+
         for traces in figure2_traces:
             this_figure.append_trace(traces, row=2, col=1)
+
         for traces in figure3_traces:
             this_figure.append_trace(traces, row=3, col=1)
 
         this_figure.update_layout(hovermode='x')
-        this_figure['layout'].update(height=1200, width=1700, title='Plotting results')
+        # Prefix y-axis tick labels with % sign
+        this_figure.update_yaxes(tickprefix="%")
+        this_figure['layout'].update(height=1400, title='Puzzle plotting results')
         this_figure.show()
 
 
