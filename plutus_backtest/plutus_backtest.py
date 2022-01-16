@@ -75,7 +75,7 @@ class backtest:
         performance = dc
         performance['Bench_Sum'] = performance.sum(axis=1)
         performance['Bench_Sum'] = performance['Bench_Sum'] + 1
-        performance['Bench_Accumulation'] = performance['Bench_Sum'].cumprod()
+        performance['Bench_Accumulation'] = (performance['Bench_Sum'].cumprod() - 1) * 100
         performance.columns.name = None
         self.benchmark_performance = performance
 
@@ -238,8 +238,8 @@ class backtest:
         :return:
             Backtest statistic and cumulative return of the portfolio
         """
-        df = backtest.portfolio_construction(self)
-        df = df.round(decimals=3)
+        df_execution = backtest.portfolio_construction(self)
+        df_execution = df_execution.round(decimals=3)
         obj = self.final_portfolio
         pdr = obj['Sum'] - 1
         self.port_mean = pdr.mean()
@@ -272,18 +272,46 @@ class backtest:
 
         if self.bench is not None:
             df_bench = backtest.benchmark_construction(self)
-            df = pd.merge(df, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
-            df["Bench_Accumulation"] = df["Bench_Accumulation"].fillna(method='ffill')
-            fig1 = px.line(df, x=df.index, y=df["Accumulation"], title="Accumulated return",
-                           hover_data=df.columns[:-3])  # show all columns values excluding last 2
+            df_execution = pd.merge(df_execution, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
+            df_execution["Bench_Accumulation"] = df_execution["Bench_Accumulation"].fillna(method='ffill')
+
+            # Execution plot - with benchmark
+            df_execution_fig1 = df_execution.astype(float)
+            df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
+            df_execution_fig1 = df_execution_fig1.round(2)
+            df_execution_fig1 = df_execution_fig1.fillna(0)
+
+            fig1 = px.line(df_execution_fig1,
+                           x=df_execution_fig1.index,
+                           y=df_execution_fig1["Accumulation"],
+                           title="Accumulated return",
+                           hover_data=df_execution_fig1.columns[:-3])  # show all columns values excluding last 2
+
             fig1.update_layout(xaxis_title="Date")
-            fig1.update_traces(name='Portfolio', showlegend=True)
-            fig1.add_scatter(x=df.index, y=df["Bench_Accumulation"], mode='lines', name="Benchmark")
+            fig1.update_traces(name='Portfolio',
+                               showlegend=True)
+
+            fig1.add_scatter(x=df_execution_fig1.index,
+                             y=df_execution_fig1["Bench_Accumulation"],
+                             mode='lines',
+                             name="Benchmark")
+
+            fig1.update_yaxes(tickprefix="%")
             fig1.show()
+
         else:
-            fig1 = px.line(df, x=df.index, y=df["Accumulation"], title="Accumulated return",
-                           hover_data=df.columns[:-2])  # show all columns values excluding last 2
+
+            # Execution plot - no benchmark
+            df_execution_fig1 = df_execution.astype(float)
+            df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
+            df_execution_fig1 = df_execution_fig1.round(2)
+            fig1 = px.line(df_execution_fig1,
+                           x=df_execution_fig1.index,
+                           y=df_execution_fig1["Accumulation"],
+                           title="Accumulated return",
+                           hover_data=df_execution_fig1.columns[:-2])  # show all columns values excluding last 2
             fig1.update_layout(xaxis_title="Date")
+            fig1.update_yaxes(tickprefix="%")
             fig1.show()
 
     def plotting(self):
@@ -426,7 +454,7 @@ class backtest:
             this_figure.append_trace(traces, row=3, col=1)
 
         this_figure.update_layout(hovermode='x')
-        # Prefix y-axis tick labels with dollar sign
+        # Prefix y-axis tick labels with % sign
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Plotting results')
 
