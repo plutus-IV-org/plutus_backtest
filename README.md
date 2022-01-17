@@ -4,16 +4,19 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oanda-backtest)](https://pypi.org/project/plutus-backtest/)
 [![Downloads](https://pepy.tech/badge/plutus-backtest)](https://pepy.tech/project/plutus-backtest)
 
+## Description:
 This project has been performed for the purpose of local backtests of financial strategies. The package contains various indicators and tools 
 allowing users obtaining exact results of their strategies over a certain period of time. The users are also able to pick 
 endless amount of trading instruments and set criteria such as long or short positioning. Beside that optional stop loss and take profit
 signals are available not only as general limit level for entire portfolio but can be also applied for each instrument individually.
 Another optional tool available is weights factor distribution which is oriented to assign weights according to the provided values. 
 In addition, the package allows to create several backtests and combine them all together into one to see the full picture of the investment 
-strategy.
+strategy.<br />
+
+Tickers for analysis are available on [Yahoo Finance page](https://finance.yahoo.com/).
 
 ## Installation: 
-* Dependency: pandas, numpy, plotly, yfinance
+* Dependency: **pandas**, **numpy**, **plotly**, **yfinance**
 * Install from pypi:
 ```
 pip install plutus_backtest
@@ -25,7 +28,7 @@ from plutus_backtest import backtest
 ```
 ## Examples: 
 
-Class backtest contains below parameters:<br />
+Class "backtest" contains below parameters:<br />
 ```
 asset: str or list or series
     Instruments taken into the consideration for the backtest.
@@ -109,7 +112,7 @@ bt.plotting()
 ![image](https://user-images.githubusercontent.com/83119547/149676946-4d26723b-bc00-49a1-9318-f0f23c9f3702.png)
 
 
-As we used plotly library - all plots are interactive and contain some details. For example "Accumulative return" plot reflects (from top to bottom):
+All plots are interactive and contain some details. For example "Accumulative return" plot reflects (from top to bottom):
 - Date;
 - Accumulation (in %) till selected date;
 - Daily changes (in %) for each instrument you called.
