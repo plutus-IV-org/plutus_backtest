@@ -3,6 +3,7 @@ import yfinance as yf
 import numpy as np
 import plotly.subplots as sp
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 pd.options.mode.chained_assignment = None
@@ -243,6 +244,7 @@ class backtest:
         port_performance = port_performance.sort_index()
 
         self.final_portfolio = port_performance
+        self.portfolio_weights = weights_df
 
         # small addition to be able to show a table
         execution_table = self.final_portfolio.astype(float)
@@ -454,12 +456,21 @@ class backtest:
                       x=df_montly_fig3.index,
                       y=df_montly_fig3["Result"])
 
+        weights_df = self.portfolio_weights
+        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df = weights_df[weights_df["Total Weights"] != 0]
+        weights_df = weights_df.drop("Total Weights", axis=1)
+        fig4 = px.area(weights_df * 100,
+                       x=weights_df.index,
+                       y=weights_df.columns)
+
 
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1, 2, 3 into it's traces
         figure1_traces = []
         figure2_traces = []
         figure3_traces = []
+        figure4_traces = []
 
         for trace in range(len(fig1["data"])):
             figure1_traces.append(fig1["data"][trace])
@@ -470,14 +481,18 @@ class backtest:
         for trace in range(len(fig3["data"])):
             figure3_traces.append(fig3["data"][trace])
 
-        # Create a 1x3 subplot
-        this_figure = sp.make_subplots(rows=3, cols=1,
+        for trace in range(len(fig4["data"])):
+            figure4_traces.append(fig4["data"][trace])
+
+        # Create a 1x4 subplot
+        this_figure = sp.make_subplots(rows=4, cols=1,
                                        vertical_spacing=0.1,
                                        shared_xaxes=False,
                                        shared_yaxes=False,
                                        subplot_titles=("Accumulative return",
                                                        "Drawdown",
-                                                       "Monthly return"))
+                                                       "Monthly return",
+                                                       "Weights distribution"))
 
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
@@ -488,7 +503,10 @@ class backtest:
         for traces in figure3_traces:
             this_figure.append_trace(traces, row=3, col=1)
 
-        this_figure.update_layout(hovermode='x')
+        for traces in figure4_traces:
+            this_figure.append_trace(traces, row=4, col=1)
+
+        this_figure.update_layout(hovermode='x', showlegend=False)
         # Prefix y-axis tick labels with % sign
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Plotting results')
