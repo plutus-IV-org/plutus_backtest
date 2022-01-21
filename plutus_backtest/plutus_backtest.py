@@ -5,7 +5,6 @@ import plotly.subplots as sp
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-
 pd.options.mode.chained_assignment = None
 
 
@@ -252,26 +251,18 @@ class backtest:
         execution_table.drop('Sum', axis=1, inplace=True)
         self.execution_table = execution_table.round(2)
 
-        return self.final_portfolio
-
-    def multiple_executions(self):
+    def execution(self):
         """
         :return:
-            Backtest statistic and cumulative return of the portfolio based on multiple inputs.
-            To be used only with puzzle functions.
+            Backtest statistic and cumulative return of the given portfolio.
         """
-        df_execution = backtest.portfolio_construction(self)
-        df_execution = df_execution.round(decimals=3)
-
-    def single_execution(self):
-        """
-        :return:
-            Backtest statistic and cumulative return of the portfolio based on only single input.
-        """
-
         # ----------------------------------------------------------------------- #
         # Stats
-        df_execution = backtest.portfolio_construction(self)
+        try:
+            df_execution = self.final_portfolio
+        except:
+            backtest.portfolio_construction(self)
+            df_execution = self.final_portfolio
         df_execution = df_execution.round(decimals=3)
         obj = self.final_portfolio
         pdr = obj['Sum'] - 1
@@ -290,7 +281,7 @@ class backtest:
         self.stocks_mean = obj_only_stocks.mean()
         self.top_per = self.stocks_mean.nlargest(1)
         self.worst_per = self.stocks_mean.nsmallest(1)
-        self.trade_length = len(pdr)
+        self.trade_length = len(pdr) - 1
         VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1 / self.LPM_0
@@ -358,9 +349,12 @@ class backtest:
             Graphical repsresentaion of portfolio performance over the given period.
         """
 
+        try:
+            df_accum = self.final_portfolio.copy()
+        except:
+            backtest.portfolio_construction(self)
+            df_accum = self.final_portfolio.copy()
 
-        backtest.portfolio_construction(self)
-        df_accum = self.final_portfolio.copy()
 
         # ----------------------------------------------------------------------- #
         # Stats
@@ -383,7 +377,7 @@ class backtest:
         self.stocks_mean = obj_only_stocks.mean()
         self.top_per = self.stocks_mean.nlargest(1)
         self.worst_per = self.stocks_mean.nsmallest(1)
-        self.trade_length = len(pdr)
+        self.trade_length = len(pdr)-1
         VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1 / self.LPM_0
@@ -546,7 +540,8 @@ class backtest:
         empty_frame = data
         empty_frame = empty_frame.round(decimals=3)
         empty_frame = empty_frame.fillna(0)
-
+        q1 = empty_frame.iloc[:,:-2]
+        q2 = sum(abs(q1).sum(axis=1) == 0)
         # ----------------------------------------------------------------------- #
         # Stats
         pdr = empty_frame['Sum'] - 1
@@ -557,7 +552,7 @@ class backtest:
         LPM_2 = pdr.clip(upper=0).std()
         if LPM_0 == 0:
             LPM_0 = 0.01
-        trade_length = len(pdr)
+        trade_length = len(pdr) - q2
         VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
         VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
         CVaR = LPM_1 / LPM_0
@@ -583,6 +578,8 @@ class backtest:
         fig1.update_yaxes(tickprefix="%")
         fig1.show()
 
+
+
     def puzzle_plotting(data):
         """
         :param:
@@ -598,6 +595,8 @@ class backtest:
         # ----------------------------------------------------------------------- #
         # Stats
         empty_frame = df
+        q1 = empty_frame.iloc[:, :-2]
+        q2 = sum(abs(q1).sum(axis=1) == 0)
         pdr = empty_frame['Sum'] - 1
         port_mean = pdr.mean()
         port_std = pdr.std()
@@ -606,7 +605,7 @@ class backtest:
         LPM_2 = pdr.clip(upper=0).std()
         if LPM_0 == 0:
             LPM_0 = 0.01
-        trade_length = len(pdr)
+        trade_length = len(pdr) -q2
         VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
         VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
         CVaR = LPM_1 / LPM_0
