@@ -69,7 +69,7 @@ bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"],
               o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
 
-bt.single_execution()
+bt.execution()
 ```
 
 <br />
@@ -111,7 +111,7 @@ bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
               benchmark = "SPY")
 
-bt.single_execution()
+bt.execution()
 ```
 <br />
 
@@ -159,6 +159,7 @@ bt = backtest(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
               weights_factor = [50, 40, 10])
+
 bt.plotting()
 ```
 
@@ -184,6 +185,7 @@ bt = backtest(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
               weights_factor = [35, 140, -21])
+
 bt.plotting()
 ```
 
@@ -238,7 +240,8 @@ bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"],
               weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], 
               take_profit = [1.1, 1.2, 1.05])
-bt.single_execution()
+
+bt.execution()
 ```
 
 <br />
@@ -272,7 +275,7 @@ bt = backtest(asset = ["AMZN", "AMZN","AMZN"],
               o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 
-bt.single_execution()
+bt.execution()
 
 bt.execution_table.head(15)
 ```
@@ -303,8 +306,8 @@ bt2 = backtest(asset = ["AMZN", "EURUSD=X"],
                o_day = ["2021-06-01", "2021-06-15"],
                c_day = ["2021-06-30", "2021-07-05"])
 
-p1 = bt1.multiple_executions()
-p2 = bt2.multiple_executions()
+p1 = bt1.portfolio_construction()
+p2 = bt2.portfolio_construction()
 q1 = bt1.final_portfolio
 q2 = bt2.final_portfolio
 
@@ -343,8 +346,8 @@ bt2 = backtest(asset = ["AMZN", "EURUSD=X"],
                o_day = ["2021-06-01", "2021-06-15"],
                c_day = ["2021-06-30", "2021-07-05"])
 
-p1 = bt1.multiple_executions()
-p2 = bt2.multiple_executions()
+p1 = bt1.portfolio_construction()
+p2 = bt2.portfolio_construction()
 q1 = bt1.final_portfolio
 q2 = bt2.final_portfolio
 
