@@ -87,6 +87,14 @@ In order to access dataframe with daily changes, use:
 <br />
 
 ```python
+from plutus_backtest import backtest
+
+bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"],
+              o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
+              c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
+
+bt.portfolio_construction()
+
 bt.execution_table.head()
 ```
 <br />
@@ -275,7 +283,7 @@ bt = backtest(asset = ["AMZN", "AMZN","AMZN"],
               o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 
-bt.execution()
+bt.portfolio_construction()
 
 bt.execution_table.head(15)
 ```
