@@ -454,6 +454,7 @@ class backtest:
         weights_df["Total Weights"] = weights_df.sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
+        weights_df = abs(weights_df)
         fig4 = px.area(weights_df * 100,
                        x=weights_df.index,
                        y=weights_df.columns)
