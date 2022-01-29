@@ -3,9 +3,13 @@ import yfinance as yf
 import numpy as np
 import plotly.subplots as sp
 import plotly.express as px
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
+
+import sys
+from time import sleep
+
 pd.options.mode.chained_assignment = None
+
 
 
 class backtest:
@@ -126,7 +130,12 @@ class backtest:
             return back_to_str
 
     def consolidated_table_detailed(self):
+
         backtest.security_list(self)
+
+        sys.stdout.write("Consolidating detailed table: ")
+        sys.stdout.flush()
+
         df_1 = self.security_list
         initial_df = pd.DataFrame()
         fq = pd.DataFrame(index=self.asset, data=self.b_day)
@@ -191,14 +200,25 @@ class backtest:
         self.auxiliar_df = aux
         self.detailed_return = dc
 
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+
+        print("\n")
+
         return self.detailed_return
+
 
     def portfolio_construction(self):
         """
         :return:
             Full constructed portfolio, including position length, weights factor, stop loss & take profit.
         """
+
         backtest.consolidated_table_detailed(self)
+
+        sys.stdout.write("Constructing your portfolio: ")
+        sys.stdout.flush()
+
         binary_weights = self.auxiliar_df / self.auxiliar_df
         binary_weights.fillna(value=0, inplace=True)
         fac_summing = np.sum(abs(np.array(self.w_factor)))
@@ -242,6 +262,7 @@ class backtest:
         port_performance.loc[q1] = [0] * len(port_performance.columns)
         port_performance = port_performance.sort_index()
 
+
         self.final_portfolio = port_performance
         self.portfolio_weights = weights_df
 
@@ -250,6 +271,13 @@ class backtest:
         execution_table.iloc[:,:-2] = (execution_table.iloc[:,:-2] * 100)
         execution_table.drop('Sum', axis=1, inplace=True)
         self.execution_table = execution_table.round(2)
+
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+
+        print("\n")
+
+
 
     def execution(self):
         """
@@ -263,6 +291,10 @@ class backtest:
         except:
             backtest.portfolio_construction(self)
             df_execution = self.final_portfolio
+
+        sys.stdout.write("Working on results: ")
+        sys.stdout.flush()
+
         df_execution = df_execution.round(decimals=3)
         obj = self.final_portfolio
         pdr = obj['Sum'] - 1
@@ -292,10 +324,16 @@ class backtest:
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         self.stat_frame = frame
         frame = frame.to_string(index=False)
-        print(frame)
+
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+        print('\n')
+        print('\n' + frame)
 
         # ----------------------------------------------------------------------- #
         # Execution plot - 2 ways
+
+
 
         if self.bench is not None:
             df_bench = backtest.benchmark_construction(self)
@@ -341,8 +379,6 @@ class backtest:
             fig1.update_yaxes(tickprefix="%")
             fig1.show()
 
-
-
     def plotting(self):
         """
         :return:
@@ -355,6 +391,8 @@ class backtest:
             backtest.portfolio_construction(self)
             df_accum = self.final_portfolio.copy()
 
+        sys.stdout.write("Working on plots: ")
+        sys.stdout.flush()
 
         # ----------------------------------------------------------------------- #
         # Stats
@@ -382,15 +420,7 @@ class backtest:
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1 / self.LPM_0
 
-        print(f'Portfolio daily average return is {round(self.port_mean, 2)}.')
-        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
-        print(f'Daily average return for approximately 90% population is {round(self.inner_mean, 2)}.')
-        print(f'Downside daily probability is {round(self.LPM_0, 2)}.')
-        print(
-            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
-        print(
-            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
-        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
+
 
         # ----------------------------------------------------------------------- #
         # Drawdown
@@ -506,6 +536,26 @@ class backtest:
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Plotting results')
 
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+        print('\n')
+
+        # ----------------------------------------------------------------------- #
+        # Printing stats
+
+        print(f'Portfolio daily average return is {round(self.port_mean, 2)}.')
+        print(f'Portfolio standard deviation is {round(self.port_std, 2)}.')
+        print(f'Daily average return for approximately 90% population is {round(self.inner_mean, 2)}.')
+        print(f'Downside daily probability is {round(self.LPM_0, 2)}.')
+        print(
+            f'There is 95% confidence that you will not lose more than {round(100 * VaR_95, 2)} % of your portfolio in a given {self.trade_length} period.')
+        print(
+            f'There is 99% confidence that you will not lose more than {round(100 * VaR_99, 2)} % of your portfolio in a given {self.trade_length} period.')
+        print(f'Expected loss that occur beyond the shortfall is {round(CVaR, 4)}.')
+
+        # ----------------------------------------------------------------------- #
+        # Printing plots
+
         this_figure.show()
 
     def puzzle_assembly(dic):
@@ -515,6 +565,9 @@ class backtest:
         :return:
             Combines several backrests results into one dataframe
         """
+
+        sys.stdout.write("Compiling your puzzle: ")
+        sys.stdout.flush()
 
         names = dic.keys()
         empty_frame = pd.DataFrame()
@@ -528,6 +581,9 @@ class backtest:
         empty_frame = empty_frame.astype(float)
         empty_frame = empty_frame.round(4)
 
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+        print('\n')
 
         return empty_frame
 
@@ -538,6 +594,10 @@ class backtest:
         :return:
             Combined backtests statistic and cumulative return of the portfolio
         """
+
+        sys.stdout.write("Working on puzzle results: ")
+        sys.stdout.flush()
+
         empty_frame = data
         empty_frame = empty_frame.round(decimals=3)
         empty_frame = empty_frame.fillna(0)
@@ -563,7 +623,6 @@ class backtest:
                   CVaR]
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         frame = frame.to_string(index=False)
-        print(frame)
 
         # ----------------------------------------------------------------------- #
         # Execution plot - Accumulation
@@ -577,8 +636,20 @@ class backtest:
                        hover_data=df_execution_fig1.columns[:-2])  # show all columns values excluding last 2
         fig1.update_layout(xaxis_title="Date")
         fig1.update_yaxes(tickprefix="%")
-        fig1.show()
 
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+        print('\n')
+
+        # ----------------------------------------------------------------------- #
+        # Printing stats
+
+        print(frame)
+
+        # ----------------------------------------------------------------------- #
+        # Printing plots
+
+        fig1.show()
 
 
     def puzzle_plotting(data):
@@ -588,6 +659,9 @@ class backtest:
         :return:
             Combines several backtests results into graphical representations
         """
+
+        sys.stdout.write("Working on puzzle plots: ")
+        sys.stdout.flush()
 
         df = data
         df = df.round(decimals=3)
@@ -616,7 +690,7 @@ class backtest:
                   CVaR]
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         frame = frame.to_string(index=False)
-        print(frame)
+
 
         # ----------------------------------------------------------------------- #
         # Drawdown
@@ -716,7 +790,21 @@ class backtest:
         # Prefix y-axis tick labels with % sign
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Puzzle plotting results')
+
+        sys.stdout.write("DONE")
+        sys.stdout.flush()
+        print('\n')
+
+        # ----------------------------------------------------------------------- #
+        # Printing stats
+
+        print(frame)
+
+        # ----------------------------------------------------------------------- #
+        # Printing plots
+
         this_figure.show()
+
 
 if __name__ == "__main__":
     backtest
