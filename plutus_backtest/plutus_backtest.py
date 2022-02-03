@@ -521,10 +521,11 @@ class backtest:
                                        vertical_spacing=0.1,
                                        shared_xaxes=False,
                                        shared_yaxes=False,
-                                       subplot_titles=("Accumulative return",
-                                                       "Drawdown",
+                                       subplot_titles=("Weights distribution",
+                                                       "Accumulative return",
                                                        "Monthly return",
-                                                       "Weights distribution"))
+                                                       "Drawdown"
+                                                       ))
 
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
