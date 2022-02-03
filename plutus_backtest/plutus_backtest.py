@@ -6,10 +6,8 @@ import plotly.express as px
 from datetime import datetime, timedelta
 
 import sys
-from time import sleep
 
 pd.options.mode.chained_assignment = None
-
 
 
 class backtest:
@@ -103,7 +101,6 @@ class backtest:
         if isinstance(self.sl, pd.core.series.Series):
             self.sl = self.sl.values
 
-
         df = pd.DataFrame(
             {"company": self.asset, "start day": self.b_day, "end day": self.s_day, "weights factor": self.w_factor,
              "take profit": self.tp, "stop loss": self.sl})
@@ -133,14 +130,16 @@ class backtest:
 
         backtest.security_list(self)
 
-        sys.stdout.write("Consolidating detailed table: ")
+        sys.stdout.write("Consolidating detailed table: .")
         sys.stdout.flush()
 
         df_1 = self.security_list
         initial_df = pd.DataFrame()
         fq = pd.DataFrame(index=self.asset, data=self.b_day)
+        # check if companies are dublicatted in a list
         v = fq.groupby(fq.index) \
             .cumcount()
+        # doubled companies will have suffix
         list_new = []
         for x in range(len(v.values)):
             if v.iloc[x] != 0:
@@ -152,7 +151,11 @@ class backtest:
         max_date = max(self.security_list['end day'])
         ydata = yf.download(self.asset, start=backtest.date_plus_one(self, min_date),
                             end=backtest.date_plus_one(self, max_date), progress=False)
+
+        sys.stdout.write("..")
+        #check if column names are Multiindex
         if not isinstance(ydata.columns, pd.MultiIndex):
+        #select desired start / end dates for selected companies
             for b_d, s_d, new_com in zip(df_1["start day"], df_1["end day"], list_new):
                 data = ydata.loc[b_d:s_d]
                 data['Ticker'] = new_com
@@ -171,6 +174,9 @@ class backtest:
         open_price = df_open.groupby('ticker').first()
         em1 = pd.DataFrame()
         em2 = pd.DataFrame()
+
+        sys.stdout.write("...")
+
         for x in open_price.index:
             get_open = open_price.loc[x]
             get_end = df_close[df_close['ticker'] == x]
@@ -206,7 +212,6 @@ class backtest:
         print("\n")
 
         return self.detailed_return
-
 
     def portfolio_construction(self):
         """
@@ -262,13 +267,12 @@ class backtest:
         port_performance.loc[q1] = [0] * len(port_performance.columns)
         port_performance = port_performance.sort_index()
 
-
         self.final_portfolio = port_performance
         self.portfolio_weights = weights_df
 
         # small addition to be able to show a table
         execution_table = self.final_portfolio.astype(float)
-        execution_table.iloc[:,:-2] = (execution_table.iloc[:,:-2] * 100)
+        execution_table.iloc[:, :-2] = (execution_table.iloc[:, :-2] * 100)
         execution_table.drop('Sum', axis=1, inplace=True)
         self.execution_table = execution_table.round(2)
 
@@ -276,8 +280,6 @@ class backtest:
         sys.stdout.flush()
 
         print("\n")
-
-
 
     def execution(self):
         """
@@ -333,11 +335,10 @@ class backtest:
         # ----------------------------------------------------------------------- #
         # Execution plot - 2 ways
 
-
-
         if self.bench is not None:
             df_bench = backtest.benchmark_construction(self)
-            df_execution = pd.merge(df_execution, df_bench["Bench_Accumulation"], how='left', left_index=True, right_index=True)
+            df_execution = pd.merge(df_execution, df_bench["Bench_Accumulation"], how='left', left_index=True,
+                                    right_index=True)
             df_execution["Bench_Accumulation"] = df_execution["Bench_Accumulation"].fillna(method='ffill')
 
             # Execution plot - Accumulation with benchmark
@@ -350,7 +351,7 @@ class backtest:
                            x=df_execution_fig1.index,
                            y=df_execution_fig1["Accumulation"],
                            title="Accumulated return",
-                           hover_data=df_execution_fig1.columns[:-3])  # show all columns values excluding last 2
+                           hover_data=df_execution_fig1.columns[:-3])  # show all columns values excluding last 3
 
             fig1.update_layout(xaxis_title="Date")
             fig1.update_traces(name='Portfolio',
@@ -415,12 +416,10 @@ class backtest:
         self.stocks_mean = obj_only_stocks.mean()
         self.top_per = self.stocks_mean.nlargest(1)
         self.worst_per = self.stocks_mean.nsmallest(1)
-        self.trade_length = len(pdr)-1
+        self.trade_length = len(pdr) - 1
         VaR_95 = -1.65 * self.port_std * np.sqrt(self.trade_length)
         VaR_99 = -2.33 * self.port_std * np.sqrt(self.trade_length)
         CVaR = self.LPM_1 / self.LPM_0
-
-
 
         # ----------------------------------------------------------------------- #
         # Drawdown
@@ -458,37 +457,45 @@ class backtest:
         # ----------------------------------------------------------------------- #
         # Create figures in Express
 
-        df_accum_fig1 = df_accum.astype(float)
-        df_accum_fig1.iloc[:,:-2] = (df_accum_fig1.iloc[:,:-2] * 100)
-        df_accum_fig1 = df_accum_fig1.round(2)
-        fig1 = px.line(df_accum_fig1,
-                       x=df_accum_fig1.index,
-                       y=df_accum_fig1["Accumulation"],
-                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
-
-        df_drawdown_fig2 = df_drawdown.astype(float)
-        df_drawdown_fig2.iloc[:,:-2] = (df_drawdown_fig2.iloc[:,:-2] * 100)
-        df_drawdown_fig2 = df_drawdown_fig2.round(2)
-        fig2 = px.line(df_drawdown_fig2,
-                       x=df_drawdown_fig2.index,
-                       y=df_drawdown_fig2["Accumulation"],
-                       hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
-
-        df_montly_fig3 = df_montly.astype(float)
-        df_montly_fig3 = df_montly_fig3.round(2)
-        fig3 = px.bar(df_montly_fig3,
-                      x=df_montly_fig3.index,
-                      y=df_montly_fig3["Result"])
-
         weights_df = self.portfolio_weights
         weights_df["Total Weights"] = weights_df.sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
         weights_df = abs(weights_df)
-        fig4 = px.area(weights_df * 100,
+        fig1 = px.area(weights_df * 100,
                        x=weights_df.index,
                        y=weights_df.columns)
 
+        df_accum_fig1 = df_accum.astype(float)
+        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
+        df_accum_fig1 = df_accum_fig1.round(2)
+        fig2 = px.line(df_accum_fig1,
+                       x=df_accum_fig1.index,
+                       y=df_accum_fig1["Accumulation"],
+                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
+
+        df_montly_fig3 = df_montly.astype(float)
+        color = []
+        for i in df_montly_fig3["Result"]:
+            if i < 0:
+                color.append('red')
+            else:
+                color.append('green')
+        df_montly_fig3["color"] = color
+        df_montly_fig3 = df_montly_fig3.round(2)
+        fig3 = px.bar(df_montly_fig3,
+                      x=df_montly_fig3.index,
+                      y=df_montly_fig3["Result"],
+                      color=df_montly_fig3["color"],
+                      color_discrete_sequence=df_montly_fig3["color"].unique())
+
+        df_drawdown_fig2 = df_drawdown.astype(float)
+        df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100)
+        df_drawdown_fig2 = df_drawdown_fig2.round(2)
+        fig4 = px.line(df_drawdown_fig2,
+                       x=df_drawdown_fig2.index,
+                       y=df_drawdown_fig2["Sum"] * 100,
+                       hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
 
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1, 2, 3 into it's traces
@@ -601,7 +608,7 @@ class backtest:
         empty_frame = data
         empty_frame = empty_frame.round(decimals=3)
         empty_frame = empty_frame.fillna(0)
-        q1 = empty_frame.iloc[:,:-2]
+        q1 = empty_frame.iloc[:, :-2]
         q2 = sum(abs(q1).sum(axis=1) == 0)
         # ----------------------------------------------------------------------- #
         # Stats
@@ -651,7 +658,6 @@ class backtest:
 
         fig1.show()
 
-
     def puzzle_plotting(data):
         """
         :param:
@@ -680,7 +686,7 @@ class backtest:
         LPM_2 = pdr.clip(upper=0).std()
         if LPM_0 == 0:
             LPM_0 = 0.01
-        trade_length = len(pdr) -q2
+        trade_length = len(pdr) - q2
         VaR_95 = -1.65 * port_std * np.sqrt(trade_length)
         VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
         CVaR = LPM_1 / LPM_0
@@ -690,7 +696,6 @@ class backtest:
                   CVaR]
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         frame = frame.to_string(index=False)
-
 
         # ----------------------------------------------------------------------- #
         # Drawdown
@@ -724,7 +729,7 @@ class backtest:
         com_frame = pd.DataFrame(index=d, data=v)
         com_frame = com_frame.sort_index()
         com_frame.index = com_frame.index.map(str)
-        #com_frame.index = pd.to_datetime(com_frame.index)
+        # com_frame.index = pd.to_datetime(com_frame.index)
         df_montly = com_frame
         df_montly.columns = ["Result"]
 
@@ -732,16 +737,15 @@ class backtest:
         # Create figures in Express
 
         df_accum_fig1 = df.astype(float)
-        df_accum_fig1.iloc[:,:-2] = (df_accum_fig1.iloc[:,:-2] * 100)
+        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
         df_accum_fig1 = df_accum_fig1.round(2)
         fig1 = px.line(df_accum_fig1,
                        x=df_accum_fig1.index,
                        y=df_accum_fig1["Accumulation"],
                        hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
 
-
         df_drawdown_fig2 = df_drawdown.astype(float)
-        df_drawdown_fig2.iloc[:,:-2] = (df_drawdown_fig2.iloc[:,:-2] * 100) * (-1)
+        df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100) * (-1)
         df_drawdown_fig2 = df_drawdown_fig2.round(2)
         fig2 = px.line(df_drawdown_fig2,
                        x=df_drawdown_fig2.index,
