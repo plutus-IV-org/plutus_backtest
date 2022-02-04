@@ -129,10 +129,6 @@ class backtest:
     def consolidated_table_detailed(self):
 
         backtest.security_list(self)
-
-        sys.stdout.write("Consolidating detailed table: .")
-        sys.stdout.flush()
-
         df_1 = self.security_list
         initial_df = pd.DataFrame()
         fq = pd.DataFrame(index=self.asset, data=self.b_day)
@@ -152,7 +148,6 @@ class backtest:
         ydata = yf.download(self.asset, start=backtest.date_plus_one(self, min_date),
                             end=backtest.date_plus_one(self, max_date), progress=False)
 
-        sys.stdout.write("..")
         #check if column names are Multiindex
         if not isinstance(ydata.columns, pd.MultiIndex):
         #select desired start / end dates for selected companies
@@ -174,8 +169,6 @@ class backtest:
         open_price = df_open.groupby('ticker').first()
         em1 = pd.DataFrame()
         em2 = pd.DataFrame()
-
-        sys.stdout.write("...")
 
         for x in open_price.index:
             get_open = open_price.loc[x]
@@ -205,12 +198,6 @@ class backtest:
         aux = aux.apply(pd.to_numeric)
         self.auxiliar_df = aux
         self.detailed_return = dc
-
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-
-        print("\n")
-
         return self.detailed_return
 
     def portfolio_construction(self):
@@ -220,10 +207,6 @@ class backtest:
         """
 
         backtest.consolidated_table_detailed(self)
-
-        sys.stdout.write("Constructing your portfolio: ")
-        sys.stdout.flush()
-
         binary_weights = self.auxiliar_df / self.auxiliar_df
         binary_weights.fillna(value=0, inplace=True)
         fac_summing = np.sum(abs(np.array(self.w_factor)))
@@ -276,11 +259,6 @@ class backtest:
         execution_table.drop('Sum', axis=1, inplace=True)
         self.execution_table = execution_table.round(2)
 
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-
-        print("\n")
-
     def execution(self):
         """
         :return:
@@ -293,9 +271,6 @@ class backtest:
         except:
             backtest.portfolio_construction(self)
             df_execution = self.final_portfolio
-
-        sys.stdout.write("Working on results: ")
-        sys.stdout.flush()
 
         df_execution = df_execution.round(decimals=3)
         obj = self.final_portfolio
@@ -326,11 +301,7 @@ class backtest:
         frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
         self.stat_frame = frame
         frame = frame.to_string(index=False)
-
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-        print('\n')
-        print('\n' + frame)
+        print(frame)
 
         # ----------------------------------------------------------------------- #
         # Execution plot - 2 ways
@@ -391,9 +362,6 @@ class backtest:
         except:
             backtest.portfolio_construction(self)
             df_accum = self.final_portfolio.copy()
-
-        sys.stdout.write("Working on plots: ")
-        sys.stdout.flush()
 
         # ----------------------------------------------------------------------- #
         # Stats
@@ -544,10 +512,6 @@ class backtest:
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Plotting results')
 
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-        print('\n')
-
         # ----------------------------------------------------------------------- #
         # Printing stats
 
@@ -573,10 +537,6 @@ class backtest:
         :return:
             Combines several backrests results into one dataframe
         """
-
-        sys.stdout.write("Compiling your puzzle: ")
-        sys.stdout.flush()
-
         names = dic.keys()
         empty_frame = pd.DataFrame()
         for x in names:
@@ -589,10 +549,6 @@ class backtest:
         empty_frame = empty_frame.astype(float)
         empty_frame = empty_frame.round(4)
 
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-        print('\n')
-
         return empty_frame
 
     def puzzle_execution(data):
@@ -602,10 +558,6 @@ class backtest:
         :return:
             Combined backtests statistic and cumulative return of the portfolio
         """
-
-        sys.stdout.write("Working on puzzle results: ")
-        sys.stdout.flush()
-
         empty_frame = data
         empty_frame = empty_frame.round(decimals=3)
         empty_frame = empty_frame.fillna(0)
@@ -645,10 +597,6 @@ class backtest:
         fig1.update_layout(xaxis_title="Date")
         fig1.update_yaxes(tickprefix="%")
 
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-        print('\n')
-
         # ----------------------------------------------------------------------- #
         # Printing stats
 
@@ -666,9 +614,6 @@ class backtest:
         :return:
             Combines several backtests results into graphical representations
         """
-
-        sys.stdout.write("Working on puzzle plots: ")
-        sys.stdout.flush()
 
         df = data
         df = df.round(decimals=3)
@@ -795,10 +740,6 @@ class backtest:
         # Prefix y-axis tick labels with % sign
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Puzzle plotting results')
-
-        sys.stdout.write("DONE")
-        sys.stdout.flush()
-        print('\n')
 
         # ----------------------------------------------------------------------- #
         # Printing stats
