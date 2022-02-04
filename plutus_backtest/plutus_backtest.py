@@ -425,22 +425,22 @@ class backtest:
         # ----------------------------------------------------------------------- #
         # Create figures in Express
 
+        df_accum_fig1 = df_accum.astype(float)
+        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
+        df_accum_fig1 = df_accum_fig1.round(2)
+        fig1 = px.line(df_accum_fig1,
+                       x=df_accum_fig1.index,
+                       y=df_accum_fig1["Accumulation"],
+                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
+
         weights_df = self.portfolio_weights
         weights_df["Total Weights"] = weights_df.sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
         weights_df = abs(weights_df)
-        fig1 = px.area(weights_df * 100,
+        fig2 = px.area(weights_df * 100,
                        x=weights_df.index,
                        y=weights_df.columns)
-
-        df_accum_fig1 = df_accum.astype(float)
-        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
-        df_accum_fig1 = df_accum_fig1.round(2)
-        fig2 = px.line(df_accum_fig1,
-                       x=df_accum_fig1.index,
-                       y=df_accum_fig1["Accumulation"],
-                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
 
         df_montly_fig3 = df_montly.astype(float)
         color = []
@@ -489,8 +489,8 @@ class backtest:
                                        vertical_spacing=0.1,
                                        shared_xaxes=False,
                                        shared_yaxes=False,
-                                       subplot_titles=("Weights distribution",
-                                                       "Accumulative return",
+                                       subplot_titles=("Accumulative return",
+                                                       "Weights distribution",
                                                        "Monthly return",
                                                        "Drawdown"
                                                        ))
@@ -648,12 +648,9 @@ class backtest:
         port_performance_drawdown = df.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
         port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
-        port_performance_drawdown = abs(port_performance_drawdown)
+        #port_performance_drawdown = abs(port_performance_drawdown)
         port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
-        port_performance_drawdown['Sum'] = port_performance_drawdown['Sum'] + 1
-        port_performance_drawdown['Accumulation'] = (port_performance_drawdown['Sum'].cumprod() - 1) * 100
-        port_performance_drawdown['Accumulation'] = port_performance_drawdown['Accumulation'] * (-1)
-        port_performance_drawdown = port_performance_drawdown.round(decimals=3)
+        port_performance_drawdown['Accumulation'] = (port_performance_drawdown['Sum'].cumsum()) * 100
         df_drawdown = port_performance_drawdown
         df_drawdown = df_drawdown.round(decimals=3)
 
@@ -690,19 +687,29 @@ class backtest:
                        y=df_accum_fig1["Accumulation"],
                        hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
 
+        df_montly_fig3 = df_montly.astype(float)
+        color = []
+        for i in df_montly_fig3["Result"]:
+            if i < 0:
+                color.append('red')
+            else:
+                color.append('green')
+        df_montly_fig3["color"] = color
+        df_montly_fig3 = df_montly_fig3.round(2)
+        fig2 = px.bar(df_montly_fig3,
+                      x=df_montly_fig3.index,
+                      y=df_montly_fig3["Result"],
+                      color=df_montly_fig3["color"],
+                      color_discrete_sequence=df_montly_fig3["color"].unique())
+
         df_drawdown_fig2 = df_drawdown.astype(float)
-        df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100) * (-1)
+        df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100)
         df_drawdown_fig2 = df_drawdown_fig2.round(2)
-        fig2 = px.line(df_drawdown_fig2,
+        fig3 = px.line(df_drawdown_fig2,
                        x=df_drawdown_fig2.index,
-                       y=df_drawdown_fig2["Accumulation"],
+                       y=df_drawdown_fig2["Sum"] * 100,
                        hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
 
-        df_montly_fig3 = df_montly.astype(float)
-        df_montly_fig3 = df_montly_fig3.round(2)
-        fig3 = px.bar(df_montly_fig3,
-                      x=df_montly_fig3.index,
-                      y=df_montly_fig3["Result"])
 
         # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
         # This is essentially breaking down the Express fig1 into it's traces
@@ -724,8 +731,8 @@ class backtest:
                                        vertical_spacing=0.1,
                                        shared_xaxes=True,
                                        subplot_titles=("Puzzle accumulative return",
-                                                       "Puzzle Drawdown",
-                                                       "Puzzle monthly return"))
+                                                       "Puzzle monthly return",
+                                                       "Puzzle Drawdown"))
 
         for traces in figure1_traces:
             this_figure.append_trace(traces, row=1, col=1)
@@ -736,7 +743,7 @@ class backtest:
         for traces in figure3_traces:
             this_figure.append_trace(traces, row=3, col=1)
 
-        this_figure.update_layout(hovermode='x')
+        this_figure.update_layout(hovermode='x', showlegend=False)
         # Prefix y-axis tick labels with % sign
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Puzzle plotting results')
