@@ -4,7 +4,7 @@ import numpy as np
 import plotly.subplots as sp
 import plotly.express as px
 from datetime import datetime, timedelta
-import progress as progress
+import progress_bar as progress
 
 pd.options.mode.chained_assignment = None
 
