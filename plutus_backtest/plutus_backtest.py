@@ -82,9 +82,9 @@ class backtest:
         df = yf.download(self.bench, start=backtest.date_plus_one(self, min_date),
                          end=backtest.date_plus_one(self, max_date), progress=False)
         df['Ticker'] = self.bench
-        df_close = df[["Ticker", "Adj Close"]]
+        df_close = df[["Ticker", self.p_p_n]]
         df_close.columns = ['ticker', 'close_price']
-        df_open = df[["Ticker", "Open"]]
+        df_open = df[["Ticker", self.p_p_p]]
         df_open.columns = ['ticker', 'open']
         open_price = df_open.groupby('ticker').first()
         em1 = pd.DataFrame()
