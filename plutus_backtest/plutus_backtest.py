@@ -36,8 +36,10 @@ class backtest:
         self.b_day = o_day
         self.s_day = c_day
         self.w_factor = weights_factor if weights_factor is not None else np.ones(len(asset))
-        self.tp = take_profit if take_profit is not None else 100 * np.ones(len(asset))
-        self.sl = stop_loss if stop_loss is not None else np.zeros(len(asset))
+        #self.tp = take_profit if take_profit is not None else 100 * np.ones(len(asset))
+        #self.sl = stop_loss if stop_loss is not None else np.zeros(len(asset))
+        self.tp = take_profit if take_profit is not None else len(self.asset) * [np.inf]
+        self.sl = stop_loss if stop_loss is not None else len(self.asset) * [-np.inf]
         self.bench = benchmark
 
     def benchmark_construction(self):
@@ -106,11 +108,12 @@ class backtest:
              "take profit": self.tp, "stop loss": self.sl})
         df = df.set_index(df['company'])
         for x in range(len(df.index)):
-            if df.iloc[x, 3] < 0:
+            if df.iloc[x, 3] < 0 and df.iloc[x, 4]!= np.inf and df.iloc[x,5]!= -np.inf:
                 a = df.iloc[x, 5]
                 b = df.iloc[x, 4]
                 df.iloc[x, 4] = (1 - a) + 1
                 df.iloc[x, 5] = 1 - (b - 1)
+
         self.security_list = df
         return self.security_list
 
@@ -147,7 +150,8 @@ class backtest:
         max_date = max(self.security_list['end day'])
         ydata = yf.download(self.asset, start=backtest.date_plus_one(self, min_date),
                             end=backtest.date_plus_one(self, max_date), progress=False)
-
+        if ydata.empty:
+            raise ValueError('No trading days were provided, perhaps days off or holidays have been given')
         #check if column names are Multiindex
         if not isinstance(ydata.columns, pd.MultiIndex):
         #select desired start / end dates for selected companies
@@ -187,6 +191,18 @@ class backtest:
         dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
         self.asset = list_new
         backtest.security_list(self)
+        if dc.columns.tolist() != self.asset:
+            l1 = dc.columns.tolist()
+            l2 = self.asset
+            res = [x for x in l1 + l2 if x not in l1 or x not in l2]
+            self.asset = l1
+            self.security_list = self.security_list.drop(res)
+            self.b_day = self.security_list['start day'].values
+            self.s_day = self.security_list['end day'].values
+            self.w_factor = self.security_list['weights factor'].values
+            self.sl = self.security_list['stop loss'].values
+            self.tp = self.security_list['take profit'].values
+            print (f"No price data found for {res} therefore was deleted from provided inputs.")
         dc = dc[self.asset]
         dc = dc.replace([np.inf, -np.inf], np.nan)
         dc = dc.fillna(0)
