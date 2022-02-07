@@ -36,8 +36,6 @@ class backtest:
         self.b_day = o_day
         self.s_day = c_day
         self.w_factor = weights_factor if weights_factor is not None else np.ones(len(asset))
-        #self.tp = take_profit if take_profit is not None else 100 * np.ones(len(asset))
-        #self.sl = stop_loss if stop_loss is not None else np.zeros(len(asset))
         self.tp = take_profit if take_profit is not None else len(self.asset) * [np.inf]
         self.sl = stop_loss if stop_loss is not None else len(self.asset) * [-np.inf]
         self.bench = benchmark
