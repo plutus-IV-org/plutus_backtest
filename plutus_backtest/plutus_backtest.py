@@ -15,23 +15,41 @@ class backtest:
 
             asset: str or list or series
                 Instruments taken into the consideration for the backtest.
+
             o_day: list of str or timestamps or series
                 Day/Days of the position opening.
+
             c_day: list of str or timestamps or series
                 Day/Days of the position closing.
+
             weights_factor: list of int or float or array-like or series default None
                 Optional list of factors which will be considered to define the weights for taken companies. By default
                 all weights are distributed equally, however if the list of factors provided the backtest will maximize
                 the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
+
             take_profit: list of float or int or series default None
                 List of values determining the level till a particular stock shall be traded.
+
             stop_loss: list of float or int or series default None
                 List of values determining the level till a particular stock shall be traded.
+
             benchmark: str default None
                 A benchmark ticker for comparison with portfolio performance
+
+            price_period_relation: str default 'O-C'
+                Instruct which periods of 2 trading days should be picked to calculate daily return.
+                Possible relations:
+                O-C / Open to Close prices
+                C-O / Close to Open prices
+                C-C / Close to Close prices
+                O-O / Open to Open prices
+                "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
+                "Close" - value of the last transacted price in a security before the market officially closes.
             """
 
-    def __init__(self, asset, o_day, c_day, weights_factor=None, take_profit=None, stop_loss=None, benchmark=None):
+    def __init__(self, asset, o_day, c_day, weights_factor=None, take_profit=None, stop_loss=None, benchmark=None,
+                 price_period_relation=None):
+
         self.asset = asset
         self.b_day = o_day
         self.s_day = c_day
@@ -39,6 +57,23 @@ class backtest:
         self.tp = take_profit if take_profit is not None else len(self.asset) * [np.inf]
         self.sl = stop_loss if stop_loss is not None else len(self.asset) * [-np.inf]
         self.bench = benchmark
+
+        if price_period_relation is None:
+            self.p_p_p = "Open"
+            self.p_p_n = "Adj Close"
+        else:
+            if price_period_relation == 'O-C':
+                self.p_p_p = "Open"
+                self.p_p_n = "Adj Close"
+            elif price_period_relation == 'C-O':
+                self.p_p_p = "Adj Close"
+                self.p_p_n = "Open"
+            elif price_period_relation == 'C-C':
+                self.p_p_p = "Adj Close"
+                self.p_p_n = "Adj Close"
+            else:
+                self.p_p_p = "Open"
+                self.p_p_n = "Open"
 
     def benchmark_construction(self):
         backtest.security_list(self)
@@ -164,9 +199,9 @@ class backtest:
                 data = q1.loc[b_d:s_d]
                 data['Ticker'] = new_com
                 initial_df = pd.concat([initial_df, data])
-        df_close = initial_df[["Ticker", "Adj Close"]]
+        df_close = initial_df[["Ticker", self.p_p_n]]
         df_close.columns = ['ticker', 'close_price']
-        df_open = initial_df[["Ticker", "Open"]]
+        df_open = initial_df[["Ticker", self.p_p_p]]
         df_open.columns = ['ticker', 'open']
         open_price = df_open.groupby('ticker').first()
         em1 = pd.DataFrame()
