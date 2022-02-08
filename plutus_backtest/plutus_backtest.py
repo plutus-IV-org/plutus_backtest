@@ -60,7 +60,8 @@ class backtest:
                 A benchmark ticker for comparison with portfolio performance
 
             price_period_relation: str default 'O-C'
-                Instruct which periods of 2 trading days should be picked to calculate daily return.
+                Instruct what part of the trading day a position shall be opened,
+                and what part of trading day it shall be closed.
                 Possible relations:
                 O-C / Open to Close prices
                 C-O / Close to Open prices
