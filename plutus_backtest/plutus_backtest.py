@@ -14,7 +14,7 @@ pd.options.mode.chained_assignment = None
 
 def start_progress(title):
     global progress_x
-    sys.stdout.write(title + ": [" + "-" * 40 + "]" + chr(8) * 41)
+    sys.stdout.write(title + ": [")# + "-" * 40 + "]" + chr(8) * 41)
     sys.stdout.flush()
     progress_x = 0
 
@@ -264,7 +264,10 @@ class backtest:
             self.w_factor = self.security_list['weights factor'].values
             self.sl = self.security_list['stop loss'].values
             self.tp = self.security_list['take profit'].values
-            print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
+            if res ==[]:
+                pass
+            else:
+                print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
 
         dc = dc[self.asset]
         dc = dc.replace([np.inf, -np.inf], np.nan)
@@ -437,7 +440,7 @@ class backtest:
             fig1.update_yaxes(tickprefix="%")
 
             progress(50)
-            end_progress(self)
+            end_progress()
 
             print(frame)
 
@@ -458,7 +461,7 @@ class backtest:
             fig1.update_yaxes(tickprefix="%")
 
             progress(50)
-            end_progress(self)
+            end_progress()
 
             print(frame)
 
@@ -635,7 +638,7 @@ class backtest:
         this_figure['layout'].update(height=1400, title='Plotting results')
 
         progress(20)
-        end_progress(self)
+        end_progress()
 
         # ----------------------------------------------------------------------- #
         # Printing stats
