@@ -4,10 +4,34 @@ import numpy as np
 import plotly.subplots as sp
 import plotly.express as px
 from datetime import datetime, timedelta
-import progress_bar as progress
+import sys
 
 pd.options.mode.chained_assignment = None
 
+########################
+#Progress Bar functions#
+########################
+
+def start_progress(title):
+    global progress_x
+    sys.stdout.write(title + ": [" + "-" * 40 + "]" + chr(8) * 41)
+    sys.stdout.flush()
+    progress_x = 0
+
+def progress(x):
+    global progress_x
+    x = int(x * 40 // 100)
+    sys.stdout.write("#" * (x - progress_x))
+    sys.stdout.flush()
+    progress_x = x
+
+def end_progress():
+    sys.stdout.write("#" * (40 - progress_x) + "] DONE! \n\n")
+    sys.stdout.flush()
+
+######################
+######## Code ########
+######################
 
 class backtest:
     """ :Parameters:
@@ -165,7 +189,7 @@ class backtest:
 
         backtest.security_list(self)
 
-        progress.start_progress("Consolidating detailed table: ")
+        start_progress("Consolidating detailed table: ")
 
         df_1 = self.security_list
         initial_df = pd.DataFrame()
@@ -209,7 +233,7 @@ class backtest:
         em1 = pd.DataFrame()
         em2 = pd.DataFrame()
 
-        progress.progress(50)
+        progress(50)
 
         for x in open_price.index:
             get_open = open_price.loc[x]
@@ -239,6 +263,7 @@ class backtest:
             self.w_factor = self.security_list['weights factor'].values
             self.sl = self.security_list['stop loss'].values
             self.tp = self.security_list['take profit'].values
+            print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
 
         dc = dc[self.asset]
         dc = dc.replace([np.inf, -np.inf], np.nan)
@@ -252,17 +277,10 @@ class backtest:
         self.auxiliar_df = aux
         self.detailed_return = dc
 
-        progress.progress(50)
-        progress.end_progress()
-
-        if res == []:
-            pass
-        else:
-            print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
+        progress(50)
+        end_progress()
 
         return self.detailed_return
-
-
 
     def portfolio_construction(self):
         """
@@ -272,7 +290,7 @@ class backtest:
 
         backtest.consolidated_table_detailed(self)
 
-        progress.start_progress("Constructing your portfolio: ")
+        start_progress("Constructing your portfolio: ")
 
         binary_weights = self.auxiliar_df / self.auxiliar_df
         binary_weights.fillna(value=0, inplace=True)
@@ -281,7 +299,7 @@ class backtest:
         dist_df = pd.DataFrame(index=self.asset, data=self.w_factor).T
         weights_df = binary_weights * dist
 
-        progress.progress(25)
+        progress(25)
 
         for z in weights_df.index:
             if abs(weights_df.loc[z]).sum() != 1:
@@ -304,7 +322,7 @@ class backtest:
         new_binary_weights.fillna(value=0, inplace=True)
         weights_df = new_binary_weights * dist
 
-        progress.progress(25)
+        progress(25)
 
         for z in weights_df.index:
             if abs(weights_df.loc[z]).sum() != 1:
@@ -319,7 +337,7 @@ class backtest:
         port_performance['Sum'] = port_performance['Sum'] + 1
         port_performance['Accumulation'] = (port_performance['Sum'].cumprod() - 1) * 100
 
-        progress.progress(25)
+        progress(25)
 
         q1 = port_performance.index[0] - timedelta(days=1)  # starting from 0%
         port_performance.loc[q1] = [0] * len(port_performance.columns)
@@ -334,8 +352,8 @@ class backtest:
         execution_table.drop('Sum', axis=1, inplace=True)
         self.execution_table = execution_table.round(2)
 
-        progress.progress(25)
-        progress.end_progress()
+        progress(25)
+        end_progress()
 
     def execution(self):
         """
@@ -350,8 +368,8 @@ class backtest:
             backtest.portfolio_construction(self)
             df_execution = self.final_portfolio
 
-        progress.start_progress("Working on results: ")
-        progress.progress(50)
+        start_progress("Working on results: ")
+        progress(50)
 
         df_execution = df_execution.round(decimals=3)
         obj = self.final_portfolio
@@ -417,8 +435,8 @@ class backtest:
 
             fig1.update_yaxes(tickprefix="%")
 
-            progress.progress(50)
-            progress.end_progress()
+            progress(50)
+            end_progress(self)
 
             print(frame)
 
@@ -438,8 +456,8 @@ class backtest:
             fig1.update_layout(xaxis_title="Date")
             fig1.update_yaxes(tickprefix="%")
 
-            progress.progress(50)
-            progress.end_progress()
+            progress(50)
+            end_progress(self)
 
             print(frame)
 
@@ -457,9 +475,9 @@ class backtest:
             backtest.portfolio_construction(self)
             df_accum = self.final_portfolio.copy()
 
-        progress.start_progress("Working on plots: ")
+        start_progress("Working on plots: ")
 
-        progress.progress(20)
+        progress(20)
 
         # ----------------------------------------------------------------------- #
         # Stats
@@ -489,7 +507,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Drawdown
-        progress.progress(20)
+        progress(20)
 
         port_performance_drawdown = self.final_portfolio.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
@@ -502,7 +520,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Monthly prod
-        progress.progress(20)
+        progress(20)
 
         mon = []
         df_monthly = self.final_portfolio.copy()
@@ -526,7 +544,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Create figures in Express
-        progress.progress(20)
+        progress(20)
 
         df_accum_fig1 = df_accum.astype(float)
         df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
@@ -615,8 +633,8 @@ class backtest:
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Plotting results')
 
-        progress.progress(20)
-        progress.end_progress()
+        progress(20)
+        end_progress(self)
 
         # ----------------------------------------------------------------------- #
         # Printing stats
@@ -643,9 +661,9 @@ class backtest:
         :return:
             Combines several backrests results into one dataframe
         """
-        progress.start_progress("Compiling your puzzle: ")
+        start_progress("Compiling your puzzle: ")
 
-        progress.progress(50)
+        progress(50)
 
         names = dic.keys()
         empty_frame = pd.DataFrame()
@@ -659,8 +677,8 @@ class backtest:
         empty_frame = empty_frame.astype(float)
         empty_frame = empty_frame.round(4)
 
-        progress.progress(50)
-        progress.end_progress()
+        progress(50)
+        end_progress()
 
         return empty_frame
 
@@ -671,7 +689,7 @@ class backtest:
         :return:
             Combined backtests statistic and cumulative return of the portfolio
         """
-        progress.start_progress("Working on puzzle results: ")
+        start_progress("Working on puzzle results: ")
 
         empty_frame = data
         empty_frame = empty_frame.round(decimals=3)
@@ -680,7 +698,7 @@ class backtest:
         q2 = sum(abs(q1).sum(axis=1) == 0)
         # ----------------------------------------------------------------------- #
         # Stats
-        progress.progress(50)
+        progress(50)
 
         pdr = empty_frame['Sum'] - 1
         port_mean = pdr.mean()
@@ -703,7 +721,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Execution plot - Accumulation
-        progress.progress(50)
+        progress(50)
 
         df_execution_fig1 = empty_frame.astype(float)
         df_execution_fig1.iloc[:, :-2] = (df_execution_fig1.iloc[:, :-2] * 100)
@@ -718,7 +736,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Printing stats
-        progress.end_progress()
+        end_progress()
         print(frame)
 
         # ----------------------------------------------------------------------- #
@@ -734,13 +752,13 @@ class backtest:
             Combines several backtests results into graphical representations
         """
 
-        progress.start_progress("Working on puzzle plots: ")
+        start_progress("Working on puzzle plots: ")
 
         df = data
         df = df.round(decimals=3)
         df = df.fillna(0)
 
-        progress.progress(20)
+        progress(20)
 
         # ----------------------------------------------------------------------- #
         # Stats
@@ -768,7 +786,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Drawdown
-        progress.progress(20)
+        progress(20)
 
         port_performance_drawdown = df.copy()
         port_performance_drawdown = port_performance_drawdown.clip(upper=0)
@@ -781,7 +799,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Monthly prod
-        progress.progress(20)
+        progress(20)
 
         mon = []
         df_monthly = df.copy()
@@ -805,7 +823,7 @@ class backtest:
 
         # ----------------------------------------------------------------------- #
         # Create figures in Express
-        progress.progress(20)
+        progress(20)
 
         df_accum_fig1 = df.astype(float)
         df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
@@ -876,8 +894,8 @@ class backtest:
         this_figure.update_yaxes(tickprefix="%")
         this_figure['layout'].update(height=1400, title='Puzzle plotting results')
 
-        progress.progress(20)
-        progress.end_progress()
+        progress(20)
+        end_progress()
 
         # ----------------------------------------------------------------------- #
         # Printing stats
