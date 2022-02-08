@@ -54,6 +54,17 @@ stop_loss: list of float or int or series default None
 
 benchmark: str default None
     A benchmark ticker for comparison with portfolio performance
+
+price_period_relation: str default 'O-C'
+    Instruct what part of the trading day a position shall be opened,
+    and what part of trading day it shall be closed.
+    Possible relations:
+    O-C / Open to Close prices
+    C-O / Close to Open prices
+    C-C / Close to Close prices
+    O-O / Open to Open prices
+    "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
+    "Close" - value of the last transacted price in a security before the market officially closes.    
 ```
 
 <br />
@@ -146,9 +157,11 @@ bt.plotting()
 ```
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/150585389-0f6f5945-f2a3-49a4-b99b-64f1a3bad3b0.png)
-![image](https://user-images.githubusercontent.com/83119547/150585470-33bd7c0d-aa97-486e-bb8c-cd8db9c525e2.png)
-![image](https://user-images.githubusercontent.com/83119547/150585526-eef9a4ee-6122-49b4-8bbc-67e088f800ee.png)
+![image](https://user-images.githubusercontent.com/83119547/153058511-3200f7d9-63d9-408b-aa07-ba92586131e4.png)
+![image](https://user-images.githubusercontent.com/83119547/153059013-7d45d213-aae9-4a33-ac9b-bb4d2865ad12.png)
+![image](https://user-images.githubusercontent.com/83119547/153058707-88d544af-3548-4887-82e3-adbe7ee87668.png)
+![image](https://user-images.githubusercontent.com/83119547/153058766-9ea72894-51aa-4a23-9189-dad596450db6.png)
+
 
 <br />
 
