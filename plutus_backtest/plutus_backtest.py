@@ -550,13 +550,45 @@ class backtest:
         # Create figures in Express
         progress(20)
 
-        df_accum_fig1 = df_accum.astype(float)
-        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
-        df_accum_fig1 = df_accum_fig1.round(2)
-        fig1 = px.line(df_accum_fig1,
-                       x=df_accum_fig1.index,
-                       y=df_accum_fig1["Accumulation"],
-                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
+        # ----------------------------------------------------------------------- #
+        # Add benchmark if triggered
+
+        if self.bench is not None:
+            df_bench = backtest.benchmark_construction(self)
+            df_accum = pd.merge(df_accum.copy(), df_bench["Bench_Accumulation"], how='left', left_index=True,
+                                right_index=True)
+            df_accum["Bench_Accumulation"] = df_accum["Bench_Accumulation"].fillna(method='ffill')
+
+            # Execution plot - Accumulation with benchmark
+            df_accum_fig1 = df_accum.astype(float)
+            df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
+            df_accum_fig1 = df_accum_fig1.round(2)
+            df_accum_fig1 = df_accum_fig1.fillna(0)
+
+            fig1 = px.line(df_accum_fig1,
+                           x=df_accum_fig1.index,
+                           y=df_accum_fig1["Accumulation"],
+                           title="Accumulated return",
+                           hover_data=df_accum_fig1.columns[:-3])  # show all columns values excluding last 3
+
+            fig1.update_layout(xaxis_title="Date")
+            fig1.update_traces(name='Portfolio',
+                               showlegend=True)
+
+            fig1.add_scatter(x=df_accum_fig1.index,
+                             y=df_accum_fig1["Bench_Accumulation"],
+                             mode='lines',
+                             name="Benchmark")
+        else:
+
+            df_accum_fig1 = df_accum.astype(float)
+            df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
+            df_accum_fig1 = df_accum_fig1.round(2)
+            fig1 = px.line(df_accum_fig1,
+                           x=df_accum_fig1.index,
+                           y=df_accum_fig1["Accumulation"],
+                           hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
+
 
         weights_df = self.portfolio_weights
         weights_df["Total Weights"] = weights_df.sum(axis=1)
