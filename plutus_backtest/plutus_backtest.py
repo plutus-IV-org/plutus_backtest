@@ -555,8 +555,9 @@ class backtest:
 
         if self.bench is not None:
             df_bench = backtest.benchmark_construction(self)
-            df_accum = pd.merge(df_accum.copy(), df_bench["Bench_Accumulation"], how='left', left_index=True,
+            df_accum = pd.merge(df_accum.copy(), df_bench["Bench_Accumulation"], how='right', left_index=True,
                                 right_index=True)
+            df_accum = df_accum.fillna(0)
             df_accum["Bench_Accumulation"] = df_accum["Bench_Accumulation"].fillna(method='ffill')
 
             # Execution plot - Accumulation with benchmark
