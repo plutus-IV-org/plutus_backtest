@@ -269,12 +269,12 @@ class backtest:
             else:
                 print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
 
-        dc = dc[self.asset]
+        dc = dc[self.security_list['company']]
         dc = dc.replace([np.inf, -np.inf], np.nan)
         dc = dc.fillna(0)
         dc = dc.apply(pd.to_numeric)
         aux = em1.pivot_table(index=em2.index, columns='ticker', values='close_price')
-        aux = aux[self.asset]
+        aux = aux[self.security_list['company']]
         aux = aux.replace([np.inf, -np.inf], np.nan)
         aux = aux.fillna(0)
         aux = aux.apply(pd.to_numeric)
@@ -300,7 +300,7 @@ class backtest:
         binary_weights.fillna(value=0, inplace=True)
         fac_summing = np.sum(abs(np.array(self.w_factor)))
         dist = np.array(self.w_factor) / fac_summing
-        dist_df = pd.DataFrame(index=self.asset, data=self.w_factor).T
+        dist_df = pd.DataFrame(index=self.security_list['company'], data=self.w_factor).T
         weights_df = binary_weights * dist
 
         progress(25)
