@@ -412,7 +412,7 @@ class backtest:
 
         if self.bench is not None:
             df_bench = backtest.benchmark_construction(self)
-            df_execution = pd.merge(df_execution, df_bench["Bench_Accumulation"], how='left', left_index=True,
+            df_execution = pd.merge(df_execution, df_bench["Bench_Accumulation"], how='right', left_index=True,
                                     right_index=True)
             df_execution["Bench_Accumulation"] = df_execution["Bench_Accumulation"].fillna(method='ffill')
 
