@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='plutus_backtest',
 
-    version='0.1.8',
+    version='0.1.9',
 
     description="plutus_backtest is a python package \
     for backtesting investment decisions using Python 3.6 and above.",
