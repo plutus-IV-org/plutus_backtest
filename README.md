@@ -128,17 +128,17 @@ from plutus_backtest import backtest
 bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"], 
               o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
-              benchmark = "SPY")
+              benchmark = "^GSPC") # ticker for S&P 500 index
 
 bt.execution()
 ```
 <br />
 
-Above example will additionaly plot a SPY index performance (accumulated return from same period as your portfolio) on your portfolio graph:
+Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as your portfolio) on your portfolio graph:
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149676316-b5531717-d33c-427d-98e3-bb4148333b79.png)
+![image](https://user-images.githubusercontent.com/83119547/160644004-c2287d34-83b0-480f-87d1-aebe6fd07501.png)
 
 <br />
 
