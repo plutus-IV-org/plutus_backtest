@@ -136,8 +136,8 @@ def _puzzle_report_generator(performance_securities_tuple):
                    y=df_accum_fig1["Accumulation"],
                    hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
 
-    fig2 = px.timeline(df_sec, x_start="start day", x_end="end day", y="company")
-    fig2.update_yaxes(autorange="reversed")  # otherwise tasks are listed from the bottom up
+    gantt = px.timeline(df_sec, x_start="start day", x_end="end day", y="company")
+    gantt.update_yaxes(autorange="reversed")  # otherwise tasks are listed from the bottom up
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Building app
@@ -157,8 +157,32 @@ def _puzzle_report_generator(performance_securities_tuple):
                         columns=[{"name": i, "id": i} for i in stats.columns]
                     )
                 ]
-            ),
-            html.Hr(),
+            )
+        ]
+    )
+
+    line_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(figure=fig1),
+                ]
+            )
+        ]
+    )
+
+    gantt_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(figure=gantt)
+                ]
+            )
+        ]
+    )
+
+    security_list_table = dbc.Card(
+        [
             html.Div(
                 [
                     dash_table.DataTable(
@@ -170,19 +194,8 @@ def _puzzle_report_generator(performance_securities_tuple):
                         columns=[{"name": i, "id": i} for i in df_sec.columns]
                     )
                 ]
-            )
-        ]
-    )
+            ),
 
-    graphs = dbc.Card(
-        [
-            html.Div(
-                [
-                    dcc.Graph(figure=fig1),
-                    html.Hr(),
-                    dcc.Graph(figure=fig2)
-                ]
-            )
         ]
     )
 
@@ -197,14 +210,14 @@ def _puzzle_report_generator(performance_securities_tuple):
         ]
     )
 
-    app.layout = dbc.Container(
+    tab1_content = dbc.Container(
         [
             html.H1("Backtest results"),
             html.Hr(),
             dbc.Row(
                 [
                     dbc.Col(sidebar, md=4),
-                    dbc.Col(graphs),
+                    dbc.Col(line_graph),
                 ],
                 align="top",
             ),
@@ -217,6 +230,36 @@ def _puzzle_report_generator(performance_securities_tuple):
         ],
         fluid=True,
     )
+
+    tab2_content = dbc.Container(
+        [
+            html.H1("Gantt line_graph and full list of assets"),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(security_list_table, md=4),
+                    dbc.Col(gantt_graph),
+                ],
+                align="top",
+            ),
+            dbc.Row(
+                [
+                    #dbc.Col(button),
+                ],
+                align="left",
+            ),
+        ],
+        fluid=True,
+    )
+
+    tabs = dbc.Tabs(
+        [
+            dbc.Tab(tab1_content, label="Backtest results"),
+            dbc.Tab(tab2_content, label="Full assets list"),
+        ]
+    )
+
+    app.layout = tabs
 
     app.title = "Plutus Backtest App!"
 

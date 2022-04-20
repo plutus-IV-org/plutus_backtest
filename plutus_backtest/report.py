@@ -1,4 +1,5 @@
 import numpy as np
+import plotly.express as px
 from plutus_backtest.backtest import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 from plutus_backtest.plots import _accumulated_return, _monthly_return, _drawdown, _plotting
 from plutus_backtest.benchmark import _benchmark_construction
@@ -86,12 +87,17 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
                                                           portfolio_weights=portfolio_weights,
                                                           benchmark_performance=benchmark_construction,
                                                           benchmark_ticker=benchmark)
+
+
+    gantt = px.timeline(security_list, x_start="start day", x_end="end day", y="company") #additional Gantt graph
+    gantt.update_yaxes(autorange="reversed")  # otherwise tasks are listed from the bottom up
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
 
+    security_list_short = security_list.head(10)
+
     app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-
 
     sidebar = dbc.Card(
         [
@@ -115,19 +121,48 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
                                 'whiteSpace': 'normal',
                                 'height': 'auto',
                         },
-                        data = security_list.to_dict('records'),
-                        columns = [{"name": i, "id": i} for i in security_list.columns]
+                        data = security_list_short.to_dict('records'),
+                        columns = [{"name": i, "id": i} for i in security_list_short.columns]
                     )
                 ]
             )
         ]
     )
 
-    graphs = dbc.Card(
+    main_graphs = dbc.Card(
         [
             html.Div(
                 [
                     dcc.Graph(figure=plots)
+                ]
+            )
+        ]
+    )
+
+
+    security_list_table = dbc.Card(
+        [
+            html.Div(
+                [
+                    dash_table.DataTable(
+                        style_data={
+                            'whiteSpace': 'normal',
+                            'height': 'auto',
+                        },
+                        data=security_list.to_dict('records'),
+                        columns=[{"name": i, "id": i} for i in security_list.columns]
+                    )
+                ]
+            ),
+
+        ]
+    )
+
+    gantt_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(figure=gantt)
                 ]
             )
         ]
@@ -145,14 +180,14 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
     )
 
 
-    app.layout = dbc.Container(
+    tab1_content = dbc.Container(
         [
             html.H1("Backtest results"),
             html.Hr(),
             dbc.Row(
                 [
                     dbc.Col(sidebar, md=4),
-                    dbc.Col(graphs),
+                    dbc.Col(main_graphs),
                 ],
                 align="top",
             ),
@@ -165,6 +200,38 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
         ],
         fluid=True,
     )
+
+
+    tab2_content = dbc.Container(
+        [
+            html.H1("Gantt graph and full list of assets"),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(security_list_table, md=4),
+                    dbc.Col(gantt_graph),
+                ],
+                align="top",
+            ),
+            dbc.Row(
+                [
+                    #dbc.Col(button),
+                ],
+                align="left",
+            ),
+        ],
+        fluid=True,
+    )
+
+
+    tabs = dbc.Tabs(
+        [
+            dbc.Tab(tab1_content, label="Backtest results"),
+            dbc.Tab(tab2_content, label="Full assets list"),
+        ]
+    )
+
+    app.layout = tabs
 
     app.title = "Plutus Backtest App!"
 

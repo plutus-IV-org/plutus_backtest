@@ -1,34 +1,35 @@
 from plutus_backtest.report import _report_generator
+from datetime import datetime, timedelta
+import random
+import numpy as np
 from plutus_backtest.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
 
+k = _report_generator(asset = ["AAPL", "AAPL"],
+                  o_day = ["2021-08-02", "2021-08-16"],
+                  c_day = ["2021-08-10", "2021-08-20"])
+
+# k = _report_generator(asset = ["AAPL", "BTC-USD", "TWTR", "AAPL"],
+#                   o_day = ["2021-08-01", "2021-04-15", "2022-01-03", "2021-09-05"],
+#                   c_day = ["2021-09-01", "2021-09-01", "2022-04-04", "2022-03-12"])
 
 
-# k = _report_generator(asset = ["AAPL", "BTC-USD", "TWTR"],
-#                   o_day = ["2021-08-01", "2021-04-15", "2022-01-03"],
-#                   c_day = ["2021-09-01", "2021-09-01", "2022-04-04"],
-#                   benchmark="SPY")
-
-
-
-bt1 = _puzzle_preparation(asset = ["AAPL", "BTC-USD","GC=F"],
-               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
-
-bt2 = _puzzle_preparation(asset = ["AMZN", "EURUSD=X"],
-               o_day = ["2021-06-01", "2021-06-15"],
-               c_day = ["2021-06-30", "2021-07-05"])
-
-dic ={0:bt1, 1:bt2}
-
-_puzzle_report_generator(_puzzle_assembly(dic))
-
-
-
-# def generate_test(list_assets):
+# tickers = ["WMT", "V", "BAC", "KO", "PFE", "PEP", "CVX", "TWTR", "BX",
+#            "PYPL", "SONY", "ABNB", "GE", "SBUX", "SBUX", "TEAM", "BSX",
+#            "MRNA", "UBS", "GM", "DG", "TRP", "MRVL", "TRI", "SYY", "EC"]
+#
+# indexes = np.random.choice(20, 20, replace=True)
+#
+# cashe_list = []
+# for x in indexes:
+#     cashe_list.append(tickers[x])
+#
+# tickers_test = cashe_list
+#
+# def generate_test(list_of_tickers):
 #     # --------------------------------------------------------- #
 #     # START DATES GENERATION
 #     min_year=2017
-#     max_year=2017
+#     max_year=2020
 #
 #     start = datetime(min_year, 1, 1, 00, 00, 00)
 #     years = max_year - min_year+1
@@ -36,7 +37,7 @@ _puzzle_report_generator(_puzzle_assembly(dic))
 #
 #     open_days = []
 #
-#     for i in range(len(list_assets)):
+#     for i in range(len(list_of_tickers)):
 #         random_date = start + (end - start) * random.random()
 #         open_days.append(random_date.strftime("%Y-%m-%d"))
 #     # --------------------------------------------------------- #
@@ -51,16 +52,16 @@ _puzzle_report_generator(_puzzle_assembly(dic))
 #
 #     close_days = []
 #
-#     for i in range(len(list_assets)):
+#     for i in range(len(list_of_tickers)):
 #         random_date = start + (end - start) * random.random()
 #         close_days.append(random_date.strftime("%Y-%m-%d"))
 #     # --------------------------------------------------------- #
 #     # --------------------------------------------------------- #
 #     # WEIGHTS GENERATION (random numbers from 0 to 1 that sum to 1)
-#     weights = ((np.random.dirichlet(np.ones(len(list_assets)),size=1))*100).tolist()[0]
+#     weights = ((np.random.dirichlet(np.ones(len(list_of_tickers)),size=1))*100).tolist()[0]
 #     # --------------------------------------------------------- #
 #
-#     bt = backtest(asset=list_assets, o_day=open_days, c_day=close_days,
-#                   weights_factor=weights,
-#                   price_period_relation="O-O",
-#                   benchmark="F")
+#     bt = _report_generator(asset=list_of_tickers, o_day=open_days, c_day=close_days)
+#
+#
+# generate_test(tickers_test)
