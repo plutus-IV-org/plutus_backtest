@@ -1,11 +1,27 @@
 from plutus_backtest.report import _report_generator
+from plutus_backtest.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
 
 
 
-k = _report_generator(asset = ["AAPL", "BTC-USD", "TWTR"],
-                  o_day = ["2021-08-01", "2021-04-15", "2022-01-03"],
-                  c_day = ["2021-09-01", "2021-09-01", "2022-04-04"],
-                  benchmark="SPY")
+# k = _report_generator(asset = ["AAPL", "BTC-USD", "TWTR"],
+#                   o_day = ["2021-08-01", "2021-04-15", "2022-01-03"],
+#                   c_day = ["2021-09-01", "2021-09-01", "2022-04-04"],
+#                   benchmark="SPY")
+
+
+
+bt1 = _puzzle_preparation(asset = ["AAPL", "BTC-USD","GC=F"],
+               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
+               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
+
+bt2 = _puzzle_preparation(asset = ["AMZN", "EURUSD=X"],
+               o_day = ["2021-06-01", "2021-06-15"],
+               c_day = ["2021-06-30", "2021-07-05"])
+
+dic ={0:bt1, 1:bt2}
+
+_puzzle_report_generator(_puzzle_assembly(dic))
+
 
 
 # def generate_test(list_assets):
