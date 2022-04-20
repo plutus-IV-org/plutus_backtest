@@ -59,7 +59,7 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _consolidated_table_detailed
 
-    consolidated_table_detailed, auxiliar_df = _consolidated_table_detailed(security_list = security_list,
+    consolidated_table_detailed, auxiliar_df, security_list = _consolidated_table_detailed(security_list = security_list,
                                                                asset = asset,
                                                                o_day=o_day,
                                                                c_day=c_day,
@@ -95,6 +95,7 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
 
     gantt = px.timeline(security_list, x_start="start day", x_end="end day", y="company") #additional Gantt graph
     gantt.update_yaxes(autorange="reversed")  # otherwise tasks are listed from the bottom up
+    gantt['layout'].update(height=1500, title='Plotting results')
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
