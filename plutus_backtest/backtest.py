@@ -52,7 +52,7 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
     security_list = df
     return security_list
 
-def _consolidated_table_detailed(security_list, asset, o_day, p_p_n, p_p_p):
+def _consolidated_table_detailed(security_list, asset, o_day, c_day, weights_factor, take_profit, stop_loss, p_p_n, p_p_p):
 
     df_1 = security_list
     initial_df = pd.DataFrame()
@@ -113,7 +113,10 @@ def _consolidated_table_detailed(security_list, asset, o_day, p_p_n, p_p_p):
         em2 = em2.append(work_df)
     dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
     asset = list_new
-    #backtest.security_list(self)
+
+    #rerunning security_list again using dublicate adjusted tickers
+    security_list = _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss)
+
     if dc.columns.tolist() != asset:
         l1 = dc.columns.tolist()
         l2 = asset
