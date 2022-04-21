@@ -62,10 +62,6 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
     consolidated_table_detailed, auxiliar_df, security_list = _consolidated_table_detailed(security_list = security_list,
                                                                asset = asset,
                                                                o_day=o_day,
-                                                               c_day=c_day,
-                                                               weights_factor=weights_factor,
-                                                               take_profit=take_profit,
-                                                               stop_loss=stop_loss,
                                                                p_p_n = p_p_n,
                                                                p_p_p = p_p_p)
 

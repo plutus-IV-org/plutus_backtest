@@ -52,14 +52,13 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
     security_list = df
     return security_list
 
-def _consolidated_table_detailed(security_list, asset, o_day, c_day, weights_factor, take_profit, stop_loss, p_p_n, p_p_p):
+def _consolidated_table_detailed(security_list, asset, o_day, p_p_n, p_p_p):
 
-    df_1 = security_list
-    initial_df = pd.DataFrame()
-    fq = pd.DataFrame(index=asset, data=o_day)
     # check if companies are dublicatted in a list
+    fq = pd.DataFrame(index=asset, data=o_day)
     v = fq.groupby(fq.index) \
         .cumcount()
+
     # doubled companies will have suffix
     list_new = []
     for x in range(len(v.values)):
@@ -68,12 +67,33 @@ def _consolidated_table_detailed(security_list, asset, o_day, c_day, weights_fac
             list_new.append(a2)
         else:
             list_new.append(v.index[x])
+
+    #load prices from yahoo
     min_date = min(security_list['start day'])
     max_date = max(security_list['end day'])
     ydata = yf.download(asset, start=_date_plus_one(min_date),
                         end=_date_plus_one(max_date), progress=False)
+
     if ydata.empty:
-        raise ValueError('No trading days were provided, perhaps days off or holidays have been given')
+        raise ValueError('No trading days were provided, perhaps days off or holidays have been given or non existing tickers')
+
+    #drop empty columns from ydata
+    empty_columns = ydata.columns[ydata.isna().any()]
+    ydata = ydata.drop(axis=1, columns=empty_columns)
+    if len(empty_columns) > 0:
+        companies_removed = np.unique(empty_columns.get_level_values(1).values)
+        print(f"\nNo price data found for {companies_removed}. Removed from analysis\n")
+
+    #update new list with dublicated tickers and initial security list to not show tickers removed above
+        for ticker in companies_removed:
+            list_new = [ x for x in list_new if ticker not in x ]
+            security_list = security_list.drop(axis=0, index=ticker)
+
+    #security_list["company"] = list_new
+
+    df_1 = security_list
+    initial_df = pd.DataFrame()
+
     #check if column names are Multiindex
     if not isinstance(ydata.columns, pd.MultiIndex):
     #select desired start / end dates for selected companies
@@ -112,38 +132,40 @@ def _consolidated_table_detailed(security_list, asset, o_day, c_day, weights_fac
         em1 = em1.append(aux_df)
         em2 = em2.append(work_df)
     dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
-    asset = list_new
+    # asset = list_new
 
     #rerunning security_list again using dublicate adjusted tickers
-    security_list = _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss)
+    # security_list = _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss)
+    #
+    # if dc.columns.tolist() != asset:
+    #     l1 = dc.columns.tolist()
+    #     l2 = asset
+    #     res = [x for x in l1 + l2 if x not in l1 or x not in l2]
+    #     asset = l1
+    #     security_list = security_list.drop(res)
+    #     b_day = security_list['start day'].values
+    #     s_day = security_list['end day'].values
+    #     w_factor = security_list['weights factor'].values
+    #     sl = security_list['stop loss'].values
+    #     tp = security_list['take profit'].values
+    #     if res ==[]:
+    #         pass
+    #     else:
+    #         print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
 
-    if dc.columns.tolist() != asset:
-        l1 = dc.columns.tolist()
-        l2 = asset
-        res = [x for x in l1 + l2 if x not in l1 or x not in l2]
-        asset = l1
-        security_list = security_list.drop(res)
-        b_day = security_list['start day'].values
-        s_day = security_list['end day'].values
-        w_factor = security_list['weights factor'].values
-        sl = security_list['stop loss'].values
-        tp = security_list['take profit'].values
-        if res ==[]:
-            pass
-        else:
-            print(f"\nNo price data found for {res} therefore was deleted from provided inputs.\n")
-
-    dc = dc[security_list['company']]
+    #dc = dc[security_list['company']]
     dc = dc.replace([np.inf, -np.inf], np.nan)
     dc = dc.fillna(0)
     dc = dc.apply(pd.to_numeric)
     aux = em1.pivot_table(index=em2.index, columns='ticker', values='close_price')
-    aux = aux[security_list['company']]
+    #aux = aux[security_list['company']]
     aux = aux.replace([np.inf, -np.inf], np.nan)
     aux = aux.fillna(0)
     aux = aux.apply(pd.to_numeric)
     auxiliar_df = aux
     detailed_return = dc
+
+    security_list["company"] = list_new
 
     return detailed_return, auxiliar_df, security_list
 
