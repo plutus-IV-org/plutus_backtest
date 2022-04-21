@@ -14,10 +14,12 @@ from plutus_backtest.puzzle_report import _puzzle_preparation, _puzzle_assembly,
 
 
 tickers = ["WMT", "V", "BAC", "KO", "PFE", "PEP", "CVX", "TWTR", "BX",
-           "PYPL", "SONY", "ABNB", "GE", "SBUX", "SBUX", "TEAM", "BSX",
-           "MRNA", "UBS", "GM", "DG", "TRP", "MRVL", "TRI", "SYY", "EC"]
+           "PYPL", "SONY", "GE", "SBUX", "SBUX", "TEAM", "BSX",
+           "UBS", "GM", "DG", "TRP", "MRVL", "TRI", "SYY", "EC"]
 
-indexes = np.random.choice(len(tickers), 60, replace=True)
+# tickers = ["WMT", "V", "BAC", "KO", "XLNX", "INFO", "ABNB"]
+
+indexes = np.random.choice(len(tickers), 30, replace=True)
 
 cashe_list = []
 for x in indexes:
