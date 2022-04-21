@@ -166,6 +166,7 @@ def _consolidated_table_detailed(security_list, asset, o_day, p_p_n, p_p_p):
     detailed_return = dc
 
     security_list["company"] = list_new
+    security_list.index = list_new
 
     return detailed_return, auxiliar_df, security_list
 
