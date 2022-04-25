@@ -13,12 +13,12 @@ from plutus_backtest.puzzle_report import _puzzle_preparation, _puzzle_assembly,
 #                   c_day = ["2021-09-01", "2021-09-01", "2022-04-04", "2022-03-12"])
 
 
-tickers = ["WMT", "V", "BAC", "KO", "PFE", "PEP", "CVX", "TWTR", "BX",
-           "PYPL", "SONY", "GE", "SBUX", "SBUX", "TEAM", "BSX",
-           "UBS", "GM", "DG", "TRP", "MRVL", "TRI", "SYY", "EC"]
+# tickers = ["WMT", "V", "BAC", "KO", "PFE", "PEP", "CVX", "TWTR", "BX",
+#            "PYPL", "SONY", "GE", "SBUX", "SBUX", "TEAM", "BSX",
+#            "UBS", "GM", "DG", "TRP", "MRVL", "TRI", "SYY", "EC"]
 
 #THIS IS NOT WORKING!!!!!!!!!!!!!!!!!!
-# tickers = ["WMT", "V", "BAC", "KO", "XLNX", "INFO", "ABNB"]
+tickers = ["WMT", "V", "BAC", "KO", "XLNX", "INFO", "ABNBdd"]
 
 indexes = np.random.choice(len(tickers), 10, replace=True)
 
