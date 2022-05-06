@@ -128,6 +128,19 @@ def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, b
                    x=df_drawdown_fig2.index,
                    y=df_drawdown_fig2["Sum"] * 100,
                    hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
+
+    # <============NEW GRAPH
+    empty_df = pd.DataFrame()
+    for i in weights_df.index:
+        accum = (df_accum_fig1["Accumulation"].loc[i])
+        new_line = weights_df.loc[i] * accum
+        empty_df = empty_df.append(new_line)
+
+    weights_plus_accum_fig = empty_df
+
+    fig5 = px.area(weights_plus_accum_fig,
+                   x=weights_plus_accum_fig.index,
+                   y=weights_plus_accum_fig.columns)
     
     # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
     # This is essentially breaking down the Express fig1, 2, 3 into it's traces
@@ -135,13 +148,17 @@ def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, b
     figure2_traces = []
     figure3_traces = []
     figure4_traces = []
+    figure5_traces = []
     
     for trace in range(len(fig1["data"])):
         figure1_traces.append(fig1["data"][trace])
     
     for trace in range(len(fig2["data"])):
         figure2_traces.append(fig2["data"][trace])
-    
+
+    for trace in range(len(fig5["data"])):
+        figure5_traces.append(fig5["data"][trace])
+
     for trace in range(len(fig3["data"])):
         figure3_traces.append(fig3["data"][trace])
     
@@ -149,7 +166,7 @@ def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, b
         figure4_traces.append(fig4["data"][trace])
     
     # Create a 1x4 subplot
-    this_figure = sp.make_subplots(rows=4, cols=1,
+    this_figure = sp.make_subplots(rows=5, cols=1,
                                    vertical_spacing=0.1,
                                    shared_xaxes=False,
                                    shared_yaxes=False,
@@ -164,17 +181,20 @@ def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, b
     
     for traces in figure2_traces:
         this_figure.append_trace(traces, row=2, col=1)
-    
-    for traces in figure3_traces:
+
+    for traces in figure5_traces:
         this_figure.append_trace(traces, row=3, col=1)
+
+    for traces in figure3_traces:
+        this_figure.append_trace(traces, row=4, col=1)
     
     for traces in figure4_traces:
-        this_figure.append_trace(traces, row=4, col=1)
+        this_figure.append_trace(traces, row=5, col=1)
     
     this_figure.update_layout(hovermode='x', showlegend=False)
     # Prefix y-axis tick labels with % sign
     this_figure.update_yaxes(tickprefix="%")
-    this_figure['layout'].update(height=800, title='Plotting results')
+    this_figure['layout'].update(height=1200, title='Plotting results')
     #this_figure['layout'].update(title='Plotting results')
     return this_figure
 
