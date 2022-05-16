@@ -362,6 +362,7 @@ class backtest:
         dc2 =(dc2.T * aux_series_2).T
         dc2['Accu'] = aux_series
         self.capitlised_weights_distribution = dc2
+
         progress(25)
 
         q1 = port_performance.index[0] - timedelta(days=1)  # starting from 0%
