@@ -71,7 +71,7 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _portfolio_construction
-    final_portfolio, portfolio_weights = _portfolio_construction(detailed_return = consolidated_table_detailed,
+    final_portfolio, portfolio_weights, capitlised_weights_distribution = _portfolio_construction(detailed_return = consolidated_table_detailed,
                                                      security_list = security_list,
                                                      auxiliar_df = auxiliar_df,
                                                      weights_factor=weights_factor)
@@ -89,6 +89,7 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
                                                           monthly_return=monthly_return,
                                                           drawdown=drawdown,
                                                           portfolio_weights=portfolio_weights,
+                                                          capitlised_weights_distribution=capitlised_weights_distribution,
                                                           benchmark_performance=benchmark_construction,
                                                           benchmark_ticker=benchmark)
 

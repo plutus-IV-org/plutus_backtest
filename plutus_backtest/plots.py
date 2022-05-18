@@ -52,7 +52,8 @@ def _monthly_return(final_portfolio):
 # ----------------------------------------------------------------------- #
 # Add benchmark if triggered
 
-def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, benchmark_performance, benchmark_ticker = None):
+def _plotting(accumulated_return, drawdown, monthly_return, capitlised_weights_distribution,
+              portfolio_weights, benchmark_performance, benchmark_ticker = None):
 
     df_accum = accumulated_return
     df_drawdown = drawdown
@@ -130,18 +131,15 @@ def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, b
                    hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
 
     # <============NEW GRAPH
-    empty_df = pd.DataFrame()
-    for i in weights_df.index:
-        accum = (df_accum_fig1["Accumulation"].loc[i])
-        new_line = weights_df.loc[i] * accum
-        empty_df = empty_df.append(new_line)
-
-    weights_plus_accum_fig = empty_df
+    weights_plus_accum_fig = capitlised_weights_distribution
 
     fig5 = px.area(weights_plus_accum_fig,
                    x=weights_plus_accum_fig.index,
                    y=weights_plus_accum_fig.columns)
-    
+
+    #fig5.update_yaxes(range=weights_plus_accum_fig["Accu"])
+    fig5.update_yaxes(showticklabels=False)
+
     # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
     # This is essentially breaking down the Express fig1, 2, 3 into it's traces
     figure1_traces = []
@@ -172,6 +170,7 @@ def _plotting(accumulated_return, drawdown, monthly_return, portfolio_weights, b
                                    shared_yaxes=False,
                                    subplot_titles=("Accumulative return",
                                                    "Weights distribution",
+                                                   "Accumulative return with Weights distribution"
                                                    "Monthly return",
                                                    "Drawdown"
                                                    ))

@@ -49,6 +49,18 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
             df.iloc[x, 4] = (1 - a) + 1
             df.iloc[x, 5] = 1 - (b - 1)
 
+        if df.iloc[x, 3] < 0 and df.iloc[x, 4]!= np.inf and df.iloc[x,5]== -np.inf:
+            b = df.iloc[x, 4]
+            df.iloc[x, 4] = 100500
+            df.iloc[x, 5] = 1 - (b - 1)
+
+        if df.iloc[x, 3] < 0 and df.iloc[x, 4]== np.inf and df.iloc[x,5]!= -np.inf:
+            a = df.iloc[x, 5]
+            df.iloc[x, 4] = (1 - a) + 1
+            df.iloc[x, 5] = -100500
+    df = df.replace(100500, np.inf)
+    df = df.replace(-100500, -np.inf)
+
     security_list = df
     return security_list
 
@@ -113,13 +125,13 @@ def _consolidated_table_detailed(security_list, asset,
         fake_df = pd.DataFrame(fake_df.iloc[0]).T
         fake_df.iloc[0, 0] = x
         fake_df.iloc[0, 1] = get_open.values[0]
-        merged_df = fake_df.append(get_end)
+        merged_df = pd.concat([fake_df, get_end])
         merged_df['daily_change'] = merged_df['close_price'].pct_change()
         merged_df = merged_df.iloc[1:]
         aux_df = merged_df[['ticker', 'close_price']]
         work_df = merged_df[['ticker', 'daily_change']]
-        em1 = em1.append(aux_df)
-        em2 = em2.append(work_df)
+        em1 = pd.concat([em1, aux_df])
+        em2 = pd.concat([em2, work_df])
     dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
 
     asset = list_new
@@ -184,17 +196,30 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
             for i in new_dist_frame.index:
                 weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
     accu = (detailed_return + 1).cumprod()
+    dic_longs = {}
+    dic_shorts = {}
     for x in accu.columns:
         q1 = accu[x]
         for y in q1:
             if y > security_list.loc[x, 'take profit']:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
+                if security_list.loc[x, 'weights factor'] > 0:
+                    dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
+                else:
+                    dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
             if y < security_list.loc[x, 'stop loss']:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
+            if security_list.loc[x, 'weights factor'] > 0:
+                dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
+            else:
+                dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
     aux_table_2 = accu * binary_weights
     new_binary_weights = aux_table_2 / aux_table_2
     new_binary_weights.fillna(value=0, inplace=True)
     weights_df = new_binary_weights * dist
+
+    stop_loss_assets = dic_shorts
+    take_profit_assets = dic_longs
 
     for z in weights_df.index:
         if abs(weights_df.loc[z]).sum() != 1:
@@ -204,11 +229,24 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
             new_dist_frame = pd.DataFrame(columns=act.index, data=new_dist).T
             for i in new_dist_frame.index:
                 weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
+
     port_performance = weights_df * detailed_return
+
+    aux_table_3 = weights_df.copy()
+    aux_table_3[aux_table_3 < 0] = -1
+    aux_table_3[aux_table_3 > 0] = 1
+    dc1 = (detailed_return * aux_table_3 + 1)
+    dc2 = dc1 * abs(weights_df)
+
     port_performance['Sum'] = port_performance.sum(axis=1)
     port_performance['Sum'] = port_performance['Sum'] + 1
     port_performance['Accumulation'] = (port_performance['Sum'].cumprod() - 1) * 100
 
+    aux_series = port_performance.Sum.cumprod()
+    aux_series_2 = aux_series.shift().fillna(value=1)
+    dc2 = (dc2.T * aux_series_2).T
+    dc2['Accu'] = aux_series
+    capitlised_weights_distribution = dc2
 
     q1 = port_performance.index[0] - timedelta(days=1)  # starting from 0%
     port_performance.loc[q1] = [0] * len(port_performance.columns)
@@ -217,7 +255,7 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
     final_portfolio = port_performance
     portfolio_weights = weights_df
 
-    return final_portfolio, portfolio_weights
+    return final_portfolio, portfolio_weights, capitlised_weights_distribution
 
 def _stats(final_portfolio):
     obj = final_portfolio
