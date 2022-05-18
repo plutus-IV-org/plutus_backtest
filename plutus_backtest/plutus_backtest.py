@@ -181,7 +181,7 @@ class backtest:
                 df.iloc[x, 4] = (1 - a) + 1
                 df.iloc[x, 5] = -100500
         df = df.replace(100500, np.inf)
-        df = df.replace(-100500, np.inf)
+        df = df.replace(-100500, -np.inf)
         self.security_list = df
         return self.security_list
 
@@ -326,18 +326,29 @@ class backtest:
                 for i in new_dist_frame.index:
                     weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
         accu = (self.detailed_return + 1).cumprod()
+        dic_longs = {}
+        dic_shorts = {}
         for x in accu.columns:
             q1 = accu[x]
             for y in q1:
                 if y > self.security_list.loc[x, 'take profit']:
                     q1.iloc[q1.values.tolist().index(y) + 1:] = 0
+                    if self.security_list.loc[x, 'weights factor']>0:
+                        dic_longs[x] = accu.index[q1.values.tolist().index(y)],q1.iloc[q1.values.tolist().index(y)]
+                    else:
+                        dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
                 if y < self.security_list.loc[x, 'stop loss']:
                     q1.iloc[q1.values.tolist().index(y) + 1:] = 0
+                    if self.security_list.loc[x, 'weights factor'] > 0:
+                        dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
+                    else:
+                        dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
         aux_table_2 = accu * binary_weights
         new_binary_weights = aux_table_2 / aux_table_2
         new_binary_weights.fillna(value=0, inplace=True)
         weights_df = new_binary_weights * dist
-
+        self.stop_loss_assets = dic_shorts
+        self.take_profit_assets =dic_longs
         progress(25)
 
         for z in weights_df.index:
