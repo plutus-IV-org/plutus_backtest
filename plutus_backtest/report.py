@@ -1,5 +1,10 @@
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+from tabulate import tabulate
+from datetime import timedelta
+pd.options.mode.chained_assignment = None
 from plutus_backtest.backtest import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 from plutus_backtest.plots import _accumulated_return, _monthly_return, _drawdown, _plotting
 from plutus_backtest.benchmark import _benchmark_construction
@@ -7,7 +12,7 @@ import dash_bootstrap_components as dbc
 from dash import Dash, Input, Output, html, dcc, dash_table
 import visdcc
 
-def _report_generator (asset, o_day, c_day, weights_factor=None,
+def execution(asset, o_day, c_day, weights_factor=None,
                        take_profit=None,
                        stop_loss=None,
                        benchmark=None,
@@ -79,10 +84,81 @@ def _report_generator (asset, o_day, c_day, weights_factor=None,
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
     stats = _stats(final_portfolio)
+    print(tabulate(stats.set_index('Indicators'), headers='keys', tablefmt='fancy_grid'))
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Plotting
     accumulated_return = _accumulated_return(final_portfolio=final_portfolio)
+    d1 = accumulated_return[['Accumulation']]
+    d1['quantiles'] =pd.cut(d1['Accumulation'], 8, labels = [1,2,3,4,5,6,7,8])
+    c1 = 'RGB(215, 48, 39)'
+    c2 = 'RGB(244, 109, 67)'
+    c3 = 'RGB(253, 174, 97)'
+    c4 = 'RGB(254, 224, 139)'
+    c5 = 'RGB(217, 239, 139)'
+    c6 = 'RGB(166, 217, 106)'
+    c7 = 'RGB(102, 189, 99)'
+    c8 = 'RGB(26, 152, 80)'
+    lst = []
+    for y in d1['quantiles']:
+        if y==1:
+            lst.append(c1)
+        elif y==2:
+            lst.append(c2)
+        elif y==3:
+            lst.append(c3)
+        elif y==4:
+            lst.append(c4)
+        elif y==5:
+            lst.append(c5)
+        elif y==6:
+            lst.append(c6)
+        elif y==7:
+            lst.append(c7)
+        else:
+            lst.append(c8)
+    d1['Palette'] = lst
+
+    fig1 = px.scatter(d1, x=d1.index, y=d1["Accumulation"], title="Accumulated return",
+                      color=d1["Accumulation"], color_continuous_scale='RdYlGn',
+                      labels={'index': "Time", 'Accumulation': 'Return'},
+                       range_x=[d1.index[0], d1.index[-1] + timedelta(2)])
+
+    fig1.update_layout(font_family="Bahnschrift Condensed",
+                       plot_bgcolor='rgb(250, 250, 245)',
+                       title_font_size=20, title_x=0, showlegend=False, font_color='Black',
+                       xaxis=dict(
+                           showline=True,
+                           showgrid=False,
+                           showticklabels=True,
+                           linecolor='rgb(0, 0, 0)',
+                           linewidth=2,
+                           ticks='outside',
+                           tickfont=dict(
+                               family='Bahnschrift Condensed',
+                               size=12,
+                               color='rgb(0, 0, 0)',
+                           )),
+                       yaxis=dict(
+                           showline=True,
+                           showgrid=False,
+                           showticklabels=True,
+                           linecolor='rgb(0, 0, 0)',
+                           linewidth=2,
+                           ticks='outside',
+                           tickfont=dict(
+                               family='Bahnschrift Condensed',
+                               size=12,
+                               color='rgb(0, 0, 0)',
+                           )), )
+
+    for x in range(len(d1.index)):
+        sdf = d1.iloc[x: x + 2]
+        col = sdf.Palette.values[-1]
+        fig1.add_trace(go.Scatter(x=sdf.index, y=sdf['Accumulation'],
+                                  line=dict(color=col, width=7)))
+
+    fig1.show()
     monthly_return = _monthly_return(final_portfolio=final_portfolio)
     drawdown = _drawdown(final_portfolio=final_portfolio)
     plots = _plotting(accumulated_return=accumulated_return,

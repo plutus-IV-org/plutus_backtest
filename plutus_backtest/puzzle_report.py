@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
-
+from tabulate import tabulate
 from plutus_backtest.backtest import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 import dash_bootstrap_components as dbc
 from dash import Dash, Input, Output, html, dcc, dash_table
@@ -124,6 +124,7 @@ def _puzzle_report_generator(performance_securities_tuple):
     # Calling _stats
 
     stats = _stats(df_data)
+    print(tabulate(stats, headers='keys', tablefmt='fancy_grid'))
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Plotting
