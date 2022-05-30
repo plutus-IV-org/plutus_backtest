@@ -90,7 +90,34 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # Plotting
     accumulated_return = _accumulated_return(final_portfolio=final_portfolio)
     d1 = accumulated_return[['Accumulation']]
-    d1['quantiles'] =pd.cut(d1['Accumulation'], 8, labels = [1,2,3,4,5,6,7,8])
+    avg = 0
+    dis_b = avg - d1.min()
+    m1 = (d1.min() + (dis_b/4)).values
+    m2 = (d1.min() + (dis_b/2)).values
+    m3 = (d1.min() + (dis_b*0.75)).values
+    dis_t = d1.max()- avg
+    b1 = (avg + (dis_t/4)).values
+    b2 = (avg +(dis_t/2)).values
+    b3 = (avg + (dis_t * 0.75)).values
+    labels = []
+    for x in d1.Accumulation.values:
+        if x < m1:
+            labels.append(1)
+        elif x< m2 and x>m1:
+            labels.append(2)
+        elif x<m3 and x>m2:
+            labels.append(3)
+        elif x<avg and x>m3:
+            labels.append(4)
+        elif x<b1 and x> avg:
+            labels.append(5)
+        elif x<b2 and x>b1:
+            labels.append(6)
+        elif x<b3 and x>b2:
+            labels.append(7)
+        else:
+            labels.append(8)
+    d1['quantiles'] =labels
     c1 = 'RGB(215, 48, 39)'
     c2 = 'RGB(244, 109, 67)'
     c3 = 'RGB(253, 174, 97)'
