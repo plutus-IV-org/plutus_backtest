@@ -16,7 +16,37 @@ def execution(asset, o_day, c_day, weights_factor=None,
                        take_profit=None,
                        stop_loss=None,
                        benchmark=None,
-                       price_period_relation=None):
+                       price_period_relation=None, full_report=False):
+    """ :Parameters:
+               asset: str or list or series
+                   Instruments taken into the consideration for the backtest.
+               o_day: list of str or timestamps or series
+                   Day/Days of the position opening.
+               c_day: list of str or timestamps or series
+                   Day/Days of the position closing.
+               weights_factor: list of int or float or array-like or series default None
+                   Optional list of factors which will be considered to define the weights for taken companies. By default
+                   all weights are distributed equally, however if the list of factors provided the backtest will maximize
+                   the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
+               take_profit: list of float or int or series default None
+                   List of values determining the level till a particular stock shall be traded.
+               stop_loss: list of float or int or series default None
+                   List of values determining the level till a particular stock shall be traded.
+               benchmark: str default None
+                   A benchmark ticker for comparison with portfolio performance
+               price_period_relation: str default 'O-C'
+                   Instruct what part of the trading day a position shall be opened,
+                   and what part of trading day it shall be closed.
+                   Possible relations:
+                   O-C / Open to Close prices
+                   C-O / Close to Open prices
+                   C-C / Close to Close prices
+                   O-O / Open to Open prices
+                   "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
+                   "Close" - value of the last transacted price in a security before the market officially closes.
+               full_report: bool, optional, default False
+                   Generates full report as PDF.
+    """
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Structuring input
 
