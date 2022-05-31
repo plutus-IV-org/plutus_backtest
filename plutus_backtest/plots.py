@@ -1,13 +1,124 @@
 import pandas as pd
-import plotly.subplots as sp
 import plotly.express as px
+import plotly.graph_objects as go
+from datetime import timedelta
+
+pd.options.mode.chained_assignment = None
+
+def _plot_formatting(fig):
+    fig.update_layout(font_family="Bahnschrift Condensed",
+                       plot_bgcolor='rgb(250, 250, 245)',
+                       title_font_size=20, title_x=0, showlegend=False, font_color='Black',
+                       xaxis=dict(
+                           showline=True,
+                           showgrid=False,
+                           showticklabels=True,
+                           linecolor='rgb(0, 0, 0)',
+                           linewidth=2,
+                           ticks='outside',
+                           tickfont=dict(
+                               family='Bahnschrift Condensed',
+                               size=12,
+                               color='rgb(0, 0, 0)',
+                           )),
+                       yaxis=dict(
+                           showline=True,
+                           showgrid=False,
+                           showticklabels=True,
+                           linecolor='rgb(0, 0, 0)',
+                           linewidth=2,
+                           ticks='outside',
+                           tickfont=dict(
+                               family='Bahnschrift Condensed',
+                               size=12,
+                               color='rgb(0, 0, 0)',
+                           )), )
+    return fig
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Accumulated return
-def _accumulated_return(final_portfolio):
-    df_accum = final_portfolio
-    return df_accum
+def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker = None):
 
+    accumulated_return = final_portfolio
+    d1 = accumulated_return[['Accumulation']]
+
+    avg = 0
+    dis_b = avg - d1.min()
+    m1 = (d1.min() + (dis_b/4)).values
+    m2 = (d1.min() + (dis_b/2)).values
+    m3 = (d1.min() + (dis_b*0.75)).values
+    dis_t = d1.max()- avg
+    b1 = (avg + (dis_t/4)).values
+    b2 = (avg +(dis_t/2)).values
+    b3 = (avg + (dis_t * 0.75)).values
+    labels = []
+    for x in d1.Accumulation.values:
+        if x < m1:
+            labels.append(1)
+        elif x< m2 and x>m1:
+            labels.append(2)
+        elif x<m3 and x>m2:
+            labels.append(3)
+        elif x<avg and x>m3:
+            labels.append(4)
+        elif x<b1 and x> avg:
+            labels.append(5)
+        elif x<b2 and x>b1:
+            labels.append(6)
+        elif x<b3 and x>b2:
+            labels.append(7)
+        else:
+            labels.append(8)
+    d1['quantiles'] = labels
+
+    c1 = 'RGB(215, 48, 39)'
+    c2 = 'RGB(244, 109, 67)'
+    c3 = 'RGB(253, 174, 97)'
+    c4 = 'RGB(254, 224, 139)'
+    c5 = 'RGB(217, 239, 139)'
+    c6 = 'RGB(166, 217, 106)'
+    c7 = 'RGB(102, 189, 99)'
+    c8 = 'RGB(26, 152, 80)'
+    lst = []
+    for y in d1['quantiles']:
+        if y==1:
+            lst.append(c1)
+        elif y==2:
+            lst.append(c2)
+        elif y==3:
+            lst.append(c3)
+        elif y==4:
+            lst.append(c4)
+        elif y==5:
+            lst.append(c5)
+        elif y==6:
+            lst.append(c6)
+        elif y==7:
+            lst.append(c7)
+        else:
+            lst.append(c8)
+    d1['Palette'] = lst
+
+    fig = px.scatter(d1, x=d1.index, y=d1["Accumulation"], title="Accumulated return",
+                      color=d1["Accumulation"], color_continuous_scale='RdYlGn',
+                      labels={'index': "Time", 'Accumulation': 'Return'},
+                       range_x=[d1.index[0], d1.index[-1] + timedelta(2)])
+
+    fig = _plot_formatting(fig)
+
+    for x in range(len(d1.index)):
+        sdf = d1.iloc[x: x + 2]
+        col = sdf.Palette.values[-1]
+        fig.add_trace(go.Scatter(x=sdf.index, y=sdf['Accumulation'],
+                                  line=dict(color=col, width=7)))
+
+    if benchmark_ticker is not None:
+        fig.add_scatter(x=benchmark_performance.index,
+                         y=benchmark_performance["Bench_Accumulation"],
+                         mode='lines',
+                         name="Benchmark")
+
+    return fig
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Drawdown
 def _drawdown(final_portfolio):
@@ -19,8 +130,22 @@ def _drawdown(final_portfolio):
     port_performance_drawdown['Accumulation'] = (port_performance_drawdown['Sum'].cumsum()) * 100
     df_drawdown = port_performance_drawdown
     df_drawdown = df_drawdown.round(decimals=3)
-    return df_drawdown
 
+    df_drawdown_fig2 = df_drawdown.astype(float)
+    df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100)
+    df_drawdown_fig2 = df_drawdown_fig2.round(2)
+    fig = px.line(df_drawdown_fig2,
+                   x=df_drawdown_fig2.index,
+                   y=df_drawdown_fig2["Sum"] * 100,
+                   hover_data=df_drawdown_fig2.columns[:-2],
+                   title="Drawdown")
+
+    fig = _plot_formatting(fig)
+
+    fig.update_layout(xaxis_title="Time",
+                      yaxis_title="Return")
+
+    return fig
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Monthly return
 def _monthly_return(final_portfolio):
@@ -43,70 +168,7 @@ def _monthly_return(final_portfolio):
     # com_frame.index = pd.to_datetime(com_frame.index)
     df_montly = com_frame
     df_montly.columns = ["Result"]
-    return df_montly
 
-# ----------------------------------------------------------------------- #
-# Create figures in Express
-
-
-# ----------------------------------------------------------------------- #
-# Add benchmark if triggered
-
-def _plotting(accumulated_return, drawdown, monthly_return, capitlised_weights_distribution,
-              portfolio_weights, benchmark_performance, benchmark_ticker = None):
-
-    df_accum = accumulated_return
-    df_drawdown = drawdown
-    df_montly = monthly_return
-
-
-    if benchmark_ticker is not None:
-        df_bench = benchmark_performance
-        df_accum = pd.merge(df_accum.copy(), df_bench["Bench_Accumulation"], how='right', left_index=True,
-                            right_index=True)
-        # df_accum = df_accum.fillna(0)
-        df_accum["Bench_Accumulation"] = df_accum["Bench_Accumulation"].fillna(method='ffill')
-        df_accum['Accumulation'] = df_accum['Accumulation'].ffill()
-        df_accum.fillna(value=0, inplace=True)
-        # Execution plot - Accumulation with benchmark
-        df_accum_fig1 = df_accum.astype(float)
-        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
-        df_accum_fig1 = df_accum_fig1.round(2)
-        df_accum_fig1 = df_accum_fig1.fillna(0)
-    
-        fig1 = px.line(df_accum_fig1,
-                       x=df_accum_fig1.index,
-                       y=df_accum_fig1["Accumulation"],
-                       title="Accumulated return",
-                       hover_data=df_accum_fig1.columns[:-3])  # show all columns values excluding last 3
-    
-        fig1.update_layout(xaxis_title="Date")
-        fig1.update_traces(name='Portfolio',
-                           showlegend=True)
-    
-        fig1.add_scatter(x=df_accum_fig1.index,
-                         y=df_accum_fig1["Bench_Accumulation"],
-                         mode='lines',
-                         name="Benchmark")
-    else:
-    
-        df_accum_fig1 = df_accum.astype(float)
-        df_accum_fig1.iloc[:, :-2] = (df_accum_fig1.iloc[:, :-2] * 100)
-        df_accum_fig1 = df_accum_fig1.round(2)
-        fig1 = px.line(df_accum_fig1,
-                       x=df_accum_fig1.index,
-                       y=df_accum_fig1["Accumulation"],
-                       hover_data=df_accum_fig1.columns[:-2])  # show all columns values excluding last 2
-    
-    weights_df = portfolio_weights
-    weights_df["Total Weights"] = weights_df.sum(axis=1)
-    weights_df = weights_df[weights_df["Total Weights"] != 0]
-    weights_df = weights_df.drop("Total Weights", axis=1)
-    weights_df = abs(weights_df)
-    fig2 = px.area(weights_df * 100,
-                   x=weights_df.index,
-                   y=weights_df.columns)
-    
     df_montly_fig3 = df_montly.astype(float)
     color = []
     for i in df_montly_fig3["Result"]:
@@ -116,87 +178,58 @@ def _plotting(accumulated_return, drawdown, monthly_return, capitlised_weights_d
             color.append('green')
     df_montly_fig3["color"] = color
     df_montly_fig3 = df_montly_fig3.round(2)
-    fig3 = px.bar(df_montly_fig3,
+    fig = px.bar(df_montly_fig3,
                   x=df_montly_fig3.index,
                   y=df_montly_fig3["Result"],
                   color=df_montly_fig3["color"],
-                  color_discrete_sequence=df_montly_fig3["color"].unique())
-    
-    df_drawdown_fig2 = df_drawdown.astype(float)
-    df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100)
-    df_drawdown_fig2 = df_drawdown_fig2.round(2)
-    fig4 = px.line(df_drawdown_fig2,
-                   x=df_drawdown_fig2.index,
-                   y=df_drawdown_fig2["Sum"] * 100,
-                   hover_data=df_drawdown_fig2.columns[:-2])  # show all columns values excluding last 2
+                  color_discrete_sequence=df_montly_fig3["color"].unique(),
+                  title="Monthly return")
 
-    # <============NEW GRAPH
-    weights_plus_accum_fig = capitlised_weights_distribution
+    fig = _plot_formatting(fig)
 
-    fig5 = px.area(weights_plus_accum_fig,
-                   x=weights_plus_accum_fig.index,
-                   y=weights_plus_accum_fig.columns)
+    fig.update_layout(xaxis_title="Time",
+                      yaxis_title="Return")
 
-    #fig5.update_yaxes(range=weights_plus_accum_fig["Accu"])
-    fig5.update_yaxes(showticklabels=False)
+    return fig
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Gantt
+def _gantt (security_list):
+    gantt = px.timeline(security_list, x_start="start day", x_end="end day", y="company") #additional Gantt graph
+    gantt.update_yaxes(autorange="reversed")  # otherwise tasks are listed from the bottom up
+    gantt['layout'].update(height=1500, title='Plotting results')
 
-    # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
-    # This is essentially breaking down the Express fig1, 2, 3 into it's traces
-    figure1_traces = []
-    figure2_traces = []
-    figure3_traces = []
-    figure4_traces = []
-    figure5_traces = []
-    
-    for trace in range(len(fig1["data"])):
-        figure1_traces.append(fig1["data"][trace])
-    
-    for trace in range(len(fig2["data"])):
-        figure2_traces.append(fig2["data"][trace])
+    return gantt
 
-    for trace in range(len(fig5["data"])):
-        figure5_traces.append(fig5["data"][trace])
+def _weights_distribution (portfolio_weights):
+    weights_df = portfolio_weights
+    weights_df["Total Weights"] = weights_df.sum(axis=1)
+    weights_df = weights_df[weights_df["Total Weights"] != 0]
+    weights_df = weights_df.drop("Total Weights", axis=1)
+    weights_df = abs(weights_df)
+    fig = px.area(weights_df * 100,
+                   x=weights_df.index,
+                   y=weights_df.columns,
+                   title="Weights distribution")
 
-    for trace in range(len(fig3["data"])):
-        figure3_traces.append(fig3["data"][trace])
-    
-    for trace in range(len(fig4["data"])):
-        figure4_traces.append(fig4["data"][trace])
-    
-    # Create a 1x4 subplot
-    this_figure = sp.make_subplots(rows=5, cols=1,
-                                   vertical_spacing=0.1,
-                                   shared_xaxes=False,
-                                   shared_yaxes=False,
-                                   subplot_titles=("Accumulative return",
-                                                   "Weights distribution",
-                                                   "Accumulative return with Weights distribution"
-                                                   "Monthly return",
-                                                   "Drawdown"
-                                                   ))
-    
-    for traces in figure1_traces:
-        this_figure.append_trace(traces, row=1, col=1)
-    
-    for traces in figure2_traces:
-        this_figure.append_trace(traces, row=2, col=1)
+    fig = _plot_formatting(fig)
 
-    for traces in figure5_traces:
-        this_figure.append_trace(traces, row=3, col=1)
+    fig.update_layout(xaxis_title="Time",
+                      yaxis_title="%")
 
-    for traces in figure3_traces:
-        this_figure.append_trace(traces, row=4, col=1)
-    
-    for traces in figure4_traces:
-        this_figure.append_trace(traces, row=5, col=1)
-    
-    this_figure.update_layout(hovermode='x', showlegend=False)
-    # Prefix y-axis tick labels with % sign
-    this_figure.update_yaxes(tickprefix="%")
-    this_figure['layout'].update(height=1200, title='Plotting results')
-    #this_figure['layout'].update(title='Plotting results')
-    return this_figure
+    return fig
 
+def _capitlised_weights_distribution(capitlised_weights_distribution):
+    fig = px.area(capitlised_weights_distribution,
+                   x=capitlised_weights_distribution.index,
+                   y=capitlised_weights_distribution.columns,
+                   title="Capitlised weights distribution")
+
+    fig = _plot_formatting(fig)
+
+    fig.update_layout(xaxis_title="Time",
+                      yaxis_title="Return")
+
+    return fig
 
 
 
