@@ -1,22 +1,55 @@
 import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 from tabulate import tabulate
-from datetime import timedelta
-pd.options.mode.chained_assignment = None
 from plutus_backtest.backtest import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
-from plutus_backtest.plots import _accumulated_return, _monthly_return, _drawdown, _plotting
+from plutus_backtest.plots import _accumulated_return, _weights_distribution, _capitlised_weights_distribution,\
+    _monthly_return, _drawdown
 from plutus_backtest.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
-from dash import Dash, Input, Output, html, dcc, dash_table
-import visdcc
+from dash import Dash, html, dcc, dash_table
+
+pd.options.mode.chained_assignment = None
 
 def execution(asset, o_day, c_day, weights_factor=None,
                        take_profit=None,
                        stop_loss=None,
                        benchmark=None,
-                       price_period_relation=None):
+                       price_period_relation=None,
+                       full_report = False):
+
+    """ :Parameters:
+               asset: str or list or series
+                   Instruments taken into the consideration for the backtest.
+               o_day: list of str or timestamps or series
+                   Day/Days of the position opening.
+               c_day: list of str or timestamps or series
+                   Day/Days of the position closing.
+               weights_factor: list of int or float or array-like or series default None
+                   Optional list of factors which will be considered to define the weights for taken companies. By default
+                   all weights are distributed equally, however if the list of factors provided the backtest will maximize
+                   the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
+               take_profit: list of float or int or series default None
+                   List of values determining the level till a particular stock shall be traded.
+               stop_loss: list of float or int or series default None
+                   List of values determining the level till a particular stock shall be traded.
+               benchmark: str default None
+                   A benchmark ticker for comparison with portfolio performance
+               price_period_relation: str default 'O-C'
+                   Instruct what part of the trading day a position shall be opened,
+                   and what part of trading day it shall be closed.
+                   Possible relations:
+                   O-C / Open to Close prices
+                   C-O / Close to Open prices
+                   C-C / Close to Close prices
+                   O-O / Open to Open prices
+                   "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
+                   "Close" - value of the last transacted price in a security before the market officially closes.
+               full_report: bool, optional, default False
+                   Generates full report as PDF.
+    """
+
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Structuring input
 
@@ -84,99 +117,27 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
     stats = _stats(final_portfolio)
-    print(tabulate(stats.set_index('Indicators'), headers='keys', tablefmt='fancy_grid'))
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Plotting
-    accumulated_return = _accumulated_return(final_portfolio=final_portfolio)
-    d1 = accumulated_return[['Accumulation']]
-    d1['quantiles'] =pd.cut(d1['Accumulation'], 8, labels = [1,2,3,4,5,6,7,8])
-    c1 = 'RGB(215, 48, 39)'
-    c2 = 'RGB(244, 109, 67)'
-    c3 = 'RGB(253, 174, 97)'
-    c4 = 'RGB(254, 224, 139)'
-    c5 = 'RGB(217, 239, 139)'
-    c6 = 'RGB(166, 217, 106)'
-    c7 = 'RGB(102, 189, 99)'
-    c8 = 'RGB(26, 152, 80)'
-    lst = []
-    for y in d1['quantiles']:
-        if y==1:
-            lst.append(c1)
-        elif y==2:
-            lst.append(c2)
-        elif y==3:
-            lst.append(c3)
-        elif y==4:
-            lst.append(c4)
-        elif y==5:
-            lst.append(c5)
-        elif y==6:
-            lst.append(c6)
-        elif y==7:
-            lst.append(c7)
-        else:
-            lst.append(c8)
-    d1['Palette'] = lst
 
-    fig1 = px.scatter(d1, x=d1.index, y=d1["Accumulation"], title="Accumulated return",
-                      color=d1["Accumulation"], color_continuous_scale='RdYlGn',
-                      labels={'index': "Time", 'Accumulation': 'Return'},
-                       range_x=[d1.index[0], d1.index[-1] + timedelta(2)])
+    if full_report == False:
+        print(tabulate(stats.set_index('Indicators'), headers='keys', tablefmt='fancy_grid'))
+        return _accumulated_return(final_portfolio = final_portfolio,
+                                   benchmark_performance = benchmark_construction,
+                                   benchmark_ticker = benchmark).show()
 
-    fig1.update_layout(font_family="Bahnschrift Condensed",
-                       plot_bgcolor='rgb(250, 250, 245)',
-                       title_font_size=20, title_x=0, showlegend=False, font_color='Black',
-                       xaxis=dict(
-                           showline=True,
-                           showgrid=False,
-                           showticklabels=True,
-                           linecolor='rgb(0, 0, 0)',
-                           linewidth=2,
-                           ticks='outside',
-                           tickfont=dict(
-                               family='Bahnschrift Condensed',
-                               size=12,
-                               color='rgb(0, 0, 0)',
-                           )),
-                       yaxis=dict(
-                           showline=True,
-                           showgrid=False,
-                           showticklabels=True,
-                           linecolor='rgb(0, 0, 0)',
-                           linewidth=2,
-                           ticks='outside',
-                           tickfont=dict(
-                               family='Bahnschrift Condensed',
-                               size=12,
-                               color='rgb(0, 0, 0)',
-                           )), )
-
-    for x in range(len(d1.index)):
-        sdf = d1.iloc[x: x + 2]
-        col = sdf.Palette.values[-1]
-        fig1.add_trace(go.Scatter(x=sdf.index, y=sdf['Accumulation'],
-                                  line=dict(color=col, width=7)))
-
-    fig1.show()
-    monthly_return = _monthly_return(final_portfolio=final_portfolio)
-    drawdown = _drawdown(final_portfolio=final_portfolio)
-    plots = _plotting(accumulated_return=accumulated_return,
-                                                          monthly_return=monthly_return,
-                                                          drawdown=drawdown,
-                                                          portfolio_weights=portfolio_weights,
-                                                          capitlised_weights_distribution=capitlised_weights_distribution,
-                                                          benchmark_performance=benchmark_construction,
-                                                          benchmark_ticker=benchmark)
-
-
-    gantt = px.timeline(security_list, x_start="start day", x_end="end day", y="company") #additional Gantt graph
-    gantt.update_yaxes(autorange="reversed")  # otherwise tasks are listed from the bottom up
-    gantt['layout'].update(height=1500, title='Plotting results')
+    else:
+        accumulated = _accumulated_return(final_portfolio = final_portfolio,
+                                          benchmark_performance = benchmark_construction,
+                                          benchmark_ticker = benchmark)
+        weights = _weights_distribution(portfolio_weights = portfolio_weights)
+        cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution = capitlised_weights_distribution)
+        monthly = _monthly_return(final_portfolio = final_portfolio)
+        drawdown = _drawdown(final_portfolio = final_portfolio)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
-
     security_list_short = security_list.head(10)
 
     app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -186,12 +147,15 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Div(
                 [
                     dash_table.DataTable(
+                        data = stats.to_dict('records'),
+                        columns = [{"name": i, "id": i} for i in stats.columns],
                         style_data={
                             'whiteSpace': 'normal',
                             'height': 'auto',
-                        },
-                        data = stats.to_dict('records'),
-                        columns = [{"name": i, "id": i} for i in stats.columns]
+                            # all three widths are needed
+                            'minWidth': '60px', 'width': '60px', 'maxWidth': '60px',
+                            'overflow': 'hidden',
+                        }
                     )
                 ]
             ),
@@ -199,12 +163,15 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Div(
                 [
                     dash_table.DataTable(
-                        style_data={
-                                'whiteSpace': 'normal',
-                                'height': 'auto',
-                        },
                         data = security_list_short.to_dict('records'),
-                        columns = [{"name": i, "id": i} for i in security_list_short.columns]
+                        columns = [{"name": i, "id": i} for i in security_list_short.columns],
+                        style_data = {
+                                     'whiteSpace': 'normal',
+                                     'height': 'auto',
+                                     # all three widths are needed
+                                     'minWidth': '60px', 'width': '60px', 'maxWidth': '60px',
+                                     'overflow': 'hidden',
+                        }
                     )
                 ]
             )
@@ -215,51 +182,66 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             html.Div(
                 [
-                    dcc.Graph(figure=plots)
+                    dcc.Graph(figure=accumulated),
+                    dcc.Graph(figure=weights),
+                    dcc.Graph(figure=cap_weights),
+                    dcc.Graph(figure=monthly),
+                    dcc.Graph(figure=drawdown),
                 ]
             )
         ]
     )
 
-
-    security_list_table = dbc.Card(
+    accumulation_graph = dbc.Card(
         [
             html.Div(
                 [
-                    dash_table.DataTable(
-                        style_data={
-                            'whiteSpace': 'normal',
-                            'height': 'auto',
-                        },
-                        data=security_list.to_dict('records'),
-                        columns=[{"name": i, "id": i} for i in security_list.columns]
-                    )
-                ]
-            ),
-
-        ]
-    )
-
-    gantt_graph = dbc.Card(
-        [
-            html.Div(
-                [
-                    dcc.Graph(figure=gantt)
+                    dcc.Graph(figure=accumulated)
                 ]
             )
         ]
     )
 
-    button = dbc.Card(
+    weights_graph = dbc.Card(
         [
             html.Div(
                 [
-                    html.Button("Download", id="click1"),
-                    visdcc.Run_js(id="javascript")
+                    dcc.Graph(figure=weights)
                 ]
             )
         ]
     )
+
+    cwd_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(figure=cap_weights)
+                ]
+            )
+        ]
+    )
+
+    montly_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(figure=monthly)
+                ]
+            )
+        ]
+    )
+
+    drawdown_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(figure=drawdown)
+                ]
+            )
+        ]
+    )
+
 
 
     tab1_content = dbc.Container(
@@ -268,16 +250,10 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(sidebar, md=4),
-                    dbc.Col(main_graphs),
+                    dbc.Col(sidebar, width=4),
+                    dbc.Col(main_graphs, width=8),
                 ],
                 align="top",
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(button),
-                ],
-                align="left",
             ),
         ],
         fluid=True,
@@ -286,44 +262,87 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     tab2_content = dbc.Container(
         [
-            html.H1("Gantt graph and full list of assets"),
+            html.H1("Accumulated return"),
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(security_list_table, md=4),
-                    dbc.Col(gantt_graph),
+                    dbc.Col(accumulation_graph),
                 ],
                 align="top",
-            ),
-            dbc.Row(
-                [
-                    #dbc.Col(button),
-                ],
-                align="left",
             ),
         ],
         fluid=True,
     )
 
+    tab3_content = dbc.Container(
+        [
+            html.H1("Weights distribution"),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(weights_graph),
+                ],
+                align="top",
+            ),
+        ],
+        fluid=True,
+    )
+
+    tab4_content = dbc.Container(
+        [
+            html.H1("Capitalised weights distribution"),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(cwd_graph),
+                ],
+                align="top",
+            ),
+        ],
+        fluid=True,
+    )
+
+    tab5_content = dbc.Container(
+        [
+            html.H1("Monthly return"),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(montly_graph),
+                ],
+                align="top",
+            ),
+        ],
+        fluid=True,
+    )
+
+    tab6_content = dbc.Container(
+        [
+            html.H1("Drawdown"),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(drawdown_graph),
+                ],
+                align="top",
+            ),
+        ],
+        fluid=True,
+    )
 
     tabs = dbc.Tabs(
         [
             dbc.Tab(tab1_content, label="Backtest results"),
-            dbc.Tab(tab2_content, label="Full assets list"),
+            dbc.Tab(tab2_content, label="Accumulated return"),
+            dbc.Tab(tab3_content, label="Weights distribution"),
+            dbc.Tab(tab4_content, label="CWD"),
+            dbc.Tab(tab5_content, label="Monthly return"),
+            dbc.Tab(tab6_content, label="Drawdown"),
         ]
     )
 
     app.layout = tabs
 
     app.title = "Plutus Backtest App!"
-
-
-    @app.callback(
-        Output("javascript", "run"),
-        [Input("click1", "n_clicks")])
-    def myfun(x):
-        if x:
-            return "window.print()"
-            return ""
 
     app.run_server(debug=True, port=8888)
