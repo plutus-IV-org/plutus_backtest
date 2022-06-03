@@ -138,8 +138,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
-    security_list_sh
-    ort = security_list.head(10)
+    security_list_short = security_list.head(10)
 
     app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
