@@ -209,10 +209,10 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
                     dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
             if y < security_list.loc[x, 'stop loss']:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
-            if security_list.loc[x, 'weights factor'] > 0:
-                dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
-            else:
-                dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
+                if security_list.loc[x, 'weights factor'] > 0:
+                    dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
+                else:
+                    dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
     aux_table_2 = accu * binary_weights
     new_binary_weights = aux_table_2 / aux_table_2
     new_binary_weights.fillna(value=0, inplace=True)
@@ -255,7 +255,7 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
     final_portfolio = port_performance
     portfolio_weights = weights_df
 
-    return final_portfolio, portfolio_weights, capitlised_weights_distribution
+    return final_portfolio, portfolio_weights, capitlised_weights_distribution , stop_loss_assets, take_profit_assets
 
 def _stats(final_portfolio):
     obj = final_portfolio

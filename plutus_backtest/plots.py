@@ -110,13 +110,15 @@ def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker
         sdf = d1.iloc[x: x + 2]
         col = sdf.Palette.values[-1]
         fig.add_trace(go.Scatter(x=sdf.index, y=sdf['Accumulation'],
-                                  line=dict(color=col, width=7)))
+                                  line=dict(color=col, width=7),hovertemplate= '<b><i>Portfolio return</i></b>: <i>%{y:.2f}%<i>,<br><b>Date</b>: %{x}<br><extra></extra>'))
 
     if benchmark_ticker is not None:
-        fig.add_scatter(x=benchmark_performance.index,
-                         y=benchmark_performance["Bench_Accumulation"],
-                         mode='lines',
-                         name="Benchmark")
+        benchmark_performance.loc[benchmark_performance.index[0]-timedelta(1)] = 1
+        benchmark_performance.sort_index(inplace = True)
+        fig.add_trace(go.Scatter(x=benchmark_performance.index,
+                         y=benchmark_performance["Bench_Accumulation"], name="Benchmark",
+                         line=dict(color= 'rgb(141, 140, 141)', width=3, dash='dashdot'), hovertemplate= '<b><i>Benchmark return</i></b>: <i>%{y:.2f}%<i>,<br><b>Date</b>: %{x}<br><extra></extra>'))
+    fig.update_layout(hovermode="closest", showlegend= False)
 
     return fig
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -209,26 +211,28 @@ def _weights_distribution (portfolio_weights):
     fig = px.area(weights_df * 100,
                    x=weights_df.index,
                    y=weights_df.columns,
-                   title="Weights distribution")
+                   title="Weights rebalancing")
 
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="%")
-
+                      yaxis_title="Weights percentage", hovermode='x', showlegend=False)
     return fig
 
 def _capitlised_weights_distribution(capitlised_weights_distribution):
-    fig = px.area(capitlised_weights_distribution,
-                   x=capitlised_weights_distribution.index,
-                   y=capitlised_weights_distribution.columns,
-                   title="Capitlised weights distribution")
+    df = capitlised_weights_distribution.drop(columns= 'Accu')
+    for x in df.index:
+        if df.loc[x].sum() ==0:
+            df.drop(index=x, inplace=True)
+    fig = px.area(df,
+                   x=df.index,
+                   y=df.columns,
+                   title="Weights change")
 
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Return")
-
+                      yaxis_title="Weights percentage", hovermode='x', showlegend=False)
     return fig
 
 

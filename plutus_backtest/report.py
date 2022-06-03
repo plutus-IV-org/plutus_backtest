@@ -109,7 +109,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _portfolio_construction
-    final_portfolio, portfolio_weights, capitlised_weights_distribution = _portfolio_construction(detailed_return = consolidated_table_detailed,
+    final_portfolio, portfolio_weights, capitlised_weights_distribution, sl_dic, tp_dic = _portfolio_construction(detailed_return = consolidated_table_detailed,
                                                      security_list = security_list,
                                                      auxiliar_df = auxiliar_df,
                                                      weights_factor=weights_factor)
@@ -138,7 +138,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
-    security_list_short = security_list.head(10)
+    security_list_sh
+    ort = security_list.head(10)
 
     app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -276,11 +277,11 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     tab3_content = dbc.Container(
         [
-            html.H1("Weights distribution"),
+            html.H1("Weights change"),
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(weights_graph),
+                    dbc.Col(cwd_graph),
                 ],
                 align="top",
             ),
@@ -290,11 +291,11 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     tab4_content = dbc.Container(
         [
-            html.H1("Capitalised weights distribution"),
+            html.H1("Weights rebalancing"),
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(cwd_graph),
+                    dbc.Col(weights_graph),
                 ],
                 align="top",
             ),
@@ -334,8 +335,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             dbc.Tab(tab1_content, label="Backtest results"),
             dbc.Tab(tab2_content, label="Accumulated return"),
-            dbc.Tab(tab3_content, label="Weights distribution"),
-            dbc.Tab(tab4_content, label="CWD"),
+            dbc.Tab(tab3_content, label="Weights change"),
+            dbc.Tab(tab4_content, label="Weights rebalancing"),
             dbc.Tab(tab5_content, label="Monthly return"),
             dbc.Tab(tab6_content, label="Drawdown"),
         ]
