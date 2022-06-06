@@ -117,6 +117,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
     stats = _stats(final_portfolio)
+    stats = stats.round(4)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Plotting
@@ -140,39 +141,22 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # Building app
     security_list_short = security_list.head(10)
 
-    app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+    app = Dash(external_stylesheets=[dbc.themes.VAPOR])
+
+    table_1 = dbc.Table.from_dataframe(security_list_short)
+    table_2 = dbc.Table.from_dataframe(stats)
 
     sidebar = dbc.Card(
         [
             html.Div(
                 [
-                    dash_table.DataTable(
-                        data = stats.to_dict('records'),
-                        columns = [{"name": i, "id": i} for i in stats.columns],
-                        style_data={
-                            'whiteSpace': 'normal',
-                            'height': 'auto',
-                            # all three widths are needed
-                            'minWidth': '60px', 'width': '60px', 'maxWidth': '60px',
-                            'overflow': 'hidden',
-                        }
-                    )
+                    table_2
                 ]
             ),
             html.Hr(),
             html.Div(
                 [
-                    dash_table.DataTable(
-                        data = security_list_short.to_dict('records'),
-                        columns = [{"name": i, "id": i} for i in security_list_short.columns],
-                        style_data = {
-                                     'whiteSpace': 'normal',
-                                     'height': 'auto',
-                                     # all three widths are needed
-                                     'minWidth': '60px', 'width': '60px', 'maxWidth': '60px',
-                                     'overflow': 'hidden',
-                        }
-                    )
+                    table_1
                 ]
             )
         ]
@@ -183,7 +167,6 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Div(
                 [
                     dcc.Graph(figure=accumulated),
-                    dcc.Graph(figure=weights),
                     dcc.Graph(figure=cap_weights),
                     dcc.Graph(figure=monthly),
                     dcc.Graph(figure=drawdown),
@@ -284,14 +267,6 @@ def execution(asset, o_day, c_day, weights_factor=None,
                 ],
                 align="top",
             ),
-        ],
-        fluid=True,
-    )
-
-    tab4_content = dbc.Container(
-        [
-            html.H1("Weights rebalancing"),
-            html.Hr(),
             dbc.Row(
                 [
                     dbc.Col(weights_graph),
@@ -302,7 +277,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         fluid=True,
     )
 
-    tab5_content = dbc.Container(
+    tab4_content = dbc.Container(
         [
             html.H1("Monthly return"),
             html.Hr(),
@@ -316,7 +291,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         fluid=True,
     )
 
-    tab6_content = dbc.Container(
+    tab5_content = dbc.Container(
         [
             html.H1("Drawdown"),
             html.Hr(),
@@ -335,9 +310,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
             dbc.Tab(tab1_content, label="Backtest results"),
             dbc.Tab(tab2_content, label="Accumulated return"),
             dbc.Tab(tab3_content, label="Weights change"),
-            dbc.Tab(tab4_content, label="Weights rebalancing"),
-            dbc.Tab(tab5_content, label="Monthly return"),
-            dbc.Tab(tab6_content, label="Drawdown"),
+            dbc.Tab(tab4_content, label="Monthly return"),
+            dbc.Tab(tab5_content, label="Drawdown"),
         ]
     )
 

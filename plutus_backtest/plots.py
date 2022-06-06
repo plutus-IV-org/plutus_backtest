@@ -6,9 +6,10 @@ from datetime import timedelta
 pd.options.mode.chained_assignment = None
 
 def _plot_formatting(fig):
-    fig.update_layout(font_family="Bahnschrift Condensed",
-                       plot_bgcolor='rgb(250, 250, 245)',
-                       title_font_size=20, title_x=0, showlegend=False, font_color='Black',
+    fig.update_layout(font_family="Lato",
+                       paper_bgcolor='rgba(0,0,0,0)',
+                       plot_bgcolor='rgba(0,0,0,0)',
+                       title_font_size=20, title_x=0, showlegend=False, font_color='rgb(255, 255, 255)',
                        xaxis=dict(
                            showline=True,
                            showgrid=False,
@@ -17,21 +18,21 @@ def _plot_formatting(fig):
                            linewidth=2,
                            ticks='outside',
                            tickfont=dict(
-                               family='Bahnschrift Condensed',
+                               family='Lato',
                                size=12,
-                               color='rgb(0, 0, 0)',
+                               color='rgb(255, 255, 255)',
                            )),
                        yaxis=dict(
                            showline=True,
                            showgrid=False,
                            showticklabels=True,
-                           linecolor='rgb(0, 0, 0)',
+                           linecolor='rgb(255, 255, 255)',
                            linewidth=2,
                            ticks='outside',
                            tickfont=dict(
-                               family='Bahnschrift Condensed',
+                               family='Lato',
                                size=12,
-                               color='rgb(0, 0, 0)',
+                               color='rgb(255, 255, 255)',
                            )), )
     return fig
 
@@ -143,6 +144,8 @@ def _drawdown(final_portfolio):
                    title="Drawdown")
 
     fig = _plot_formatting(fig)
+
+    fig.update_traces(line_color='red')
 
     fig.update_layout(xaxis_title="Time",
                       yaxis_title="Return")
