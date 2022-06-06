@@ -141,7 +141,7 @@ def _drawdown(final_portfolio):
                    y=df_drawdown_fig2["Sum"] * 100,
                    hover_data=df_drawdown_fig2.columns[:-2],
                    title="Drawdown")
-
+    fig.update_traces(line_color='red')
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
@@ -217,6 +217,7 @@ def _weights_distribution (portfolio_weights):
 
     fig.update_layout(xaxis_title="Time",
                       yaxis_title="Weights percentage", hovermode='x', showlegend=False)
+
     return fig
 
 def _capitlised_weights_distribution(capitlised_weights_distribution):

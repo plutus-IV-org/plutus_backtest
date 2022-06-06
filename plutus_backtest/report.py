@@ -112,7 +112,11 @@ def execution(asset, o_day, c_day, weights_factor=None,
     final_portfolio, portfolio_weights, capitlised_weights_distribution, sl_dic, tp_dic = _portfolio_construction(detailed_return = consolidated_table_detailed,
                                                      security_list = security_list,
                                                      auxiliar_df = auxiliar_df,
-                                                     weights_factor=weights_factor)
+                                                 weights_factor=weights_factor)
+    com_dic = {**sl_dic, **tp_dic}
+    if bool(com_dic):
+        sltp_df = pd.DataFrame(com_dic).T
+        sltp_df.columns = ['Date', 'Level']
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
@@ -138,6 +142,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
+
     security_list_short = security_list.head(10)
 
     app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -175,6 +180,9 @@ def execution(asset, o_day, c_day, weights_factor=None,
                     )
                 ]
             )
+
+
+
         ]
     )
 
