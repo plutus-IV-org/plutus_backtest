@@ -201,13 +201,13 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
     for x in accu.columns:
         q1 = accu[x]
         for y in q1:
-            if y > security_list.loc[x, 'take profit']:
+            if y > security_list.loc[x, 'take profit'] and y!=0:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
                 if security_list.loc[x, 'weights factor'] > 0:
                     dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
                 else:
                     dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
-            if y < security_list.loc[x, 'stop loss']:
+            if y < security_list.loc[x, 'stop loss'] and y!=0:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
                 if security_list.loc[x, 'weights factor'] > 0:
                     dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y)]
