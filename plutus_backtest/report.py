@@ -4,6 +4,7 @@ from tabulate import tabulate
 from plutus_backtest.backtest import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 from plutus_backtest.plots import _accumulated_return, _weights_distribution, _capitlised_weights_distribution,\
     _monthly_return, _drawdown
+from plutus_backtest.trade_breaker import _sl_tp
 from plutus_backtest.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, dash_table
@@ -113,10 +114,11 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                                      security_list = security_list,
                                                      auxiliar_df = auxiliar_df,
                                                  weights_factor=weights_factor)
-    com_dic = {**sl_dic, **tp_dic}
-    if bool(com_dic):
-        sltp_df = pd.DataFrame(com_dic).T
-        sltp_df.columns = ['Date', 'Level']
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Calling _sl_tp trade breaker
+    trade_breaker_frame = _sl_tp(sl_dic,tp_dic)
+
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
