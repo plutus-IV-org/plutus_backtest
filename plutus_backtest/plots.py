@@ -6,10 +6,11 @@ from datetime import timedelta
 pd.options.mode.chained_assignment = None
 
 def _plot_formatting(fig):
-    fig.update_layout(font_family="Lato",
+    font = "system-ui"
+    fig.update_layout(font_family=font,
                        paper_bgcolor='rgba(0,0,0,0)',
                        plot_bgcolor='rgba(0,0,0,0)',
-                       title_font_size=20, title_x=0, showlegend=False, font_color='rgb(255, 255, 255)',
+                       title_font_size=20, title_x=0.1, showlegend=False, font_color='rgb(255, 255, 255)',
                        xaxis=dict(
                            showline=True,
                            showgrid=False,
@@ -18,7 +19,7 @@ def _plot_formatting(fig):
                            linewidth=2,
                            ticks='outside',
                            tickfont=dict(
-                               family='Lato',
+                               family=font,
                                size=12,
                                color='rgb(255, 255, 255)',
                            )),
@@ -30,7 +31,7 @@ def _plot_formatting(fig):
                            linewidth=2,
                            ticks='outside',
                            tickfont=dict(
-                               family='Lato',
+                               family=font,
                                size=12,
                                color='rgb(255, 255, 255)',
                            )), )
