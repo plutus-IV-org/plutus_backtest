@@ -204,15 +204,15 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
             if y > security_list.loc[x, 'take profit'] and y!=0:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
                 if security_list.loc[x, 'weights factor'] > 0:
-                    dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y),'Take profit']
+                    dic_longs[x] = accu.index[q1.values.tolist().index(y)], round(q1.iloc[q1.values.tolist().index(y)],3),'Take profit'
                 else:
-                    dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y), 'Stop loss']
+                    dic_shorts[x] = accu.index[q1.values.tolist().index(y)], round(q1.iloc[q1.values.tolist().index(y)],3), 'Stop loss'
             if y < security_list.loc[x, 'stop loss'] and y!=0:
                 q1.iloc[q1.values.tolist().index(y) + 1:] = 0
                 if security_list.loc[x, 'weights factor'] > 0:
-                    dic_shorts[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y), 'Stop loss']
+                    dic_shorts[x] = accu.index[q1.values.tolist().index(y)], round(q1.iloc[q1.values.tolist().index(y)],3), 'Stop loss'
                 else:
-                    dic_longs[x] = accu.index[q1.values.tolist().index(y)], q1.iloc[q1.values.tolist().index(y), 'Take profit']
+                    dic_longs[x] = accu.index[q1.values.tolist().index(y)], round(q1.iloc[q1.values.tolist().index(y)],3), 'Take profit'
     aux_table_2 = accu * binary_weights
     new_binary_weights = aux_table_2 / aux_table_2
     new_binary_weights.fillna(value=0, inplace=True)

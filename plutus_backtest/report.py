@@ -116,10 +116,9 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                                  weights_factor=weights_factor)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _sl_tp trade breaker
-    trade_breaker_frame = _sl_tp(sl_dic,tp_dic)
-
-
-
+    for x in range(len(security_list)):
+        if list(security_list['take profit'].values)[x]!=np.inf or list(security_list['stop loss'].values)[x]!=-np.inf :
+            trade_breaker_frame = _sl_tp(sl_dic,tp_dic)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
     stats = _stats(final_portfolio)
@@ -148,7 +147,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     security_list_short = security_list.head(10)
 
-    app = Dash(external_stylesheets=[dbc.themes.VAPOR])
+    app = Dash(external_stylesheets=[dbc.themes.QUARTZ])
 
     table_1 = dbc.Table.from_dataframe(security_list_short)
     table_2 = dbc.Table.from_dataframe(stats)
