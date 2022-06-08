@@ -103,7 +103,7 @@ def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker
 
     fig = px.scatter(d1, x=d1.index, y=d1["Accumulation"], title="Accumulated return",
                       color=d1["Accumulation"], color_continuous_scale='RdYlGn',
-                      labels={'index': "Time", 'Accumulation': 'Return'},
+                      labels={'index': "Time", 'Accumulation': 'Return %'},
                        range_x=[d1.index[0], d1.index[-1] + timedelta(2)])
 
     fig = _plot_formatting(fig)
@@ -207,6 +207,11 @@ def _gantt (security_list):
     return gantt
 
 def _weights_distribution (portfolio_weights):
+    """
+    Weights rebalancing graph serves only to visualize the percentage of the capital being invested in  the moment of
+    weights rebalancing. The total sum of the weights is always 100% since during rebalance the assets are getting the
+    weights according to the weights factor provided and total capital at that moment.
+    """
     weights_df = portfolio_weights
     weights_df["Total Weights"] = weights_df.sum(axis=1)
     weights_df = weights_df[weights_df["Total Weights"] != 0]
@@ -225,6 +230,12 @@ def _weights_distribution (portfolio_weights):
     return fig
 
 def _capitlised_weights_distribution(capitlised_weights_distribution):
+    """
+    Weights change graph is oriented to represent how the return is being distributed among the traded assets  as well
+    as providing the information how the capital would be split between the assets over the time compare to the initial
+    trade date. It allows visualization understanding which asset is generating positive return and which one is actually
+    generating the loss. An increase of asset area states the overall percentage of the capital is invested in this asset.
+    """
     df = capitlised_weights_distribution.drop(columns= 'Accu')
     for x in df.index:
         if df.loc[x].sum() ==0:

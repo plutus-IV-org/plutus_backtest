@@ -172,7 +172,7 @@ def _consolidated_table_detailed(security_list, asset,
     auxiliar_df = aux
     detailed_return = dc
 
-    return detailed_return, auxiliar_df, security_list, weights_factor
+    return detailed_return, auxiliar_df, security_list, weights_factor, df_close
 
 def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights_factor):
     """

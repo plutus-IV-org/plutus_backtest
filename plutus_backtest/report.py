@@ -98,7 +98,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _consolidated_table_detailed
 
-    consolidated_table_detailed, auxiliar_df, security_list, weights_factor = _consolidated_table_detailed(security_list = security_list,
+    consolidated_table_detailed, auxiliar_df, security_list, weights_factor, price_close= _consolidated_table_detailed(security_list = security_list,
                                                                                            asset = asset,
                                                                                            o_day=o_day,
                                                                                            c_day=c_day,
@@ -116,9 +116,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                                  weights_factor=weights_factor)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _sl_tp trade breaker
-    for x in range(len(security_list)):
-        if list(security_list['take profit'].values)[x]!=np.inf or list(security_list['stop loss'].values)[x]!=-np.inf :
-            trade_breaker_frame = _sl_tp(sl_dic,tp_dic)
+    if False in np.isinf(security_list[['take profit', 'stop loss']]).values:
+        trade_breaker_frame = _sl_tp(sl_dic,tp_dic,price_close)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
     stats = _stats(final_portfolio)
