@@ -148,27 +148,53 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     app = Dash(external_stylesheets=[dbc.themes.QUARTZ])
 
-    table_1 = dbc.Table.from_dataframe(security_list_short)
-    table_2 = dbc.Table.from_dataframe(stats)
+    if False in np.isinf(security_list[['take profit', 'stop loss']]).values:
 
-    sidebar = dbc.Card(
-        [
-            html.Div(
-                [
-                    table_2
-                ]
-            ),
-            html.Hr(),
-            html.Div(
-                [
-                    table_1
-                ]
-            )
+        table_1 = dbc.Table.from_dataframe(security_list_short)
+        table_2 = dbc.Table.from_dataframe(stats)
+        table_3 = dbc.Table.from_dataframe(trade_breaker_frame)
 
 
+        sidebar = dbc.Card(
+            [
+                html.Div(
+                    [
+                        table_2
+                    ]
+                ),
+                html.Br(),
+                html.Div(
+                    [
+                        table_1
+                    ]
+                ),
+                html.Br(),
+                html.Div(
+                    [
+                        table_3
+                    ]
+                ),
+            ]
+        )
+    else:
+        table_1 = dbc.Table.from_dataframe(security_list_short)
+        table_2 = dbc.Table.from_dataframe(stats)
 
-        ]
-    )
+        sidebar = dbc.Card(
+            [
+                html.Div(
+                    [
+                        table_2
+                    ]
+                ),
+                html.Br(),
+                html.Div(
+                    [
+                        table_1
+                    ]
+                ),
+            ]
+        )
 
     main_graphs = dbc.Card(
         [
@@ -257,7 +283,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(accumulation_graph),
+                    dbc.Row(accumulation_graph),
                 ],
                 align="top",
             ),
@@ -271,13 +297,29 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(cwd_graph),
+                    dbc.Row(cwd_graph),
+                    dbc.Row(html.P(
+                        """
+                        Weights change graph is oriented to represent how the return is being distributed among the traded assets  as well
+                        as providing the information how the capital would be split between the assets over the time compare to the initial
+                        trade date. It allows visualization understanding which asset is generating positive return and which one is actually
+                        generating the loss. An increase of asset area states the overall percentage of the capital is invested in this asset.
+                        """
+                    ))
                 ],
                 align="top",
             ),
+            dbc.Row(),
             dbc.Row(
                 [
-                    dbc.Col(weights_graph),
+                    dbc.Row(weights_graph),
+                    dbc.Row(html.P(
+                        """
+                        Weights rebalancing graph serves only to visualize the percentage of the capital being invested in  the moment of
+                        weights rebalancing. The total sum of the weights is always 100% since during rebalance the assets are getting the
+                        weights according to the weights factor provided and total capital at that moment.
+                        """
+                    ))
                 ],
                 align="top",
             ),
@@ -291,7 +333,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(montly_graph),
+                    dbc.Row(montly_graph),
                 ],
                 align="top",
             ),
@@ -305,7 +347,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(drawdown_graph),
+                    dbc.Row(drawdown_graph),
                 ],
                 align="top",
             ),
