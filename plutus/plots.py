@@ -225,7 +225,7 @@ def _weights_distribution (portfolio_weights):
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Weights percentage", hovermode='x', showlegend=False)
+                      yaxis_title="Weights percentage", hovermode="x unified", showlegend=False)
 
     return fig
 
@@ -248,7 +248,7 @@ def _capitlised_weights_distribution(capitlised_weights_distribution):
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Weights percentage", hovermode='x', showlegend=False)
+                      yaxis_title="Weights percentage", hovermode="x unified", showlegend=False)
     return fig
 
 
