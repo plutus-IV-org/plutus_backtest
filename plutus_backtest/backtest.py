@@ -24,7 +24,8 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
         DataFrame with all input data.
     """
 
-
+    if isinstance(asset, pd.core.series.Series):
+        asset = asset.values
     if isinstance(weights_factor, pd.core.series.Series):
         weights_factor = weights_factor.values
     if isinstance(o_day, pd.core.series.Series):
@@ -37,7 +38,16 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
         take_profit = take_profit.values
     if isinstance(stop_loss, pd.core.series.Series):
         stop_loss = stop_loss.values
-
+    if isinstance(o_day, np.ndarray):
+        ls = []
+        for x in range(len(o_day)):
+            ls.append(str(o_day[x])[:10])
+        o_day = ls
+    if isinstance(c_day, np.ndarray):
+        ls = []
+        for x in range(len(c_day)):
+            ls.append(str(c_day[x])[:10])
+        c_day = ls
     df = pd.DataFrame(
         {"company": asset, "start day": o_day, "end day": c_day, "weights factor": weights_factor,
          "take profit": take_profit, "stop loss": stop_loss})
@@ -86,7 +96,10 @@ def _consolidated_table_detailed(security_list, asset,
     #load prices from yahoo
     min_date = min(security_list['start day'])
     max_date = max(security_list['end day'])
-    ydata = yf.download(asset, start=_date_plus_one(min_date),
+    data = asset.copy()
+    if type(data)!=list:
+        data = list(data.values)
+    ydata = yf.download(data, start=_date_plus_one(min_date),
                         end=_date_plus_one(max_date), progress=False)
 
     if ydata.empty:
@@ -98,8 +111,8 @@ def _consolidated_table_detailed(security_list, asset,
     if not isinstance(ydata.columns, pd.MultiIndex):
     #select desired start / end dates for selected companies
         for b_d, s_d, new_com in zip(df_original["start day"], df_original["end day"], list_new):
-            data = ydata.loc[b_d:s_d]
-            data['Ticker'] = new_com
+            data = ydata.loc[b_d:s_d].copy()
+            data['Ticker'] = new_com.copy()
             initial_df = pd.concat([initial_df, data])
     else:
         for com, b_d, s_d, new_com in zip(df_original["company"], pd.to_datetime(df_original["start day"]),

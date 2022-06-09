@@ -1,5 +1,4 @@
 import pandas as pd
-import yfinance as yf
 
 def _sl_tp(stop_loss_dic, take_profit_dic,prices):
     com_dic = {**stop_loss_dic, **take_profit_dic}
@@ -13,8 +12,9 @@ def _sl_tp(stop_loss_dic, take_profit_dic,prices):
         sltp_df['Exit price'] = exit_price.copy()
         sltp_df['Date'] = sltp_df['Date'].astype(str)
         sltp_df.reset_index(inplace=True)
-        sltp_df = sltp_df.rename(columns={'index': 'Company'})
+        sltp_df.rename(columns={'index': 'Asset'}, inplace = True)
         return sltp_df
     else:
-        empty_df = pd.DataFrame({0: ["None amongst provided assets has reached sl/tp levels"]}).T.set_index(0)
+        empty_df = pd.DataFrame({0: ["None amongst provided assets has reached sl/tp levels"]}).T
+        empty_df.rename(columns={0:"SL/TP info"}, inplace =True)
         return empty_df
