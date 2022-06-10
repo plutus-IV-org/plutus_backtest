@@ -112,7 +112,7 @@ def _consolidated_table_detailed(security_list, asset,
     #select desired start / end dates for selected companies
         for b_d, s_d, new_com in zip(df_original["start day"], df_original["end day"], list_new):
             data = ydata.loc[b_d:s_d].copy()
-            data['Ticker'] = new_com.copy()
+            data['Ticker'] = new_com
             initial_df = pd.concat([initial_df, data])
     else:
         for com, b_d, s_d, new_com in zip(df_original["company"], pd.to_datetime(df_original["start day"]),
@@ -182,12 +182,12 @@ def _consolidated_table_detailed(security_list, asset,
     aux = aux.replace([np.inf, -np.inf], np.nan)
     aux = aux.fillna(0)
     aux = aux.apply(pd.to_numeric)
-    auxiliar_df = aux
-    detailed_return = dc
+    auxiliar_df = aux.copy()
+    detailed_return = dc.copy()
 
     return detailed_return, auxiliar_df, security_list, weights_factor, df_close
 
-def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights_factor):
+def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights_factor, major_sample):
     """
     :return:
         Full constructed portfolio, including position length, weights factor, stop loss & take profit.
@@ -267,8 +267,11 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
 
     final_portfolio = port_performance
     portfolio_weights = weights_df
-
-    return final_portfolio, portfolio_weights, capitlised_weights_distribution , stop_loss_assets, take_profit_assets
+    if major_sample == None:
+        top_assets = portfolio_weights.columns.tolist()
+    else:
+        top_assets= abs(portfolio_weights).sum(axis=0).nlargest(major_sample).index.tolist()
+    return final_portfolio, portfolio_weights, capitlised_weights_distribution , stop_loss_assets, take_profit_assets, top_assets
 
 def _stats(final_portfolio):
     obj = final_portfolio
