@@ -1,5 +1,5 @@
-from plutus_backtest.report import _report_generator
-from plutus_backtest.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
+from plutus.backtest import _report_generator
+from plutus.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
 
 
 

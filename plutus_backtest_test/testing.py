@@ -1,15 +1,15 @@
-from plutus_backtest.report import execution
+from plutus.backtest import execution
 from datetime import datetime, timedelta
 import random
 import numpy as np
-from plutus_backtest.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
+from plutus.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
 
 # k = _report_generator(asset = ["AAPL", "AAPL"],
 #                   o_day = ["2021-08-02", "2021-08-16"],
 #                   c_day = ["2021-08-10", "2021-08-20"])
 
 k = execution(asset=["AAPL", "TWTR", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
-              c_day=["2021-09-01", "2021-10-04", "2022-03-12"], full_report=True)
+              c_day=["2021-09-01", "2021-10-04", "2022-03-12"], take_profit=1.10, stop_loss=0.80, full_report=True)
 
 
 # tickers = ["WMT", "V", "BAC", "KO", "PFE", "PEP", "CVX", "TWTR", "BX",
