@@ -41,7 +41,7 @@ def _plot_formatting(fig):
 # Accumulated return
 def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker = None):
 
-    accumulated_return = final_portfolio
+    accumulated_return = final_portfolio.copy()
     d1 = accumulated_return[['Accumulation']]
 
     avg = 0
@@ -126,7 +126,7 @@ def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Drawdown
 def _drawdown(final_portfolio):
-    port_performance_drawdown = final_portfolio
+    port_performance_drawdown = final_portfolio.copy()
     port_performance_drawdown = port_performance_drawdown.clip(upper=0)
     port_performance_drawdown = port_performance_drawdown.drop(columns=['Sum', 'Accumulation'])
     # port_performance_drawdown = abs(port_performance_drawdown)
@@ -156,7 +156,7 @@ def _drawdown(final_portfolio):
 # Monthly return
 def _monthly_return(final_portfolio):
     mon = []
-    df_monthly = final_portfolio
+    df_monthly = final_portfolio.copy()
     df_monthly = df_monthly.drop(index=df_monthly.index[0], axis=0)  # drop first row
 
     for x in df_monthly.index:
@@ -206,13 +206,18 @@ def _gantt (security_list):
 
     return gantt
 
-def _weights_distribution (portfolio_weights):
+def _weights_distribution (portfolio_weights, major_assets):
     """
     Weights rebalancing graph serves only to visualize the percentage of the capital being invested in  the moment of
     weights rebalancing. The total sum of the weights is always 100% since during rebalance the assets are getting the
     weights according to the weights factor provided and total capital at that moment.
     """
-    weights_df = portfolio_weights
+    weights_df = portfolio_weights.copy()
+    ma = major_assets.copy()
+    rest = weights_df.drop(columns=ma, axis=1).sum(axis=1).values
+    major = weights_df[ma]
+    major['Minors'] = rest
+    weights_df = major.copy()
     weights_df["Total Weights"] = weights_df.sum(axis=1)
     weights_df = weights_df[weights_df["Total Weights"] != 0]
     weights_df = weights_df.drop("Total Weights", axis=1)
@@ -225,21 +230,27 @@ def _weights_distribution (portfolio_weights):
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Weights percentage", hovermode='x', showlegend=False)
+                      yaxis_title="Weights percentage", showlegend=False)
 
     return fig
 
-def _capitlised_weights_distribution(capitlised_weights_distribution):
+def _capitlised_weights_distribution(capitlised_weights_distribution, major_assets):
     """
     Weights change graph is oriented to represent how the return is being distributed among the traded assets  as well
     as providing the information how the capital would be split between the assets over the time compare to the initial
     trade date. It allows visualization understanding which asset is generating positive return and which one is actually
     generating the loss. An increase of asset area states the overall percentage of the capital is invested in this asset.
     """
+
     df = capitlised_weights_distribution.drop(columns= 'Accu')
     for x in df.index:
         if df.loc[x].sum() ==0:
             df.drop(index=x, inplace=True)
+    ma = major_assets.copy()
+    rest = df.drop(columns=ma, axis=1).sum(axis=1).values
+    major = df[ma]
+    major['Minors'] = rest
+    df = major.copy()
     fig = px.area(df,
                    x=df.index,
                    y=df.columns,
@@ -248,7 +259,7 @@ def _capitlised_weights_distribution(capitlised_weights_distribution):
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Weights percentage", hovermode='x', showlegend=False)
+                      yaxis_title="Weights percentage", showlegend=False)
     return fig
 
 

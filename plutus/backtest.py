@@ -16,7 +16,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
                        stop_loss=None,
                        benchmark=None,
                        price_period_relation=None,
-                       full_report = False):
+                       full_report = False, major_sample = 10):
 
     """ :Parameters:
                asset: str or list or series
@@ -47,6 +47,12 @@ def execution(asset, o_day, c_day, weights_factor=None,
                    "Close" - value of the last transacted price in a security before the market officially closes.
                full_report: bool, optional, default False
                    Generates full report as PDF.
+               major_sample: int or None, optional, default 10
+                   Based on duration of the trading period as well as weights factor of the asset.
+                   In order to make understandable visualisation in full report graphs such as weights changes and
+                   weights distribution, major sample is used which will focus to provide info regarding main provided
+                   assets. Can be changed to any int. If value is None the backtest will consider all assets as major
+                   ones.
     """
 
 
@@ -110,10 +116,10 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _portfolio_construction
-    final_portfolio, portfolio_weights, capitlised_weights_distribution, sl_dic, tp_dic = _portfolio_construction(detailed_return = consolidated_table_detailed,
+    final_portfolio, portfolio_weights, capitlised_weights_distribution, sl_dic, tp_dic, top_assets = _portfolio_construction(detailed_return = consolidated_table_detailed,
                                                      security_list = security_list,
                                                      auxiliar_df = auxiliar_df,
-                                                 weights_factor=weights_factor)
+                                                 weights_factor=weights_factor, major_sample = major_sample)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _sl_tp trade breaker
     if False in np.isinf(security_list[['take profit', 'stop loss']]).values:
@@ -136,19 +142,21 @@ def execution(asset, o_day, c_day, weights_factor=None,
         accumulated = _accumulated_return(final_portfolio = final_portfolio,
                                           benchmark_performance = benchmark_construction,
                                           benchmark_ticker = benchmark)
-        weights = _weights_distribution(portfolio_weights = portfolio_weights)
-        cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution = capitlised_weights_distribution)
+        weights = _weights_distribution(portfolio_weights = portfolio_weights, major_assets= top_assets)
+        cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution = capitlised_weights_distribution, major_assets= top_assets)
         monthly = _monthly_return(final_portfolio = final_portfolio)
         drawdown = _drawdown(final_portfolio = final_portfolio)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
+    security_list.rename(columns={'company': 'Top assets', 'start day': 'Start', 'end day': 'End', 'weights factor':'Weights factor',
+                                  "take profit": "Take profit","stop loss":"Stop loss" }, inplace = True)
 
-    security_list_short = security_list.head(10)
+    security_list_short = security_list.loc[top_assets].head(10)
 
     app = Dash(external_stylesheets=[dbc.themes.QUARTZ])
 
-    if False in np.isinf(security_list[['take profit', 'stop loss']]).values:
+    if False in np.isinf(security_list[['Take profit', 'Stop loss']]).values:
 
         table_1 = dbc.Table.from_dataframe(security_list_short)
         table_2 = dbc.Table.from_dataframe(stats)
@@ -304,6 +312,9 @@ def execution(asset, o_day, c_day, weights_factor=None,
                         as providing the information how the capital would be split between the assets over the time compare to the initial
                         trade date. It allows visualization understanding which asset is generating positive return and which one is actually
                         generating the loss. An increase of asset area states the overall percentage of the capital is invested in this asset.
+                        Primary the graph is focused on major sample group and the rest of assets are considered as minors in order to proved
+                        understandable visualization, however if major sample is None then the graph will present all assets weights but
+                        will also slow the backtest execution.
                         """
                     ))
                 ],
@@ -317,7 +328,9 @@ def execution(asset, o_day, c_day, weights_factor=None,
                         """
                         Weights rebalancing graph serves only to visualize the percentage of the capital being invested in  the moment of
                         weights rebalancing. The total sum of the weights is always 100% since during rebalance the assets are getting the
-                        weights according to the weights factor provided and total capital at that moment.
+                        weights according to the weights factor provided and total capital at that moment. Primary the graph is focused on
+                        major sample group and the rest of assets are considered as minors in order to proved understandable visualization,
+                        however if major sample is None then the graph will present all assets weights but will also slow the backtest execution.
                         """
                     ))
                 ],
