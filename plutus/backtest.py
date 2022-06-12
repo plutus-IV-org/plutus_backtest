@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
-from plutus_backtest.backtest import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
-from plutus_backtest.plots import _accumulated_return, _weights_distribution, _capitlised_weights_distribution,\
+from plutus.calculations import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
+from plutus.plots import _accumulated_return, _weights_distribution, _capitlised_weights_distribution,\
     _monthly_return, _drawdown
-from plutus_backtest.trade_breaker import _sl_tp
-from plutus_backtest.benchmark import _benchmark_construction
+from plutus.trade_breaker import _sl_tp
+from plutus.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, dash_table
 

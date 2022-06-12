@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='plutus_backtest',
+    name='plutus',
 
     version='0.2.0.0',
 
-    description="plutus_backtest is a python package \
+    description="plutus is a python package \
     for backtesting investment decisions using Python 3.6 and above.",
 
     long_description_content_type='text/markdown',
@@ -47,7 +47,7 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
 
-    packages=find_packages(include=['plutus_backtest', 'plutus_backtest.*']),
+    packages=find_packages(include=['plutus', 'plutus.*']),
 
     url="https://github.com/witmul/plutus_backtest",
 
