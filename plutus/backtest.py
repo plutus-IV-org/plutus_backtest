@@ -453,6 +453,6 @@ def execution(asset, o_day, c_day, weights_factor=None,
         prevent_initial_call=True,
     )
     def func(n_clicks):
-        return dcc.send_data_frame(portfolio_weights.to_csv, "final_portfolio_data.csv")
+        return dcc.send_data_frame(portfolio_weights.to_csv, "portfolio_weights?data.csv")
 
     app.run_server(debug=True, port=8888)
