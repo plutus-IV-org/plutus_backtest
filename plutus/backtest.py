@@ -7,7 +7,7 @@ from plutus.plots import _accumulated_return, _weights_distribution, _capitlised
 from plutus.trade_breaker import _sl_tp
 from plutus.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
-from dash import Dash, html, dcc, dash_table
+from dash import Dash, html, dcc, Input, Output
 
 pd.options.mode.chained_assignment = None
 
@@ -16,7 +16,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
                        stop_loss=None,
                        benchmark=None,
                        price_period_relation=None,
-                       full_report = False, major_sample = 10):
+                       full_report = False,
+                       major_sample = 10):
 
     """ :Parameters:
                asset: str or list or series
@@ -53,13 +54,14 @@ def execution(asset, o_day, c_day, weights_factor=None,
                    weights distribution, major sample is used which will focus to provide info regarding main provided
                    assets. Can be changed to any int. If value is None the backtest will consider all assets as major
                    ones.
+               accumulated_dataframe : bool, optional, default False
+                   Will allow user to assing data that is used for accumulated return plot to a variable.
     """
 
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Structuring input
-
     weights_factor = weights_factor if weights_factor is not None else np.ones(len(asset))
     take_profit = take_profit if take_profit is not None else len(asset) * [np.inf]
     stop_loss = stop_loss if stop_loss is not None else len(asset) * [-np.inf]
@@ -134,16 +136,16 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     if full_report == False:
         print(tabulate(stats.set_index('Indicators'), headers='keys', tablefmt='fancy_grid'))
-        return _accumulated_return(final_portfolio = final_portfolio,
+        plot = _accumulated_return(final_portfolio = final_portfolio,
                                    benchmark_performance = benchmark_construction,
                                    benchmark_ticker = benchmark).show()
+        return plot, final_portfolio, portfolio_weights
+
 
     else:
         accumulated = _accumulated_return(final_portfolio = final_portfolio,
                                           benchmark_performance = benchmark_construction,
                                           benchmark_ticker = benchmark)
-        weights = _weights_distribution(portfolio_weights = portfolio_weights, major_assets= top_assets)
-        cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution = capitlised_weights_distribution, major_assets= top_assets)
         monthly = _monthly_return(final_portfolio = final_portfolio)
         drawdown = _drawdown(final_portfolio = final_portfolio)
 
@@ -209,7 +211,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Div(
                 [
                     dcc.Graph(figure=accumulated),
-                    dcc.Graph(figure=cap_weights),
+                    dcc.Graph(id="cwd_graph_main"),
                     dcc.Graph(figure=monthly),
                     dcc.Graph(figure=drawdown),
                 ]
@@ -231,7 +233,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             html.Div(
                 [
-                    dcc.Graph(figure=weights)
+
+                    dcc.Graph(id="weights_graph")
                 ]
             )
         ]
@@ -241,7 +244,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             html.Div(
                 [
-                    dcc.Graph(figure=cap_weights)
+                    dcc.Graph(id="cwd_graph_tab")
                 ]
             )
         ]
@@ -267,7 +270,19 @@ def execution(asset, o_day, c_day, weights_factor=None,
         ]
     )
 
+    download_final_portfolio = dbc.Card(html.Div(
+        [
+        html.Button("Download final porfolio data", id="btn_portfolio_csv"),
+        dcc.Download(id="download-portfolio-csv"),
+        ]
+    ))
 
+    download_portfolio_weights = dbc.Card(html.Div(
+        [
+        html.Button("Download porfolio weights data", id="btn_weights_csv"),
+        dcc.Download(id="download-weights-csv"),
+        ]
+    ))
 
     tab1_content = dbc.Container(
         [
@@ -275,11 +290,14 @@ def execution(asset, o_day, c_day, weights_factor=None,
             html.Hr(),
             dbc.Row(
                 [
-                    dbc.Col(sidebar, width=4),
+                    dbc.Col([dbc.Row([sidebar,
+                                      download_final_portfolio,
+                                      download_portfolio_weights])], width=4),
                     dbc.Col(main_graphs, width=8),
                 ],
                 align="top",
             ),
+
         ],
         fluid=True,
     )
@@ -303,6 +321,17 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             html.H1("Weights change"),
             html.Hr(),
+
+            dbc.Row([dcc.Dropdown(
+                final_portfolio.columns.tolist()[:-2],
+                multi=True,
+                value=top_assets,
+                id="assets_dropdown",
+                style={'color': 'black',
+                       'width': '50%'}
+                )]),
+
+
             dbc.Row(
                 [
                     dbc.Row(cwd_graph),
@@ -381,5 +410,49 @@ def execution(asset, o_day, c_day, weights_factor=None,
     app.layout = tabs
 
     app.title = "Plutus Backtest App!"
+
+    @app.callback(
+        Output("cwd_graph_tab", "figure"),
+        Input("assets_dropdown", "value")
+    )
+    def assets_dropdown_cwd_tab(top_assets):
+        cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution=capitlised_weights_distribution,
+                                                       major_assets=top_assets)
+        return cap_weights
+
+    @app.callback(
+        Output("weights_graph", "figure"),
+        Input("assets_dropdown", "value")
+    )
+    def assets_dropdown_weights_tab(top_assets):
+        weights = _weights_distribution(portfolio_weights=portfolio_weights,
+                                        major_assets=top_assets)
+
+        return weights
+
+    @app.callback(
+        Output("cwd_graph_main", "figure"),
+        Input("assets_dropdown", "value")
+    )
+    def assets_dropdown_cwd_main(top_assets):
+        cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution=capitlised_weights_distribution,
+                                                       major_assets=top_assets)
+        return cap_weights
+
+    @app.callback(
+        Output("download-portfolio-csv", "data"),
+        Input("btn_portfolio_csv", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def func(n_clicks):
+        return dcc.send_data_frame(final_portfolio.to_csv, "final_portfolio_data.csv")
+
+    @app.callback(
+        Output("download-weights-csv", "data"),
+        Input("btn_weights_csv", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def func(n_clicks):
+        return dcc.send_data_frame(portfolio_weights.to_csv, "final_portfolio_data.csv")
 
     app.run_server(debug=True, port=8888)
