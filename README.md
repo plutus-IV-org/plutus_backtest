@@ -156,7 +156,7 @@ bt = execution(asset=["AAPL", "F", "MS"],
 
 <br />
 
-If the user didn't specified weights of particular assets in your portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights distribution**.
+If the user didn't specified weights of particular assets in your portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights rebalancing**.
 
 <br />
 
@@ -166,14 +166,13 @@ If the user didn't specified weights of particular assets in your portfolio (usi
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "F", "MS"], 
+bt = execution(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
-              weights_factor = [50, 40, 10])
+              weights_factor = [50, 40, 10], full_report = True)
 
-bt.plotting()
 ```
 
 <br />
@@ -183,7 +182,8 @@ Example of Weights distribution plot:
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/150591736-44613521-8e4d-49da-9341-669b17f2a250.png)
+![3](https://user-images.githubusercontent.com/83161286/174977790-bf5ce252-d0b0-47f5-9b6d-e2e2fc6c48cf.png)
+![4](https://user-images.githubusercontent.com/83161286/174977803-e3577a0a-a182-459f-8fe3-416922f66005.png)
 
 <br />
 
@@ -194,12 +194,10 @@ No need to include weights that will sum up to 100% (but it is recommended). Cod
 ```python
 from plutus_backtest import backtest
 
-bt = backtest(asset=["AAPL", "F", "MS"], 
+bt = execution(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
-              weights_factor = [35, 140, -21])
-
-bt.plotting()
+              weights_factor = [35, 140, -21], full_report = True)
 ```
 
 <br />
@@ -211,32 +209,8 @@ MS: |21| / 196 = ~10.7%
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/150592404-1037b82b-f324-47bd-984c-dfed683d3afc.png)
-
-<br />
-
-If only 2 out of 3 assets are traded in selected period, weights will be calculated as described above, but excluding 3rd asset. 
-
-<br />
-
-weights_factor total is 175 [35 + 140]. <br />
-AAPL: 35 / 175 = 20%<br />
-F: 140 / 175 = 80%<br />
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/150602852-7f8557cb-4a37-4d33-bd83-8d0e039bec43.png)
-
-<br />
-
-All plots are interactive and contain some details. For example "Accumulative return" plot reflects (from top to bottom):
-- Date;
-- Accumulation (in %) till selected date;
-- Daily changes (in %) for each instrument you called.
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/149677024-3749bd18-c7e3-4602-a38a-acfd06de9bfb.png)
+![5](https://user-images.githubusercontent.com/83161286/174978869-3876ecf5-59cb-4613-834d-68437283cfcd.png)
+![6](https://user-images.githubusercontent.com/83161286/174978875-af5f0758-7f8d-49e0-8402-e6c9757ba5ad.png)
 
 <br />
 
