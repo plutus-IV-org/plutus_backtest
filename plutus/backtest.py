@@ -54,8 +54,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
                    weights distribution, major sample is used which will focus to provide info regarding main provided
                    assets. Can be changed to any int. If value is None the backtest will consider all assets as major
                    ones.
-               accumulated_dataframe : bool, optional, default False
-                   Will allow user to assing data that is used for accumulated return plot to a variable.
+
     """
 
 
