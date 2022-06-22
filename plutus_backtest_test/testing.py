@@ -1,17 +1,20 @@
 from plutus.backtest import execution
+import pandas as pd
 from datetime import datetime, timedelta
 import random
 import numpy as np
-from plutus.puzzle_report import _puzzle_preparation, _puzzle_assembly, _puzzle_report_generator
+
 
 # k = _report_generator(asset = ["AAPL", "AAPL"],
 #                   o_day = ["2021-08-02", "2021-08-16"],
 #                   c_day = ["2021-08-10", "2021-08-20"])
+#
+# k = execution(asset=["AAPL", "TWTR", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+#               c_day=["2021-09-01", "2021-10-04", "2022-03-12"], full_report=True)
 
-k, k1 = execution(asset=["AAPL", "TWTR", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
-              c_day=["2021-09-01", "2021-10-04", "2022-03-12"],
-              full_report=True)
-print(k1)
+df = pd.read_excel(r'C:\Users\ilsbo\PycharmProjects\plutus_backtest\plutus_backtest\sample_data_excel.xlsx')
+k = execution(asset=df['Asset'], o_day=df['Open'], c_day=df['Close'], full_report= True)
+
 # tickers = ["WMT", "V", "BAC", "KO", "PFE", "PEP", "CVX", "TWTR", "BX",
 #            "PYPL", "SONY", "GE", "SBUX", "SBUX", "TEAM", "BSX",
 #            "UBS", "GM", "DG", "TRP", "MRVL", "TRI", "SYY", "EC"]
