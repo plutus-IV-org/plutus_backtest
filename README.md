@@ -207,6 +207,8 @@ AAPL: 35 / 196 = ~17%<br />
 F: 140 / 196 = ~71.4%<br />
 MS: |21| / 196 = ~10.7%
 
+Keep in mind that weights factor with **-** will indicate short selling for a perticular asset
+
 <br />
 
 ![5](https://user-images.githubusercontent.com/83161286/174978869-3876ecf5-59cb-4613-834d-68437283cfcd.png)
