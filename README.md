@@ -98,10 +98,11 @@ In order to access dataframe with portfolio daily changes and weights distributi
 ```python
 from plutus.backtest import execution
 
-bt, portfolio_daily_changes, portfolio_weights = execution(asset=["AAPL", "TWTR", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
-               c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
+bt, portfolio_daily_changes, portfolio_weights = execution(asset=["AAPL", "TWTR", "GC=F"], 
+                                                  o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+                                                  c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
 
-
+portfolio_daily_changes.head()
 ```
 <br />
 
@@ -207,7 +208,7 @@ AAPL: 35 / 196 = ~17%<br />
 F: 140 / 196 = ~71.4%<br />
 MS: |21| / 196 = ~10.7%
 
-Keep in mind that weights factor with "-" sign will indicate short selling for a perticular asset
+Keep in mind that weights factor with "-" sign will indicate short selling for a particular asset
 
 <br />
 
@@ -223,14 +224,13 @@ More complex approach would be assigning weights factor/stop loss/ take profit i
 ```python
 from plutus.backtest import execution
 
-bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
+bt = execution(asset = ["AAPL", "BTC-USD","GC=F"], 
               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"], 
               weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], 
               take_profit = [1.1, 1.2, 1.05])
 
-bt.execution()
 ```
 
 <br />
