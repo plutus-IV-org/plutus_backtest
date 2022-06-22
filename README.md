@@ -159,8 +159,9 @@ bt = execution(asset=["AAPL", "F", "MS"],
 If the user didn't specified weights of particular assets in your portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights distribution**.
 
 <br />
-![1](https://user-images.githubusercontent.com/83161286/174976482-ef37263b-5dd4-46b4-8553-48e300744e01.png)
-![2](https://user-images.githubusercontent.com/83161286/174976491-b95b4737-3052-42f3-a2c6-31ee14f77d35.png)
+
+![1](https://user-images.githubusercontent.com/83161286/174976799-8f858e22-8817-418c-8aa0-4e9cc4eecb0d.png)
+![2](https://user-images.githubusercontent.com/83161286/174976837-174a5da5-bfc2-4249-aa9a-9ac0d198bfbb.png)
 
 <br />
 
