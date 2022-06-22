@@ -221,7 +221,7 @@ More complex approach would be assigning weights factor/stop loss/ take profit i
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
 bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
@@ -245,7 +245,8 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677220-079db767-06d7-428a-bcb5-1cbf3a4394b7.png)
+![10](https://user-images.githubusercontent.com/83161286/174981977-e5bcca06-706f-40c1-8d20-71557e94481a.png)
+![11](https://user-images.githubusercontent.com/83161286/174981983-c085db26-719d-4f20-aa41-555d26fcd240.png)
 
 <br />
 
@@ -258,15 +259,13 @@ In case of users need to test one instrument but several times with different ti
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset = ["AMZN", "AMZN","AMZN"], 
+bt, portfolio_daily_changes = execution(asset = ["AMZN", "AMZN","AMZN"], 
               o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 
-bt.portfolio_construction()
-
-bt.execution_table.head(15)
+portfolio_daily_changes.head(15)
 ```
 
 <br />
@@ -275,86 +274,12 @@ bt.execution_table.head(15)
 
 <br />
 
-Each time when one asset is repeating the package will assign additional number to it to track required periods. 
+Each time when one asset is repeating the backtest will assign additional number to it to track required periods. 
 It's worth to mention that due to data limitation the code will use only close price for the analysis of the securities. Only the first trading day has relationship open/close, since it's assumed that the tradingstarts with open price and finishes with close one.
 
 <br />
 
-Ultimately, if the users would like to perform several backtest and combine them into one to see the full picture then there are few functions related to that, namely:
 
-<br />
-
-```python
-from plutus_backtest import backtest
-
-bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
-               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
-
-bt2 = backtest(asset = ["AMZN", "EURUSD=X"], 
-               o_day = ["2021-06-01", "2021-06-15"],
-               c_day = ["2021-06-30", "2021-07-05"])
-
-p1 = bt1.portfolio_construction()
-p2 = bt2.portfolio_construction()
-q1 = bt1.final_portfolio
-q2 = bt2.final_portfolio
-
-dic ={}
-dic[0] = q1
-dic[1]= q2
-
-combined_frame = backtest.puzzle_assembly(dic)
-
-combined_frame
-```
-
-<br />
-
-First of all all backtest shall be executed in order to obtain final portfolio of the each one. Then they shall be assigned to an empty dictionary. Thereafter 
-function "puzzle_assembly" takes the data from diffirent backtest and unite it into one dataframe. Please note: only "Accumulation" column from below table is shown in %.
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/149677619-6c8ef3e9-2f92-4bce-83f0-b90265043c3c.png)
-
-<br />
-
-In order to visualize data functions "puzzle_execution" or "puzzle_plotting" shall be called. Which work exactly in the same way as it was explained previously.
-
-<br />
-
-```python
-from plutus_backtest import backtest
-
-bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
-               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
-
-bt2 = backtest(asset = ["AMZN", "EURUSD=X"], 
-               o_day = ["2021-06-01", "2021-06-15"],
-               c_day = ["2021-06-30", "2021-07-05"])
-
-p1 = bt1.portfolio_construction()
-p2 = bt2.portfolio_construction()
-q1 = bt1.final_portfolio
-q2 = bt2.final_portfolio
-
-dic ={}
-dic[0] = q1
-dic[1]= q2
-
-combined_frame = backtest.puzzle_assembly(dic)
-
-backtest.puzzle_execution(combined_frame)
-```
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/149677777-8f3d1dd6-65b2-433d-916e-475ab5d3a406.png)
-
-
-<br />
 
 ## Support:
 Please [open an issue](https://github.com/witmul/backt/issues/new) for support.<br />
