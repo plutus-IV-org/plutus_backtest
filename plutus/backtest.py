@@ -154,7 +154,16 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                   "take profit": "Take profit","stop loss":"Stop loss" }, inplace = True)
 
     security_list_short = security_list.loc[top_assets].head(10)
-
+    st = []
+    ed = []
+    for x in range(len(security_list_short.index)):
+        st.append(security_list_short['Start'].values[x][8:10]+'-' +security_list_short['Start'].values[x][5:7] +
+                  '-' + security_list_short['Start'].values[x][2:4])
+        ed.append(security_list_short['End'].values[x][8:10] + '-' + security_list_short['End'].values[x][5:7] +
+                  '-' + security_list_short['End'].values[x][2:4])
+    security_list_short['Start'] =st
+    security_list_short['End'] = ed
+    security_list_short.rename(columns = {'Start': 'Starting date', 'End':'  Ending  date  '}, inplace = True)
     app = Dash(external_stylesheets=[dbc.themes.QUARTZ])
 
     if False in np.isinf(security_list[['Take profit', 'Stop loss']]).values:
