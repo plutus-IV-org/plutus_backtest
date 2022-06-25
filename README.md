@@ -229,7 +229,7 @@ bt = execution(asset = ["AAPL", "BTC-USD","GC=F"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"], 
               weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], 
-              take_profit = [1.1, 1.2, 1.05])
+              take_profit = [1.1, 1.2, 1.05], full_report = True)
 
 ```
 
