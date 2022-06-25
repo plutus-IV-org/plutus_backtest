@@ -86,8 +86,8 @@ def _puzzle_assembly(data_dictionaries):
         q1 = data_dictionaries[x][0][data_dictionaries[x][0].columns[:-2]] #performence results (first table in tuple)
         q2 = data_dictionaries[x][1] #securities lists (second table in tuple)
 
-        empty_frame_data = empty_frame_data.append(q1)
-        empty_frame_securities = empty_frame_securities.append(q2)
+        empty_frame_data = pd.concat([empty_frame_data, q1])
+        empty_frame_securities = pd.concat([empty_frame_securities, q2])
 
     df_sec = empty_frame_securities
 

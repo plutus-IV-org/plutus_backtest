@@ -2,14 +2,15 @@ import numpy as np
 import pandas as pd
 from tabulate import tabulate
 from plutus.calculations import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
-from plutus.plots import _accumulated_return, _weights_distribution, _capitlised_weights_distribution,\
+from plutus.plots import _accumulated_return, _accumulated_return_short, _weights_distribution, _capitlised_weights_distribution,\
     _monthly_return, _drawdown
 from plutus.trade_breaker import _sl_tp
 from plutus.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, Input, Output
+from jupyter_dash import JupyterDash
 
-pd.options.mode.chained_assignment = None
+#pd.options.mode.chained_assignment = None
 
 def execution(asset, o_day, c_day, weights_factor=None,
                        take_profit=None,
@@ -135,7 +136,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     if full_report == False:
         print(tabulate(stats.set_index('Indicators'), headers='keys', tablefmt='fancy_grid'))
-        plot = _accumulated_return(final_portfolio = final_portfolio,
+        plot = _accumulated_return_short(final_portfolio = final_portfolio,
                                    benchmark_performance = benchmark_construction,
                                    benchmark_ticker = benchmark).show()
         return plot, final_portfolio, portfolio_weights
@@ -164,7 +165,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
     security_list_short['Start'] =st
     security_list_short['End'] = ed
     security_list_short.rename(columns = {'Start': 'Starting date', 'End':'  Ending  date  '}, inplace = True)
-    app = Dash(external_stylesheets=[dbc.themes.QUARTZ])
+
+    app = JupyterDash(external_stylesheets=[dbc.themes.QUARTZ])
 
     if False in np.isinf(security_list[['Take profit', 'Stop loss']]).values:
 
@@ -463,4 +465,4 @@ def execution(asset, o_day, c_day, weights_factor=None,
     def func(n_clicks):
         return dcc.send_data_frame(portfolio_weights.to_csv, "portfolio_weights_data.csv")
 
-    app.run_server(debug=True, port=8888)
+    app.run_server(mode='external')
