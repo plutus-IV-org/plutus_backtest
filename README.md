@@ -24,7 +24,8 @@ pip install plutus_backtest
 ```
 * Verified in Python:
 
-```
+```pyhton
+
 ## Examples: 
 
 Class "backtest" contains below parameters:<br />
