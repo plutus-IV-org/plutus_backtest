@@ -3,8 +3,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import timedelta
 
-pd.options.mode.chained_assignment = None
-
 def _plot_formatting(fig):
     font = "system-ui"
     fig.update_layout(font_family=font,
@@ -42,7 +40,12 @@ def _plot_formatting_short(fig):
     fig.update_layout(font_family=font,
                        paper_bgcolor='rgba(0,0,0,0)',
                        plot_bgcolor='rgba(0,0,0,0)',
-                       title_font_size=20, title_x=0.1, showlegend=False, font_color='rgb(255, 255, 255)',
+                       title_font_size=28, title_x=0.1, showlegend=False, font_color='rgb(0, 0, 0)',
+                       font=dict(
+                           family=font,
+                           size=20,
+                           color='rgb(0, 0, 0)',
+                       ),
                        xaxis=dict(
                            showline=True,
                            showgrid=False,
@@ -52,7 +55,7 @@ def _plot_formatting_short(fig):
                            ticks='outside',
                            tickfont=dict(
                                family=font,
-                               size=12,
+                               size=18,
                                color='rgb(0, 0, 0)',
                            )),
                        yaxis=dict(
@@ -64,14 +67,102 @@ def _plot_formatting_short(fig):
                            ticks='outside',
                            tickfont=dict(
                                family=font,
-                               size=12,
+                               size=18,
                                color='rgb(0, 0, 0)',
                            )), )
     return fig
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Accumulated return
+# Accumulated return with normal formatting for full report
 def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker = None):
+
+    accumulated_return = final_portfolio.copy()
+    d1 = accumulated_return[['Accumulation']]
+
+    avg = 0
+    dis_b = avg - d1.min()
+    m1 = (d1.min() + (dis_b/4)).values
+    m2 = (d1.min() + (dis_b/2)).values
+    m3 = (d1.min() + (dis_b*0.75)).values
+    dis_t = d1.max()- avg
+    b1 = (avg + (dis_t/4)).values
+    b2 = (avg +(dis_t/2)).values
+    b3 = (avg + (dis_t * 0.75)).values
+    labels = []
+    for x in d1.Accumulation.values:
+        if x < m1:
+            labels.append(1)
+        elif x< m2 and x>m1:
+            labels.append(2)
+        elif x<m3 and x>m2:
+            labels.append(3)
+        elif x<avg and x>m3:
+            labels.append(4)
+        elif x<b1 and x> avg:
+            labels.append(5)
+        elif x<b2 and x>b1:
+            labels.append(6)
+        elif x<b3 and x>b2:
+            labels.append(7)
+        else:
+            labels.append(8)
+    d1 = d1.copy()
+    d1['quantiles'] = labels
+
+    c1 = 'RGB(215, 48, 39)'
+    c2 = 'RGB(244, 109, 67)'
+    c3 = 'RGB(253, 174, 97)'
+    c4 = 'RGB(254, 224, 139)'
+    c5 = 'RGB(217, 239, 139)'
+    c6 = 'RGB(166, 217, 106)'
+    c7 = 'RGB(102, 189, 99)'
+    c8 = 'RGB(26, 152, 80)'
+    lst = []
+    for y in d1['quantiles']:
+        if y==1:
+            lst.append(c1)
+        elif y==2:
+            lst.append(c2)
+        elif y==3:
+            lst.append(c3)
+        elif y==4:
+            lst.append(c4)
+        elif y==5:
+            lst.append(c5)
+        elif y==6:
+            lst.append(c6)
+        elif y==7:
+            lst.append(c7)
+        else:
+            lst.append(c8)
+    d1['Palette'] = lst
+
+    fig = px.scatter(d1, x=d1.index, y=d1["Accumulation"], title="Accumulated return",
+                      color=d1["Accumulation"], color_continuous_scale='RdYlGn',
+                      labels={'index': "Time", 'Accumulation': 'Return %'},
+                       range_x=[d1.index[0], d1.index[-1] + timedelta(2)])
+
+    fig = _plot_formatting(fig)
+
+    for x in range(len(d1.index)):
+        sdf = d1.iloc[x: x + 2]
+        col = sdf.Palette.values[-1]
+        fig.add_trace(go.Scatter(x=sdf.index, y=sdf['Accumulation'],
+                                  line=dict(color=col, width=7),hovertemplate= '<b><i>Portfolio return</i></b>: <i>%{y:.2f}%<i>,<br><b>Date</b>: %{x}<br><extra></extra>'))
+
+    if benchmark_ticker is not None:
+        benchmark_performance.loc[benchmark_performance.index[0]-timedelta(1)] = 1
+        benchmark_performance.sort_index(inplace = True)
+        fig.add_trace(go.Scatter(x=benchmark_performance.index,
+                         y=benchmark_performance["Bench_Accumulation"], name="Benchmark",
+                         line=dict(color= 'rgb(141, 140, 141)', width=3, dash='dashdot'), hovertemplate= '<b><i>Benchmark return</i></b>: <i>%{y:.2f}%<i>,<br><b>Date</b>: %{x}<br><extra></extra>'))
+    fig.update_layout(hovermode="closest", showlegend= False)
+
+    return fig
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Accumulated return with adjusted formatting for short report
+def _accumulated_return_short(final_portfolio, benchmark_performance, benchmark_ticker = None):
 
     accumulated_return = final_portfolio.copy()
     d1 = accumulated_return[['Accumulation']]
@@ -138,7 +229,7 @@ def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker
                       labels={'index': "Time", 'Accumulation': 'Return %'},
                        range_x=[d1.index[0], d1.index[-1] + timedelta(2)])
 
-    fig = _plot_formatting(fig)
+    fig = _plot_formatting_short(fig)
 
     for x in range(len(d1.index)):
         sdf = d1.iloc[x: x + 2]
@@ -155,6 +246,7 @@ def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker
     fig.update_layout(hovermode="closest", showlegend= False)
 
     return fig
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Drawdown
 def _drawdown(final_portfolio):

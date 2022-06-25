@@ -10,7 +10,7 @@ def _benchmark_construction(security_list, benchmark, p_p_n, p_p_p):
     max_date = max(security_list['end day'])
     df = yf.download(benchmark, start=_date_plus_one(min_date),
                      end=_date_plus_one(max_date), progress=False)
-    df['Ticker'] = benchmark
+    df['Ticker'] = benchmark[0]
     df_close = df[["Ticker", p_p_n]]
     df_close.columns = ['ticker', 'close_price']
     df_open = df[["Ticker", p_p_p]]
@@ -25,13 +25,13 @@ def _benchmark_construction(security_list, benchmark, p_p_n, p_p_p):
         fake_df = pd.DataFrame(fake_df.iloc[0]).T
         fake_df.iloc[0, 0] = x
         fake_df.iloc[0, 1] = get_open.values[0]
-        merged_df = fake_df.append(get_end)
+        merged_df = pd.concat([fake_df, get_end])
         merged_df['daily_change'] = merged_df['close_price'].pct_change()
         merged_df = merged_df.iloc[1:]
         aux_df = merged_df[['ticker', 'close_price']]
         work_df = merged_df[['ticker', 'daily_change']]
-        em1 = em1.append(aux_df)
-        em2 = em2.append(work_df)
+        em1 = pd.concat([em1, aux_df])
+        em2 = pd.concat([em2, work_df])
     dc = em2.pivot_table(index=em2.index, columns='ticker', values='daily_change')
     dc = dc.replace([np.inf, -np.inf], np.nan)
     dc = dc.fillna(0)
