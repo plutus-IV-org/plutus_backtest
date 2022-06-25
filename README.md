@@ -84,7 +84,7 @@ bt = execution(asset=["AAPL", "BTC-USD", "GC=F"], o_day=["2021-08-01", "2021-08-
 
 <br />
 
-As a result you will see a statistical table as well as graphical representation of the portfolio which shows accumulated return.
+As a result a statistical table as well as graphical representation of the portfolio accumulated return will appear.
 
 <br />
 
