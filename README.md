@@ -24,8 +24,6 @@ pip install plutus_backtest
 ```
 * Verified in Python:
 
-```python
-from plutus_backtest import backtest
 ```
 ## Examples: 
 
