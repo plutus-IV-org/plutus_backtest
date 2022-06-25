@@ -110,7 +110,7 @@ The result will appear as following (all values are in %):
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677827-5bf80957-cf17-4d4d-8a57-817cbc976e82.png)
+![2](https://user-images.githubusercontent.com/83161286/175761065-ff74aa7b-a6c2-4339-939a-e59bd9a0c249.png)
 
 <br />
 
