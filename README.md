@@ -127,11 +127,11 @@ bt = execution(asset=["AAPL", "TWTR", "FB"], o_day=["2021-08-01", "2021-08-03", 
 ```
 <br />
 
-Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as your portfolio) on your portfolio graph:
+Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as the portfolio) [grey line] on the accumulated graph:
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/160644004-c2287d34-83b0-480f-87d1-aebe6fd07501.png)
+![3а](https://user-images.githubusercontent.com/83161286/175761187-ac99e1dd-b38f-41d0-9d7e-4ab054737491.png)
 
 <br />
 
