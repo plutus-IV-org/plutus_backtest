@@ -24,7 +24,9 @@ pip install plutus_backtest
 ```
 * Verified in Python:
 
-```pyhton
+```python
+from plutus.backtest import execution
+```
 
 ## Examples: 
 
