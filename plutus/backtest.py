@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from tabulate import tabulate
 from plutus.calculations import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 from plutus.plots import _accumulated_return, _accumulated_return_short, _weights_distribution, _capitlised_weights_distribution,\
