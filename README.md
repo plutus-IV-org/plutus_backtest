@@ -25,8 +25,9 @@ pip install plutus_backtest
 * Verified in Python:
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 ```
+
 ## Examples: 
 
 Class "backtest" contains below parameters:<br />
@@ -76,18 +77,18 @@ A short and fast way to run a single backtest would be:
 ```python
 from plutus.backtest import execution
 
-bt = execution(asset=["AAPL", "TWTR", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+bt = execution(asset=["AAPL", "BTC-USD", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
                c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
 
 ```
 
 <br />
 
-As a result you will see a statistical table as well as graphical representation of the portfolio which shows accumulated return.
+As a result a statistical table as well as graphical representation of the portfolio accumulated return will appear.
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149675789-605bb97c-be06-4297-b7c2-9b821cfdda2a.png)
+![1](https://user-images.githubusercontent.com/83161286/175760999-bcdf3ebf-6544-4a5e-8a66-1b86f6a8ba59.png)
 
 <br />
 
@@ -110,7 +111,7 @@ The result will appear as following (all values are in %):
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677827-5bf80957-cf17-4d4d-8a57-817cbc976e82.png)
+![2](https://user-images.githubusercontent.com/83161286/175761065-ff74aa7b-a6c2-4339-939a-e59bd9a0c249.png)
 
 <br />
 
@@ -127,11 +128,11 @@ bt = execution(asset=["AAPL", "TWTR", "FB"], o_day=["2021-08-01", "2021-08-03", 
 ```
 <br />
 
-Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as your portfolio) on your portfolio graph:
+Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as the portfolio) [grey line] on the accumulated graph:
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/160644004-c2287d34-83b0-480f-87d1-aebe6fd07501.png)
+![3а](https://user-images.githubusercontent.com/83161286/175761187-ac99e1dd-b38f-41d0-9d7e-4ab054737491.png)
 
 <br />
 
@@ -150,10 +151,10 @@ bt = execution(asset=["AAPL", "F", "MS"],
 ```
 <br />
 
-![Снимок экрана 2022-06-22 095208](https://user-images.githubusercontent.com/83161286/174975152-704667ca-8136-4fcb-90c6-22a04bdd0b32.png)
-![Снимок экрана 2022-06-22 095254](https://user-images.githubusercontent.com/83161286/174975164-de073392-bdea-4e55-9b26-32b5f64ebc8c.png)
-![Снимок экрана 2022-06-22 095330](https://user-images.githubusercontent.com/83161286/174975169-4487284f-5a16-4a75-b22b-fa5bc0fd4261.png)
-![Снимок экрана 2022-06-22 095401](https://user-images.githubusercontent.com/83161286/174975174-db3dacad-7af7-4b9f-b838-562d6d81e0cd.png)
+![4a](https://user-images.githubusercontent.com/83161286/175761298-a47d662f-20c8-4e7f-871e-024fdbec78f3.png)
+![4b](https://user-images.githubusercontent.com/83161286/175761295-48f775a1-67bb-41ce-9c88-57cacfb51731.png)
+![4c](https://user-images.githubusercontent.com/83161286/175761302-36444d54-a930-4372-bc5f-5e082baf5cc9.png)
+![4d](https://user-images.githubusercontent.com/83161286/175761306-5a5302b7-76f1-4d29-a2ca-d3e25cbda3a9.png)
 
 <br />
 
@@ -193,7 +194,7 @@ No need to include weights that will sum up to 100% (but it is recommended). Cod
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
 bt = execution(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
@@ -229,7 +230,7 @@ bt = execution(asset = ["AAPL", "BTC-USD","GC=F"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"], 
               weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], 
-              take_profit = [1.1, 1.2, 1.05])
+              take_profit = [1.1, 1.2, 1.05], full_report = True)
 
 ```
 
@@ -245,8 +246,8 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![10](https://user-images.githubusercontent.com/83161286/174981977-e5bcca06-706f-40c1-8d20-71557e94481a.png)
-![11](https://user-images.githubusercontent.com/83161286/174981983-c085db26-719d-4f20-aa41-555d26fcd240.png)
+![5a](https://user-images.githubusercontent.com/83161286/175761447-4cc57c76-a596-4ce7-9430-beda28612d6a.png)
+![5b](https://user-images.githubusercontent.com/83161286/175761442-41509b86-0b4f-4926-9553-f5d8beaa188d.png)
 
 <br />
 
@@ -261,16 +262,16 @@ In case of users need to test one instrument but several times with different ti
 ```python
 from plutus.backtest import execution
 
-bt, portfolio_daily_changes = execution(asset = ["AMZN", "AMZN","AMZN"], 
+bt, portfolio_daily_changes, pprtfolio_weights = execution(asset = ["AMZN", "AMZN","AMZN"], 
               o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 
-portfolio_daily_changes.head(15)
+
 ```
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677380-0bfa8600-ce68-4087-9cd7-c114f48490ba.png)
+ ![6](https://user-images.githubusercontent.com/83161286/175761567-2218b966-6509-481f-abde-68576c9a0357.png)
 
 <br />
 
