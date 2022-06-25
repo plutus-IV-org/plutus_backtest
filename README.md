@@ -17,7 +17,7 @@ In addition, the package allows to create full html report containing varius gra
 Tickers for analysis are available on [Yahoo Finance page](https://finance.yahoo.com/).
 
 ## Installation: 
-* Dependency: **pandas**, **numpy**, **plotly**, **yfinance**, **werkzeug**, **tabulate**
+* Dependency: **pandas**, **numpy**, **plotly**, **yfinance**, **dash**, **tabulate**
 * Install from pypi:
 ```
 pip install plutus_backtest
@@ -149,6 +149,18 @@ bt = execution(asset=["AAPL", "F", "MS"],
 
 
 ```
+<br />
+
+Above script will generate a link to Dash app with report: 
+
+<br />
+
+![image](https://user-images.githubusercontent.com/83119547/175771957-67729f53-ef8e-43a1-b712-af079c401b1d.png)
+
+<br />
+
+Click on it, and you will be redirected to a new tab.
+
 <br />
 
 ![4a](https://user-images.githubusercontent.com/83161286/175761298-a47d662f-20c8-4e7f-871e-024fdbec78f3.png)
