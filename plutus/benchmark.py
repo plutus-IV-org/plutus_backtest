@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter(action='ignore', category=Warning)
+
 import pandas as pd
 import yfinance as yf
 import numpy as np

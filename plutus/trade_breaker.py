@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter(action='ignore', category=Warning)
+
 import pandas as pd
 
 def _sl_tp(stop_loss_dic, take_profit_dic,prices):

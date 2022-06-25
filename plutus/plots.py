@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter(action='ignore', category=Warning)
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -256,7 +259,7 @@ def _drawdown(final_portfolio):
     # port_performance_drawdown = abs(port_performance_drawdown)
     port_performance_drawdown['Sum'] = port_performance_drawdown.sum(axis=1)
     port_performance_drawdown['Accumulation'] = (port_performance_drawdown['Sum'].cumsum()) * 100
-    df_drawdown = port_performance_drawdown
+    df_drawdown = port_performance_drawdown.copy()
     df_drawdown = df_drawdown.round(decimals=3)
 
     df_drawdown_fig2 = df_drawdown.astype(float)
