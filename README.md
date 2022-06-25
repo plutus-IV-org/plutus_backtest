@@ -76,7 +76,7 @@ A short and fast way to run a single backtest would be:
 ```python
 from plutus.backtest import execution
 
-bt = execution(asset=["AAPL", "TWTR", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+bt = execution(asset=["AAPL", "BTC-USD", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
                c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
 
 ```
@@ -87,7 +87,7 @@ As a result you will see a statistical table as well as graphical representation
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149675789-605bb97c-be06-4297-b7c2-9b821cfdda2a.png)
+
 
 <br />
 
