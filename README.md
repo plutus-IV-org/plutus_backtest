@@ -87,7 +87,7 @@ As a result you will see a statistical table as well as graphical representation
 
 <br />
 
-
+![1](https://user-images.githubusercontent.com/83161286/175760999-bcdf3ebf-6544-4a5e-8a66-1b86f6a8ba59.png)
 
 <br />
 
