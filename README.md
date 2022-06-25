@@ -193,7 +193,7 @@ No need to include weights that will sum up to 100% (but it is recommended). Cod
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
 bt = execution(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
@@ -245,8 +245,8 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![10](https://user-images.githubusercontent.com/83161286/174981977-e5bcca06-706f-40c1-8d20-71557e94481a.png)
-![11](https://user-images.githubusercontent.com/83161286/174981983-c085db26-719d-4f20-aa41-555d26fcd240.png)
+![5a](https://user-images.githubusercontent.com/83161286/175761447-4cc57c76-a596-4ce7-9430-beda28612d6a.png)
+![5b](https://user-images.githubusercontent.com/83161286/175761442-41509b86-0b4f-4926-9553-f5d8beaa188d.png)
 
 <br />
 
