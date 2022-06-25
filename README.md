@@ -150,10 +150,10 @@ bt = execution(asset=["AAPL", "F", "MS"],
 ```
 <br />
 
-![Снимок экрана 2022-06-22 095208](https://user-images.githubusercontent.com/83161286/174975152-704667ca-8136-4fcb-90c6-22a04bdd0b32.png)
-![Снимок экрана 2022-06-22 095254](https://user-images.githubusercontent.com/83161286/174975164-de073392-bdea-4e55-9b26-32b5f64ebc8c.png)
-![Снимок экрана 2022-06-22 095330](https://user-images.githubusercontent.com/83161286/174975169-4487284f-5a16-4a75-b22b-fa5bc0fd4261.png)
-![Снимок экрана 2022-06-22 095401](https://user-images.githubusercontent.com/83161286/174975174-db3dacad-7af7-4b9f-b838-562d6d81e0cd.png)
+![4a](https://user-images.githubusercontent.com/83161286/175761298-a47d662f-20c8-4e7f-871e-024fdbec78f3.png)
+![4b](https://user-images.githubusercontent.com/83161286/175761295-48f775a1-67bb-41ce-9c88-57cacfb51731.png)
+![4c](https://user-images.githubusercontent.com/83161286/175761302-36444d54-a930-4372-bc5f-5e082baf5cc9.png)
+![4d](https://user-images.githubusercontent.com/83161286/175761306-5a5302b7-76f1-4d29-a2ca-d3e25cbda3a9.png)
 
 <br />
 
