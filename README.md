@@ -261,16 +261,16 @@ In case of users need to test one instrument but several times with different ti
 ```python
 from plutus.backtest import execution
 
-bt, portfolio_daily_changes = execution(asset = ["AMZN", "AMZN","AMZN"], 
+bt, portfolio_daily_changes, pprtfolio_weights = execution(asset = ["AMZN", "AMZN","AMZN"], 
               o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 
-portfolio_daily_changes.head(15)
+
 ```
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677380-0bfa8600-ce68-4087-9cd7-c114f48490ba.png)
+ ![6](https://user-images.githubusercontent.com/83161286/175761567-2218b966-6509-481f-abde-68576c9a0357.png)
 
 <br />
 
