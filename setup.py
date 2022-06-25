@@ -6,9 +6,9 @@ with open("README.md", "r") as fh:
 setup(
     name='plutus_backtest',
 
-    version='0.1.9',
+    version='0.3.0.0',
 
-    description="plutus_backtest is a python package \
+    description="plutus is a python package \
     for backtesting investment decisions using Python 3.6 and above.",
 
     long_description_content_type='text/markdown',
@@ -47,16 +47,23 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
 
-    packages=find_packages(include=['plutus_backtest', 'plutus_backtest.*']),
+    packages=find_packages(include=['plutus', 'plutus.*']),
 
     url="https://github.com/witmul/plutus_backtest",
 
     python_requires=">=3.6.0",
 
     install_requires=[
-        "numpy>=1.21.2",
-        "pandas>=1.3.3",
-        "plotly>=5.4.0",
-        "yfinance>=0.1.63"
+        "dash >= 2.3.0",
+        "dash_bootstrap_components >= 1.1.0",
+        "numpy >= 1.21.2",
+        "pandas >= 1.3.3",
+        "plotly >= 5.4.0",
+        "setuptools >= 57.4.0",
+        "tabulate >= 0.8.9",
+        "visdcc >= 0.0.50",
+        "yfinance >= 0.1.63",
+        "werkzeug==2.0.0",
+        "jupyter_dash"
     ],
 )

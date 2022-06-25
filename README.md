@@ -10,15 +10,14 @@ allowing users obtaining exact results of their strategies over a certain period
 endless amount of trading instruments and set criteria such as long or short positioning. Beside that optional stop loss and take profit
 signals are available not only as general limit level for entire portfolio but can be also applied for each instrument individually.
 Another optional tool available is weights factor distribution which is oriented to assign weights according to the provided values. 
-In addition, the package allows to create several backtests and combine them all together into one to see the full picture of the investment 
-strategy.
+In addition, the package allows to create full html report containing varius graphs and indicators.
 
 <br />
 
 Tickers for analysis are available on [Yahoo Finance page](https://finance.yahoo.com/).
 
 ## Installation: 
-* Dependency: **pandas**, **numpy**, **plotly**, **yfinance**
+* Dependency: **pandas**, **numpy**, **plotly**, **yfinance**, **werkzeug**, **tabulate**
 * Install from pypi:
 ```
 pip install plutus_backtest
@@ -26,45 +25,47 @@ pip install plutus_backtest
 * Verified in Python:
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 ```
+
 ## Examples: 
 
 Class "backtest" contains below parameters:<br />
 ```
 asset: str or list or series
-    Instruments taken into the consideration for the backtest.
-
+   Instruments taken into the consideration for the backtest.
 o_day: list of str or timestamps or series
-    Day/Days of the position opening.
-
+   Day/Days of the position opening.
 c_day: list of str or timestamps or series
-    Day/Days of the position closing.
-
+   Day/Days of the position closing.
 weights_factor: list of int or float or array-like or series default None
-    Optional list of factors which will be considered to define the weights for taken companies. By default
-    all weights are distributed equally, however if the list of factors provided the backtest will maximize
-    the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
-
+   Optional list of factors which will be considered to define the weights for taken companies. By default
+   all weights are distributed equally, however if the list of factors provided the backtest will maximize
+   the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
 take_profit: list of float or int or series default None
-    List of values determining the level till a particular stock shall be traded.
-
+   List of values determining the level till a particular stock shall be traded.
 stop_loss: list of float or int or series default None
-    List of values determining the level till a particular stock shall be traded.
-
+   List of values determining the level till a particular stock shall be traded.
 benchmark: str default None
-    A benchmark ticker for comparison with portfolio performance
-
+   A benchmark ticker for comparison with portfolio performance
 price_period_relation: str default 'O-C'
-    Instruct what part of the trading day a position shall be opened,
-    and what part of trading day it shall be closed.
-    Possible relations:
-    O-C / Open to Close prices
-    C-O / Close to Open prices
-    C-C / Close to Close prices
-    O-O / Open to Open prices
-    "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
-    "Close" - value of the last transacted price in a security before the market officially closes.    
+   Instruct what part of the trading day a position shall be opened,
+   and what part of trading day it shall be closed.
+   Possible relations:
+   O-C / Open to Close prices
+   C-O / Close to Open prices
+   C-C / Close to Close prices
+   O-O / Open to Open prices
+   "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
+   "Close" - value of the last transacted price in a security before the market officially closes.
+full_report: bool, optional, default False
+   Generates full report as PDF.
+major_sample: int or None, optional, default 10
+   Based on duration of the trading period as well as weights factor of the asset.
+   In order to make understandable visualisation in full report graphs such as weights changes and
+   weights distribution, major sample is used which will focus to provide info regarding main provided
+   assets. Can be changed to any int. If value is None the backtest will consider all assets as major
+   ones.
 ```
 
 <br />
@@ -74,39 +75,35 @@ A short and fast way to run a single backtest would be:
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"], 
-              o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
+bt = execution(asset=["AAPL", "BTC-USD", "GC=F"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+               c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
 
-bt.execution()
 ```
 
 <br />
 
-As a result you will see a statistical table as well as graphical representation of the portfolio which shows accumulated return.
+As a result a statistical table as well as graphical representation of the portfolio accumulated return will appear.
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149675789-605bb97c-be06-4297-b7c2-9b821cfdda2a.png)
+![1](https://user-images.githubusercontent.com/83161286/175760999-bcdf3ebf-6544-4a5e-8a66-1b86f6a8ba59.png)
 
 <br />
 
-In order to access dataframe with daily changes, use:
+In order to access dataframe with portfolio daily changes and weights distribution, use:
 
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"],
-              o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
+bt, portfolio_daily_changes, portfolio_weights = execution(asset=["AAPL", "TWTR", "GC=F"], 
+                                                  o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+                                                  c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
 
-bt.portfolio_construction()
-
-bt.execution_table.head()
+portfolio_daily_changes.head()
 ```
 <br />
 
@@ -114,7 +111,7 @@ The result will appear as following (all values are in %):
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677827-5bf80957-cf17-4d4d-8a57-817cbc976e82.png)
+![2](https://user-images.githubusercontent.com/83161286/175761065-ff74aa7b-a6c2-4339-939a-e59bd9a0c249.png)
 
 <br />
 
@@ -123,65 +120,61 @@ If you would like to compare performance of your portfolio with any other instru
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "BTC-USD", "GC=F"], 
-              o_day=["2021-08-01", "2021-07-15", "2021-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
-              benchmark = "^GSPC") # ticker for S&P 500 index
+bt = execution(asset=["AAPL", "TWTR", "FB"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
+               c_day=["2021-09-01", "2021-10-04", "2022-03-12"], benchmark= ['^GSPC'])
 
-bt.execution()
 ```
 <br />
 
-Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as your portfolio) on your portfolio graph:
+Above example will additionaly plot a S&P 500 index performance (accumulated return from same period as the portfolio) [grey line] on the accumulated graph:
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/160644004-c2287d34-83b0-480f-87d1-aebe6fd07501.png)
+![3а](https://user-images.githubusercontent.com/83161286/175761187-ac99e1dd-b38f-41d0-9d7e-4ab054737491.png)
 
 <br />
 
-"plotting" function will enable users to observe additional graphs such as drawdown and monthly income plots:
+"Full report" is an optional parameter which allows users users to observe additional graphs frames and indicators:
 
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "F", "MS"], 
+bt = execution(asset=["AAPL", "F", "MS"], 
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"])
+              c_day=["2021-09-01", "2021-09-01", "2021-09-15"], full_report = True)
 
-bt.plotting()
+
 ```
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/153058511-3200f7d9-63d9-408b-aa07-ba92586131e4.png)
-![image](https://user-images.githubusercontent.com/83119547/153059013-7d45d213-aae9-4a33-ac9b-bb4d2865ad12.png)
-![image](https://user-images.githubusercontent.com/83119547/153058707-88d544af-3548-4887-82e3-adbe7ee87668.png)
-![image](https://user-images.githubusercontent.com/83119547/153058766-9ea72894-51aa-4a23-9189-dad596450db6.png)
-
-
-<br />
-
-If you didn't specified weights of particular assets in your portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights distribution**.
+![4a](https://user-images.githubusercontent.com/83161286/175761298-a47d662f-20c8-4e7f-871e-024fdbec78f3.png)
+![4b](https://user-images.githubusercontent.com/83161286/175761295-48f775a1-67bb-41ce-9c88-57cacfb51731.png)
+![4c](https://user-images.githubusercontent.com/83161286/175761302-36444d54-a930-4372-bc5f-5e082baf5cc9.png)
+![4d](https://user-images.githubusercontent.com/83161286/175761306-5a5302b7-76f1-4d29-a2ca-d3e25cbda3a9.png)
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/150586848-3568b240-9fed-4c97-b59e-8b2d2a62ab85.png)
+If the user didn't specified weights of particular assets in your portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights rebalancing**.
+
+<br />
+
+![1](https://user-images.githubusercontent.com/83161286/174976799-8f858e22-8817-418c-8aa0-4e9cc4eecb0d.png)
+![2](https://user-images.githubusercontent.com/83161286/174976837-174a5da5-bfc2-4249-aa9a-9ac0d198bfbb.png)
 
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "F", "MS"], 
+bt = execution(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
-              weights_factor = [50, 40, 10])
+              weights_factor = [50, 40, 10], full_report = True)
 
-bt.plotting()
 ```
 
 <br />
@@ -191,7 +184,8 @@ Example of Weights distribution plot:
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/150591736-44613521-8e4d-49da-9341-669b17f2a250.png)
+![3](https://user-images.githubusercontent.com/83161286/174977790-bf5ce252-d0b0-47f5-9b6d-e2e2fc6c48cf.png)
+![4](https://user-images.githubusercontent.com/83161286/174977803-e3577a0a-a182-459f-8fe3-416922f66005.png)
 
 <br />
 
@@ -200,14 +194,12 @@ No need to include weights that will sum up to 100% (but it is recommended). Cod
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset=["AAPL", "F", "MS"], 
+bt = execution(asset=["AAPL", "F", "MS"],
               o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
               c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
-              weights_factor = [35, 140, -21])
-
-bt.plotting()
+              weights_factor = [35, 140, -21], full_report = True)
 ```
 
 <br />
@@ -217,34 +209,12 @@ AAPL: 35 / 196 = ~17%<br />
 F: 140 / 196 = ~71.4%<br />
 MS: |21| / 196 = ~10.7%
 
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/150592404-1037b82b-f324-47bd-984c-dfed683d3afc.png)
+Keep in mind that weights factor with "-" sign will indicate short selling for a particular asset
 
 <br />
 
-If only 2 out of 3 assets are traded in selected period, weights will be calculated as described above, but excluding 3rd asset. 
-
-<br />
-
-weights_factor total is 175 [35 + 140]. <br />
-AAPL: 35 / 175 = 20%<br />
-F: 140 / 175 = 80%<br />
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/150602852-7f8557cb-4a37-4d33-bd83-8d0e039bec43.png)
-
-<br />
-
-All plots are interactive and contain some details. For example "Accumulative return" plot reflects (from top to bottom):
-- Date;
-- Accumulation (in %) till selected date;
-- Daily changes (in %) for each instrument you called.
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/149677024-3749bd18-c7e3-4602-a38a-acfd06de9bfb.png)
+![5](https://user-images.githubusercontent.com/83161286/174978869-3876ecf5-59cb-4613-834d-68437283cfcd.png)
+![6](https://user-images.githubusercontent.com/83161286/174978875-af5f0758-7f8d-49e0-8402-e6c9757ba5ad.png)
 
 <br />
 
@@ -253,16 +223,15 @@ More complex approach would be assigning weights factor/stop loss/ take profit i
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
+bt = execution(asset = ["AAPL", "BTC-USD","GC=F"], 
               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
               c_day = ["2021-09-01", "2021-09-01","2021-09-15"], 
               weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], 
-              take_profit = [1.1, 1.2, 1.05])
+              take_profit = [1.1, 1.2, 1.05], full_report = True)
 
-bt.execution()
 ```
 
 <br />
@@ -277,7 +246,8 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677220-079db767-06d7-428a-bcb5-1cbf3a4394b7.png)
+![5a](https://user-images.githubusercontent.com/83161286/175761447-4cc57c76-a596-4ce7-9430-beda28612d6a.png)
+![5b](https://user-images.githubusercontent.com/83161286/175761442-41509b86-0b4f-4926-9553-f5d8beaa188d.png)
 
 <br />
 
@@ -290,103 +260,27 @@ In case of users need to test one instrument but several times with different ti
 <br />
 
 ```python
-from plutus_backtest import backtest
+from plutus.backtest import execution
 
-bt = backtest(asset = ["AMZN", "AMZN","AMZN"], 
+bt, portfolio_daily_changes, pprtfolio_weights = execution(asset = ["AMZN", "AMZN","AMZN"], 
               o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
               c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
 
-bt.portfolio_construction()
 
-bt.execution_table.head(15)
 ```
 
 <br />
 
-![image](https://user-images.githubusercontent.com/83119547/149677380-0bfa8600-ce68-4087-9cd7-c114f48490ba.png)
+ ![6](https://user-images.githubusercontent.com/83161286/175761567-2218b966-6509-481f-abde-68576c9a0357.png)
 
 <br />
 
-Each time when one asset is repeating the package will assign additional number to it to track required periods. 
+Each time when one asset is repeating the backtest will assign additional number to it to track required periods. 
 It's worth to mention that due to data limitation the code will use only close price for the analysis of the securities. Only the first trading day has relationship open/close, since it's assumed that the tradingstarts with open price and finishes with close one.
 
 <br />
 
-Ultimately, if the users would like to perform several backtest and combine them into one to see the full picture then there are few functions related to that, namely:
 
-<br />
-
-```python
-from plutus_backtest import backtest
-
-bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
-               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
-
-bt2 = backtest(asset = ["AMZN", "EURUSD=X"], 
-               o_day = ["2021-06-01", "2021-06-15"],
-               c_day = ["2021-06-30", "2021-07-05"])
-
-p1 = bt1.portfolio_construction()
-p2 = bt2.portfolio_construction()
-q1 = bt1.final_portfolio
-q2 = bt2.final_portfolio
-
-dic ={}
-dic[0] = q1
-dic[1]= q2
-
-combined_frame = backtest.puzzle_assembly(dic)
-
-combined_frame
-```
-
-<br />
-
-First of all all backtest shall be executed in order to obtain final portfolio of the each one. Then they shall be assigned to an empty dictionary. Thereafter 
-function "puzzle_assembly" takes the data from diffirent backtest and unite it into one dataframe. Please note: only "Accumulation" column from below table is shown in %.
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/149677619-6c8ef3e9-2f92-4bce-83f0-b90265043c3c.png)
-
-<br />
-
-In order to visualize data functions "puzzle_execution" or "puzzle_plotting" shall be called. Which work exactly in the same way as it was explained previously.
-
-<br />
-
-```python
-from plutus_backtest import backtest
-
-bt1 = backtest(asset = ["AAPL", "BTC-USD","GC=F"], 
-               o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-               c_day = ["2021-09-01", "2021-09-01","2021-09-15"])
-
-bt2 = backtest(asset = ["AMZN", "EURUSD=X"], 
-               o_day = ["2021-06-01", "2021-06-15"],
-               c_day = ["2021-06-30", "2021-07-05"])
-
-p1 = bt1.portfolio_construction()
-p2 = bt2.portfolio_construction()
-q1 = bt1.final_portfolio
-q2 = bt2.final_portfolio
-
-dic ={}
-dic[0] = q1
-dic[1]= q2
-
-combined_frame = backtest.puzzle_assembly(dic)
-
-backtest.puzzle_execution(combined_frame)
-```
-
-<br />
-
-![image](https://user-images.githubusercontent.com/83119547/149677777-8f3d1dd6-65b2-433d-916e-475ab5d3a406.png)
-
-
-<br />
 
 ## Support:
 Please [open an issue](https://github.com/witmul/backt/issues/new) for support.<br />
