@@ -115,7 +115,7 @@ The result will appear as following (all values are in %):
 
 <br />
 
-If you would like to compare performance of your portfolio with any other instrument you can use a parameter "benchmark":
+If the user would like to compare performance of of the portfolio with any other instrument a parameter "benchmark" shall be called:
 
 <br />
 
@@ -159,7 +159,7 @@ Above script will generate a link to Dash app with report:
 
 <br />
 
-Click on it, and you will be redirected to a new tab.
+By clicking it, and it will redirect to a new tab.
 
 <br />
 
@@ -170,7 +170,7 @@ Click on it, and you will be redirected to a new tab.
 
 <br />
 
-If the user didn't specified weights of particular assets in your portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights rebalancing**.
+If the user didn't specify weights of particular assets in the portfolio (using **weights_factor** parameter), % allocation will be distributed equally (in selected period of time) and shown in the last plot called **Weights rebalancing**.
 
 <br />
 
