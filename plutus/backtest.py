@@ -121,6 +121,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                                      security_list = security_list,
                                                      auxiliar_df = auxiliar_df,
                                                  weights_factor=weights_factor, major_sample = major_sample)
+    final_portfolio.index.name = None
+    portfolio_weights.index.name = None
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _sl_tp trade breaker
     if False in np.isinf(security_list[['take profit', 'stop loss']]).values:

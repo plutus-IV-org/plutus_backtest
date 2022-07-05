@@ -265,10 +265,13 @@ def _drawdown(final_portfolio):
     df_drawdown_fig2 = df_drawdown.astype(float)
     df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100)
     df_drawdown_fig2 = df_drawdown_fig2.round(2)
-    fig = px.line(df_drawdown_fig2,
-                   x=df_drawdown_fig2.index,
-                   y=df_drawdown_fig2["Sum"] * 100,
-                   hover_data=df_drawdown_fig2.columns[:-2],
+    dff = df_drawdown_fig2[df_drawdown_fig2.columns[:-2]]
+    dff['Rounded total'] = df_drawdown_fig2["Sum"] * 100
+    dff.index.name = 'Date'
+    fig = px.line(dff,
+                   x=dff.index,
+                   y='Rounded total',
+                   hover_data=dff.columns[:-1],
                    title="Drawdown")
     fig.update_traces(line_color='red')
     fig = _plot_formatting(fig)
