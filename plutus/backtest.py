@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from tabulate import tabulate
 from plutus.calculations import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 from plutus.plots import _accumulated_return, _accumulated_return_short, _weights_distribution, _capitlised_weights_distribution,\
@@ -127,6 +128,9 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # Calling _sl_tp trade breaker
     if False in np.isinf(security_list[['take profit', 'stop loss']]).values:
         trade_breaker_frame = _sl_tp(sl_dic,tp_dic,price_close)
+    else:
+        trade_breaker_frame = pd.DataFrame()
+        disable_button = True
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
     stats = _stats(final_portfolio)
@@ -180,6 +184,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         table_2 = dbc.Table.from_dataframe(stats)
         table_3 = dbc.Table.from_dataframe(trade_breaker_frame)
 
+        disable_button = False
 
         sidebar = dbc.Card(
             [
@@ -205,6 +210,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
     else:
         table_1 = dbc.Table.from_dataframe(security_list_short)
         table_2 = dbc.Table.from_dataframe(stats)
+
+        disable_button = True
 
         sidebar = dbc.Card(
             [
@@ -288,15 +295,25 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     download_final_portfolio = dbc.Card(html.Div(
         [
-        html.Button("Download final porfolio data", id="btn_portfolio_csv"),
+        dbc.Button("Download final porfolio data", color="primary", id="btn_portfolio_csv",
+                   style={"margin-bottom": "10px"}),
         dcc.Download(id="download-portfolio-csv"),
         ]
     ))
 
     download_portfolio_weights = dbc.Card(html.Div(
         [
-        html.Button("Download porfolio weights data", id="btn_weights_csv"),
+        dbc.Button("Download porfolio weights data", color="primary", id="btn_weights_csv",
+                   style={"margin-bottom": "10px"}),
         dcc.Download(id="download-weights-csv"),
+        ]
+    ))
+
+    download_sl_tp_triggers = dbc.Card(html.Div(
+        [
+        dbc.Button("Download SL/TP triggers data", color="primary", id="btn_sl_tp_csv",
+                   disabled=disable_button, style={"margin-bottom": "10px"}),
+        dcc.Download(id="download-sl-tp-csv")
         ]
     ))
 
@@ -308,7 +325,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
                 [
                     dbc.Col([dbc.Row([sidebar,
                                       download_final_portfolio,
-                                      download_portfolio_weights])], width=4),
+                                      download_portfolio_weights,
+                                      download_sl_tp_triggers])], width=4),
                     dbc.Col(main_graphs, width=8),
                 ],
                 align="top",
@@ -471,4 +489,11 @@ def execution(asset, o_day, c_day, weights_factor=None,
     def func(n_clicks):
         return dcc.send_data_frame(portfolio_weights.to_csv, "portfolio_weights_data.csv")
 
+    @app.callback(
+        Output("download-sl-tp-csv", "data"),
+        Input("btn_sl_tp_csv", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def func(n_clicks):
+        return dcc.send_data_frame(trade_breaker_frame.to_csv, "portfolio_sl_tp_data.csv")
     app.run_server(mode='external')
