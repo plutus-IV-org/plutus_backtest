@@ -8,7 +8,7 @@ from plutus.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, Input, Output
 from jupyter_dash import JupyterDash
-
+import re
 #pd.options.mode.chained_assignment = None
 
 def execution(asset, o_day, c_day, weights_factor=None,
@@ -154,7 +154,12 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # Building app
     security_list.rename(columns={'company': 'Top assets', 'start day': 'Start', 'end day': 'End', 'weights factor':'Weights factor',
                                   "take profit": "Take profit","stop loss":"Stop loss" }, inplace = True)
-
+    lst = security_list.index
+    lst = [re.sub('[0-9]', '', i) for i in lst]
+    security_list.set_index([lst, lst], inplace = True)
+    security_list['Top assets'] = lst.copy()
+    security_list['Take profit'] = security_list['Take profit'].round(2)
+    security_list['Stop loss'] = security_list['Stop loss'].round(2)
     security_list_short = security_list.loc[top_assets].head(10)
     st = []
     ed = []

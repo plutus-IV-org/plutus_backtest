@@ -1,6 +1,6 @@
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
-
+import re
 import pandas as pd
 
 def _sl_tp(stop_loss_dic, take_profit_dic,prices):
@@ -21,6 +21,7 @@ def _sl_tp(stop_loss_dic, take_profit_dic,prices):
         sltp_df['Date'] = st
         sltp_df.reset_index(inplace=True)
         sltp_df.rename(columns={'index': 'Asset'}, inplace = True)
+        sltp_df.Asset = [re.sub('[0-9]', '', i) for i in sltp_df.Asset]
         return sltp_df
     else:
         empty_df = pd.DataFrame({0: ["None amongst provided assets has reached sl/tp levels"]}).T

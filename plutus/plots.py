@@ -343,15 +343,21 @@ def _weights_distribution (portfolio_weights, major_assets):
     weights according to the weights factor provided and total capital at that moment.
     """
     weights_df = portfolio_weights.copy()
-    ma = major_assets.copy()
-    rest = weights_df.drop(columns=ma, axis=1).sum(axis=1).values
-    major = weights_df[ma]
-    major['Minors'] = rest
-    weights_df = major.copy()
-    weights_df["Total Weights"] = weights_df.sum(axis=1)
-    weights_df = weights_df[weights_df["Total Weights"] != 0]
-    weights_df = weights_df.drop("Total Weights", axis=1)
-    weights_df = abs(weights_df)
+    if len(major_assets) != len(portfolio_weights.columns):
+        ma = major_assets.copy()
+        rest = weights_df.drop(columns=ma, axis=1).sum(axis=1).values
+        major = weights_df[ma]
+        major['Minors'] = rest
+        weights_df = major.copy()
+        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df = weights_df[weights_df["Total Weights"] != 0]
+        weights_df = weights_df.drop("Total Weights", axis=1)
+        weights_df = abs(weights_df)
+    else:
+        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df = weights_df[weights_df["Total Weights"] != 0]
+        weights_df = weights_df.drop("Total Weights", axis=1)
+        weights_df = abs(weights_df)
     fig = px.area(weights_df * 100,
                    x=weights_df.index,
                    y=weights_df.columns,
@@ -360,7 +366,7 @@ def _weights_distribution (portfolio_weights, major_assets):
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Weights percentage", showlegend=False)
+                      yaxis_title="Weights percentage", showlegend=False, hovermode="x")
 
     return fig
 
@@ -376,11 +382,12 @@ def _capitlised_weights_distribution(capitlised_weights_distribution, major_asse
     for x in df.index:
         if df.loc[x].sum() ==0:
             df.drop(index=x, inplace=True)
-    ma = major_assets.copy()
-    rest = df.drop(columns=ma, axis=1).sum(axis=1).values
-    major = df[ma]
-    major['Minors'] = rest
-    df = major.copy()
+    if len(major_assets)!= len(df.columns):
+        ma = major_assets.copy()
+        rest = df.drop(columns=ma, axis=1).sum(axis=1).values
+        major = df[ma]
+        major['Minors'] = rest
+        df = major.copy()
     fig = px.area(df,
                    x=df.index,
                    y=df.columns,
@@ -389,7 +396,7 @@ def _capitlised_weights_distribution(capitlised_weights_distribution, major_asse
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
-                      yaxis_title="Weights percentage", showlegend=False)
+                      yaxis_title="Weights percentage", showlegend=False, hovermode="x")
     return fig
 
 

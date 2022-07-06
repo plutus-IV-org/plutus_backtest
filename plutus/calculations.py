@@ -5,7 +5,7 @@ import pandas as pd
 import yfinance as yf
 import numpy as np
 from datetime import timedelta, datetime
-
+import re
 
 
 def _date_plus_one(d):
@@ -80,6 +80,9 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
 def _consolidated_table_detailed(security_list, asset,
                                  o_day, c_day, weights_factor,
                                  take_profit, stop_loss, p_p_n, p_p_p):
+
+    if isinstance(weights_factor, pd.core.series.Series):
+        weights_factor = weights_factor.values
 
     # check if companies are dublicatted in a list
     df_original = security_list
@@ -262,19 +265,26 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
     aux_series_2 = aux_series.shift().fillna(value=1)
     dc2 = (dc2.T * aux_series_2).T
     dc2['Accu'] = aux_series
-    capitlised_weights_distribution = dc2
+    capitlised_weights_distribution = dc2.copy()
 
     q1 = port_performance.index[0] - timedelta(days=1)  # starting from 0%
     port_performance.loc[q1] = [0] * len(port_performance.columns)
     port_performance = port_performance.sort_index()
+    ##### Grouping indexies #####
+    port_performance.columns = [re.sub('[0-9]', '', i) for i in port_performance.columns]
+    final_portfolio = port_performance.T.groupby(level=[0], sort=False).sum().T
 
-    final_portfolio = port_performance
-    portfolio_weights = weights_df
+    weights_df.columns = [re.sub('[0-9]', '', i) for i in weights_df.columns]
+    portfolio_weights = weights_df.T.groupby(level=[0], sort=False).sum().T
+
+    capitlised_weights_distribution.columns = [re.sub('[0-9]', '', i) for i in capitlised_weights_distribution.columns]
+    weights_changes = capitlised_weights_distribution.T.groupby(level=[0], sort=False).sum().T
+
     if major_sample == None:
         top_assets = portfolio_weights.columns.tolist()
     else:
         top_assets= abs(portfolio_weights).sum(axis=0).nlargest(major_sample).index.tolist()
-    return final_portfolio, portfolio_weights, capitlised_weights_distribution , stop_loss_assets, take_profit_assets, top_assets
+    return final_portfolio, portfolio_weights, weights_changes, stop_loss_assets, take_profit_assets, top_assets
 
 def _stats(final_portfolio):
     obj = final_portfolio
