@@ -303,24 +303,25 @@ def _monthly_return(final_portfolio):
     com_frame.index = com_frame.index.map(str)
     # com_frame.index = pd.to_datetime(com_frame.index)
     df_montly = com_frame
-    df_montly.columns = ["Result"]
+    df_montly.columns = ["Return"]
 
     df_montly_fig3 = df_montly.astype(float)
     color = []
-    for i in df_montly_fig3["Result"]:
+    for i in df_montly_fig3["Return"]:
         if i < 0:
             color.append('red')
         else:
             color.append('green')
     df_montly_fig3["color"] = color
     df_montly_fig3 = df_montly_fig3.round(2)
+    df_montly_fig3.index.name = 'Date'
     fig = px.bar(df_montly_fig3,
                   x=df_montly_fig3.index,
-                  y=df_montly_fig3["Result"],
+                  y=df_montly_fig3["Return"],
                   color=df_montly_fig3["color"],
                   color_discrete_sequence=df_montly_fig3["color"].unique(),
                   title="Monthly return")
-
+    fig.update_traces(hovertemplate='<b><i>Return</i></b>: <i>%{y:.2f}%<i>,<br><b>Month</b>: %{x|%b %Y}<br><extra></extra>')
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
@@ -360,13 +361,17 @@ def _weights_distribution (portfolio_weights, major_assets):
         weights_df = abs(weights_df)
     fig = px.area(weights_df * 100,
                    x=weights_df.index,
-                   y=weights_df.columns,
+                   y=weights_df.columns,hover_data= weights_df.columns.name,
                    title="Weights rebalancing")
 
     fig = _plot_formatting(fig)
 
     fig.update_layout(xaxis_title="Time",
                       yaxis_title="Weights percentage", showlegend=False, hovermode="x")
+    names = {'variable': '<b><i>Asset</b></i>', 'index' : '<b><i>Date</b></i>', 'value': '<b><i>Weights</b></i>'}
+    fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('variable', names['variable'])))
+    fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('index', names['index'])))
+    fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('value', names['value'])))
 
     return fig
 
@@ -397,6 +402,10 @@ def _capitlised_weights_distribution(capitlised_weights_distribution, major_asse
 
     fig.update_layout(xaxis_title="Time",
                       yaxis_title="Weights percentage", showlegend=False, hovermode="x")
+    names = {'variable': '<b><i>Asset</b></i>', 'index' : '<b><i>Date</b></i>', 'value': '<b><i>Weights</b></i>'}
+    fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('variable', names['variable'])))
+    fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('index', names['index'])))
+    fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('value', names['value'])))
     return fig
 
 
