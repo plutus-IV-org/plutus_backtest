@@ -1,0 +1,5 @@
+dist/
+*.egg-info
+test.py
+*.idea
+plutus/__pycache__/
