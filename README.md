@@ -221,7 +221,6 @@ Keep in mind that weights factor with "-" sign will indicate short selling for a
 
 <br />
 
-![127 0 0 1_8050_ (3)](https://user-images.githubusercontent.com/83161286/178343248-bc032d8b-cedd-4d17-9f47-0bb49edad53e.png)
 
 <br />
 
@@ -253,8 +252,8 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![5a](https://user-images.githubusercontent.com/83161286/175761447-4cc57c76-a596-4ce7-9430-beda28612d6a.png)
-![5b](https://user-images.githubusercontent.com/83161286/175761442-41509b86-0b4f-4926-9553-f5d8beaa188d.png)
+![127 0 0 1_8050_ (3)](https://user-images.githubusercontent.com/83161286/178343248-bc032d8b-cedd-4d17-9f47-0bb49edad53e.png)
+
 
 <br />
 
