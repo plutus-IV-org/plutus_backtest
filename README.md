@@ -172,8 +172,7 @@ If the user didn't specify weights of particular assets in the portfolio (using 
 
 <br />
 
-![1](https://user-images.githubusercontent.com/83161286/174976799-8f858e22-8817-418c-8aa0-4e9cc4eecb0d.png)
-![2](https://user-images.githubusercontent.com/83161286/174976837-174a5da5-bfc2-4249-aa9a-9ac0d198bfbb.png)
+![127 0 0 1_8050_ (1)](https://user-images.githubusercontent.com/83161286/178343049-228b9b2a-3959-4b5c-8bd5-8716483b0340.png)
 
 <br />
 
@@ -194,8 +193,7 @@ Example of Weights distribution plot:
 
 <br />
 
-![3](https://user-images.githubusercontent.com/83161286/174977790-bf5ce252-d0b0-47f5-9b6d-e2e2fc6c48cf.png)
-![4](https://user-images.githubusercontent.com/83161286/174977803-e3577a0a-a182-459f-8fe3-416922f66005.png)
+![127 0 0 1_8050_ (2)](https://user-images.githubusercontent.com/83161286/178343137-cbfcb091-b964-4605-9ace-6749cb847fcc.png)
 
 <br />
 
@@ -223,8 +221,7 @@ Keep in mind that weights factor with "-" sign will indicate short selling for a
 
 <br />
 
-![5](https://user-images.githubusercontent.com/83161286/174978869-3876ecf5-59cb-4613-834d-68437283cfcd.png)
-![6](https://user-images.githubusercontent.com/83161286/174978875-af5f0758-7f8d-49e0-8402-e6c9757ba5ad.png)
+![127 0 0 1_8050_ (3)](https://user-images.githubusercontent.com/83161286/178343248-bc032d8b-cedd-4d17-9f47-0bb49edad53e.png)
 
 <br />
 
