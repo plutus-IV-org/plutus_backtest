@@ -163,10 +163,8 @@ By clicking it, and it will redirect to a new tab.
 
 <br />
 
-![4a](https://user-images.githubusercontent.com/83161286/175761298-a47d662f-20c8-4e7f-871e-024fdbec78f3.png)
-![4b](https://user-images.githubusercontent.com/83161286/175761295-48f775a1-67bb-41ce-9c88-57cacfb51731.png)
-![4c](https://user-images.githubusercontent.com/83161286/175761302-36444d54-a930-4372-bc5f-5e082baf5cc9.png)
-![4d](https://user-images.githubusercontent.com/83161286/175761306-5a5302b7-76f1-4d29-a2ca-d3e25cbda3a9.png)
+
+![127 0 0 1_8050_](https://user-images.githubusercontent.com/83161286/178342908-8df58628-7bed-4174-97e4-1b44f7e14364.png)
 
 <br />
 
