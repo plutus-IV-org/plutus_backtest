@@ -444,7 +444,6 @@ def _bar_weights_changes(capitlised_weights_distribution, major_assets):
     fig.update(layout_coloraxis_showscale=False)
     return fig
 
-
 def _bar_weights_rebalance(portfolio_weights, major_assets):
     weights_df = portfolio_weights.copy()
     if len(major_assets) != len(portfolio_weights.columns):

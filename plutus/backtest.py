@@ -148,7 +148,6 @@ def execution(asset, o_day, c_day, weights_factor=None,
         plot_2 = _bar_weights_rebalance(portfolio_weights, top_assets).show()
         return plot, final_portfolio, portfolio_weights
 
-
     else:
         accumulated = _accumulated_return(final_portfolio = final_portfolio,
                                           benchmark_performance = benchmark_construction,
