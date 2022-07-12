@@ -1,5 +1,13 @@
-dist/
-*.egg-info
-test.py
-*.idea
-plutus/__pycache__/
+# Ignore everything...
+/*
+
+
+# Except...
+!/plutus/*.py
+!.gitignore
+!LICENCE
+!README.md
+!requirements.txt
+!setup.py
+
+
