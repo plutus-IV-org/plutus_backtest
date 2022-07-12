@@ -111,7 +111,7 @@ The result will appear as following (all values are in %):
 
 <br />
 
-![2](https://user-images.githubusercontent.com/83161286/175761065-ff74aa7b-a6c2-4339-939a-e59bd9a0c249.png)
+![port fin head](https://user-images.githubusercontent.com/83161286/178458212-9cd51033-707c-476c-a9ed-94c35255bb69.png)
 
 <br />
 
@@ -278,12 +278,12 @@ bt, portfolio_daily_changes, pprtfolio_weights = execution(asset = ["AMZN", "AMZ
 
 <br />
 
- ![6](https://user-images.githubusercontent.com/83161286/175761567-2218b966-6509-481f-abde-68576c9a0357.png)
+![multiindex](https://user-images.githubusercontent.com/83161286/178458263-d0d4253a-5358-4876-862f-995fc8aaf134.png)
 
 <br />
 
-Each time when one asset is repeating the backtest will assign additional number to it to track required periods. 
-It's worth to mention that due to data limitation the code will use only close price for the analysis of the securities. Only the first trading day has relationship open/close, since it's assumed that the tradingstarts with open price and finishes with close one.
+Each time when one asset is repeating the backtest will unite it under one comon ticker name, the same corrections will happen on the graphs. 
+It's worth to mention that due to data limitation the code uses close price for the analysis of the securities. 
 
 <br />
 
