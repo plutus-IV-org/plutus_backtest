@@ -408,10 +408,83 @@ def _capitlised_weights_distribution(capitlised_weights_distribution, major_asse
     fig.for_each_trace(lambda t: t.update(hovertemplate=t.hovertemplate.replace('value', names['value'])))
     return fig
 
+def _bar_weights_changes(capitlised_weights_distribution, major_assets):
+    df = capitlised_weights_distribution.drop(columns='Accu')
+    for x in df.index:
+        if df.loc[x].sum() == 0:
+            df.drop(index=x, inplace=True)
+    if len(major_assets) != len(df.columns):
+        ma = major_assets.copy()
+        rest = df.drop(columns=ma, axis=1).sum(axis=1).values
+        major = df[ma]
+        major['Minors'] = rest
+        df = major.copy()
+    ef = pd.DataFrame()
+    tic = []
+    for x in df.columns:
+        a1 = df[x]
+        tic.append([a1.name] * len(a1))
+        ef = pd.concat([ef, a1])
+        flat_list = [x for xs in tic for x in xs]
+    ef[1] = flat_list
+    ef.index = ef.index.strftime("%Y-%m-%d")
+    ef.index.name = 'Date'
+    ef.rename(columns={0: 'Weights', 1: 'Asset'}, inplace=True)
+    fig = px.bar(ef, x='Asset', y='Weights', color='Weights', color_continuous_scale="RdYlGn",
+                  pattern_shape="Asset", pattern_shape_sequence=["x"], animation_frame=ef.index,
+                  range_y=[-1, 1])
+    fig.update_yaxes(showgrid=False)
+    fig.update_layout(plot_bgcolor='rgb(255, 255, 255)')
+    if len(ef) > 250:
+        fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 250
+    else:
+        fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 500
+    fig.update_layout(barmode='stack', bargap=0.01, hovermode="closest")
+    fig.update_layout(showlegend=False)
+    fig.update(layout_coloraxis_showscale=False)
+    return fig
 
 
-
-
-
+def _bar_weights_rebalance(portfolio_weights, major_assets):
+    weights_df = portfolio_weights.copy()
+    if len(major_assets) != len(portfolio_weights.columns):
+        ma = major_assets.copy()
+        rest = weights_df.drop(columns=ma, axis=1).sum(axis=1).values
+        major = weights_df[ma]
+        major['Minors'] = rest
+        weights_df = major.copy()
+        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df = weights_df[weights_df["Total Weights"] != 0]
+        weights_df = weights_df.drop("Total Weights", axis=1)
+        weights_df = abs(weights_df)
+    else:
+        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df = weights_df[weights_df["Total Weights"] != 0]
+        weights_df = weights_df.drop("Total Weights", axis=1)
+        weights_df = abs(weights_df)
+    ef = pd.DataFrame()
+    tic = []
+    for x in weights_df.columns:
+        a1 = weights_df[x]
+        tic.append([a1.name] * len(a1))
+        ef = pd.concat([ef, a1])
+        flat_list = [x for xs in tic for x in xs]
+    ef[1] = flat_list
+    ef.index = ef.index.strftime("%Y-%m-%d")
+    ef.index.name = 'Date'
+    ef.rename(columns={0: 'Weights', 1: 'Asset'}, inplace=True)
+    fig = px.bar(ef, x='Asset', y='Weights', color='Weights', color_continuous_scale="RdYlGn",
+                  pattern_shape="Asset", pattern_shape_sequence=["x"], animation_frame=ef.index,
+                  range_y=[-1, 1])
+    fig.update_yaxes(showgrid=False)
+    fig.update_layout(plot_bgcolor='rgb(255, 255, 255)')
+    if len(ef)>250:
+        fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 250
+    else:
+        fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 500
+    fig.update_layout(barmode='stack', bargap=0.01, hovermode="closest")
+    fig.update_layout(showlegend=False)
+    fig.update(layout_coloraxis_showscale=False)
+    return fig
 
 
