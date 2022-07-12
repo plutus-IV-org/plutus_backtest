@@ -30,7 +30,7 @@ from plutus.backtest import execution
 
 ## Examples: 
 
-Class "backtest" contains below parameters:<br />
+Function "execution" contains below parameters:<br />
 ```
 asset: str or list or series
    Instruments taken into the consideration for the backtest.
@@ -59,7 +59,7 @@ price_period_relation: str default 'O-C'
    "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
    "Close" - value of the last transacted price in a security before the market officially closes.
 full_report: bool, optional, default False
-   Generates full report as PDF.
+   Generates full report in your browser.
 major_sample: int or None, optional, default 10
    Based on duration of the trading period as well as weights factor of the asset.
    In order to make understandable visualisation in full report graphs such as weights changes and
