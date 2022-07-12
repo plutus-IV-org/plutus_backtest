@@ -146,7 +146,6 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                    benchmark_ticker = benchmark).show()
         return plot, final_portfolio, portfolio_weights
 
-
     else:
         accumulated = _accumulated_return(final_portfolio = final_portfolio,
                                           benchmark_performance = benchmark_construction,
