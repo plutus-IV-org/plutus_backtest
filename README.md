@@ -221,6 +221,7 @@ Keep in mind that weights factor with "-" sign will indicate short selling for a
 
 <br />
 
+![127 0 0 1_8050_ (4)](https://user-images.githubusercontent.com/83161286/178457568-5e53274e-10c5-4377-80b9-27e753032369.png)
 
 <br />
 
