@@ -243,7 +243,7 @@ bt = execution(asset = ["AAPL", "BTC-USD","GC=F"],
 
 <br />
 
-In this case all parameters are used. The weights will not be distributed equally. "AAPL"  will have 20% of the total portofolio BTC-USD - 10% and 
+In this case the weights will not be distributed equally. "AAPL"  will have 20% of the total portofolio BTC-USD - 10% and 
 "GC=F" will have 70%. The negative sign in the weights factor will mean short selling, therefore first "AAPL" and "GC=F" instruments are in long position and 
 "BTC-USD" is in the short.
 
@@ -258,7 +258,7 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-In the moment when one of the securities reaching its stop loss or take profit, the trade will automatically stopped and the weights will be reassigned respectively to the left assets.
+In the moment when one of the securities reaching its stop loss or take profit, the trade will be automatically stopped and the weights will be reassigned respectively to the left assets.
 
 <br />
 
