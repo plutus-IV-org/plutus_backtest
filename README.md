@@ -30,7 +30,7 @@ from plutus.backtest import execution
 
 ## Examples: 
 
-Class "backtest" contains below parameters:<br />
+Function "execution" contains below parameters:<br />
 ```
 asset: str or list or series
    Instruments taken into the consideration for the backtest.
@@ -59,7 +59,7 @@ price_period_relation: str default 'O-C'
    "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
    "Close" - value of the last transacted price in a security before the market officially closes.
 full_report: bool, optional, default False
-   Generates full report as PDF.
+   Generates full report in your browser.
 major_sample: int or None, optional, default 10
    Based on duration of the trading period as well as weights factor of the asset.
    In order to make understandable visualisation in full report graphs such as weights changes and
@@ -111,7 +111,7 @@ The result will appear as following (all values are in %):
 
 <br />
 
-![2](https://user-images.githubusercontent.com/83161286/175761065-ff74aa7b-a6c2-4339-939a-e59bd9a0c249.png)
+![port fin head](https://user-images.githubusercontent.com/83161286/178458212-9cd51033-707c-476c-a9ed-94c35255bb69.png)
 
 <br />
 
@@ -221,6 +221,7 @@ Keep in mind that weights factor with "-" sign will indicate short selling for a
 
 <br />
 
+![127 0 0 1_8050_ (4)](https://user-images.githubusercontent.com/83161286/178457568-5e53274e-10c5-4377-80b9-27e753032369.png)
 
 <br />
 
@@ -242,7 +243,7 @@ bt = execution(asset = ["AAPL", "BTC-USD","GC=F"],
 
 <br />
 
-In this case all parameters are used. The weights will not be distributed equally. "AAPL"  will have 20% of the total portofolio BTC-USD - 10% and 
+In this case the weights will not be distributed equally. "AAPL"  will have 20% of the total portofolio BTC-USD - 10% and 
 "GC=F" will have 70%. The negative sign in the weights factor will mean short selling, therefore first "AAPL" and "GC=F" instruments are in long position and 
 "BTC-USD" is in the short.
 
@@ -257,7 +258,7 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-In the moment when one of the securities reaching its stop loss or take profit, the trade will automatically stopped and the weights will be reassigned respectively to the left assets.
+In the moment when one of the securities reaching its stop loss or take profit, the trade will be automatically stopped and the weights will be reassigned respectively to the left assets.
 
 <br />
 
@@ -277,12 +278,12 @@ bt, portfolio_daily_changes, pprtfolio_weights = execution(asset = ["AMZN", "AMZ
 
 <br />
 
- ![6](https://user-images.githubusercontent.com/83161286/175761567-2218b966-6509-481f-abde-68576c9a0357.png)
+![multiindex](https://user-images.githubusercontent.com/83161286/178458263-d0d4253a-5358-4876-862f-995fc8aaf134.png)
 
 <br />
 
-Each time when one asset is repeating the backtest will assign additional number to it to track required periods. 
-It's worth to mention that due to data limitation the code will use only close price for the analysis of the securities. Only the first trading day has relationship open/close, since it's assumed that the tradingstarts with open price and finishes with close one.
+Each time when one asset is repeating the backtest will unite it under one comon ticker name, the same corrections will happen on the graphs. 
+It's worth to mention that due to data limitation the code uses close price for the analysis of the securities. 
 
 <br />
 

@@ -3,7 +3,7 @@ import pandas as pd
 from tabulate import tabulate
 from plutus.calculations import _security_list, _consolidated_table_detailed, _portfolio_construction, _stats
 from plutus.plots import _accumulated_return, _accumulated_return_short, _weights_distribution, _capitlised_weights_distribution,\
-    _monthly_return, _drawdown
+    _monthly_return, _drawdown, _bar_weights_changes, _bar_weights_rebalance
 from plutus.trade_breaker import _sl_tp
 from plutus.benchmark import _benchmark_construction
 import dash_bootstrap_components as dbc
@@ -144,6 +144,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
         plot = _accumulated_return_short(final_portfolio = final_portfolio,
                                    benchmark_performance = benchmark_construction,
                                    benchmark_ticker = benchmark).show()
+        plot_1 = _bar_weights_changes(capitlised_weights_distribution,top_assets).show()
+        plot_2 = _bar_weights_rebalance(portfolio_weights, top_assets).show()
         return plot, final_portfolio, portfolio_weights
 
     else:
