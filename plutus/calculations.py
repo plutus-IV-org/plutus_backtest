@@ -288,7 +288,8 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
 
 def _stats(final_portfolio):
     obj = final_portfolio
-    pdr = obj['Sum'] - 1
+    pdr0 = obj['Sum']- 1
+    pdr= pdr0.iloc[1:].copy()
     port_mean = pdr.mean()
     port_mean_pct = port_mean * 100
     port_std = pdr.std()
