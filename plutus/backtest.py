@@ -144,8 +144,6 @@ def execution(asset, o_day, c_day, weights_factor=None,
         plot = _accumulated_return_short(final_portfolio = final_portfolio,
                                    benchmark_performance = benchmark_construction,
                                    benchmark_ticker = benchmark).show()
-        plot_1 = _bar_weights_changes(capitlised_weights_distribution,top_assets).show()
-        plot_2 = _bar_weights_rebalance(portfolio_weights, top_assets).show()
         return plot, final_portfolio, portfolio_weights
 
     else:
@@ -294,6 +292,27 @@ def execution(asset, o_day, c_day, weights_factor=None,
         ]
     )
 
+    weights_changes_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(id="weights_changes_graph_tab")
+                ]
+            )
+        ]
+    )
+
+
+    weights_rebalance_graph = dbc.Card(
+        [
+            html.Div(
+                [
+                    dcc.Graph(id="weights_rebalance_graph_tab")
+                ]
+            )
+        ]
+    )
+
     download_final_portfolio = dbc.Card(html.Div(
         [
         dbc.Button("Download final porfolio data", color="primary", id="btn_portfolio_csv",
@@ -400,6 +419,20 @@ def execution(asset, o_day, c_day, weights_factor=None,
                 ],
                 align="top",
             ),
+            dbc.Row(),
+            dbc.Row(
+                [
+                    dbc.Row(weights_changes_graph),
+                ],
+                align="top",
+            ),
+            dbc.Row(),    
+            dbc.Row(
+                [
+                    dbc.Row(weights_rebalance_graph),
+                ],
+                align="top",
+            ),                  
         ],
         fluid=True,
     )
@@ -448,22 +481,27 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     @app.callback(
         Output("cwd_graph_tab", "figure"),
+        Output("weights_changes_graph_tab", "figure"),
         Input("assets_dropdown", "value")
     )
     def assets_dropdown_cwd_tab(top_assets):
         cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution=capitlised_weights_distribution,
                                                        major_assets=top_assets)
-        return cap_weights
+        weights_changes = _bar_weights_changes(capitlised_weights_distribution,top_assets)
+                                    
+        return cap_weights, weights_changes
 
     @app.callback(
         Output("weights_graph", "figure"),
+        Output("weights_rebalance_graph_tab", "figure"),
         Input("assets_dropdown", "value")
     )
     def assets_dropdown_weights_tab(top_assets):
         weights = _weights_distribution(portfolio_weights=portfolio_weights,
                                         major_assets=top_assets)
+        weights_rebalance = _bar_weights_rebalance(portfolio_weights, top_assets)
 
-        return weights
+        return weights, weights_rebalance
 
     @app.callback(
         Output("cwd_graph_main", "figure"),

@@ -432,7 +432,7 @@ def _bar_weights_changes(capitlised_weights_distribution, major_assets):
     ef.rename(columns={0: 'Weights', 1: 'Asset'}, inplace=True)
     fig = px.bar(ef, x='Asset', y='Weights', color='Weights', color_continuous_scale="RdYlGn",
                   pattern_shape="Asset", pattern_shape_sequence=["x"], animation_frame=ef.index,
-                  range_y=[-1, 1])
+                  range_y=[-1, 1], title="Weights change animated")
     fig.update_yaxes(showgrid=False)
     fig.update_layout(plot_bgcolor='rgb(255, 255, 255)')
     if len(ef) > 250:
@@ -442,6 +442,7 @@ def _bar_weights_changes(capitlised_weights_distribution, major_assets):
     fig.update_layout(barmode='stack', bargap=0.01, hovermode="closest")
     fig.update_layout(showlegend=False)
     fig.update(layout_coloraxis_showscale=False)
+    fig = _plot_formatting(fig)
     return fig
 
 def _bar_weights_rebalance(portfolio_weights, major_assets):
@@ -474,7 +475,7 @@ def _bar_weights_rebalance(portfolio_weights, major_assets):
     ef.rename(columns={0: 'Weights', 1: 'Asset'}, inplace=True)
     fig = px.bar(ef, x='Asset', y='Weights', color='Weights', color_continuous_scale="RdYlGn",
                   pattern_shape="Asset", pattern_shape_sequence=["x"], animation_frame=ef.index,
-                  range_y=[-1, 1])
+                  range_y=[-1, 1], title="Weights rebalance animated")
     fig.update_yaxes(showgrid=False)
     fig.update_layout(plot_bgcolor='rgb(255, 255, 255)')
     if len(ef)>250:
@@ -484,6 +485,7 @@ def _bar_weights_rebalance(portfolio_weights, major_assets):
     fig.update_layout(barmode='stack', bargap=0.01, hovermode="closest")
     fig.update_layout(showlegend=False)
     fig.update(layout_coloraxis_showscale=False)
+    fig = _plot_formatting(fig)
     return fig
 
 
