@@ -152,6 +152,9 @@ def execution(asset, o_day, c_day, weights_factor=None,
                                           benchmark_ticker = benchmark)
         monthly = _monthly_return(final_portfolio = final_portfolio)
         drawdown = _drawdown(final_portfolio = final_portfolio)
+        weights_rebalance = _bar_weights_rebalance(portfolio_weights, top_assets)
+        weights_changes = _bar_weights_changes(capitlised_weights_distribution,top_assets)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Building app
@@ -296,7 +299,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             html.Div(
                 [
-                    dcc.Graph(id="weights_changes_graph_tab")
+                    dcc.Graph(figure=weights_changes)
                 ]
             )
         ]
@@ -307,7 +310,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         [
             html.Div(
                 [
-                    dcc.Graph(id="weights_rebalance_graph_tab")
+                    dcc.Graph(figure=weights_rebalance)
                 ]
             )
         ]
@@ -318,7 +321,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         dbc.Button("Download final porfolio data", color="primary", id="btn_portfolio_csv",
                    style={"margin-bottom": "10px"}),
         dcc.Download(id="download-portfolio-csv"),
-        ]
+        ],className="d-grid gap-2"
     ))
 
     download_portfolio_weights = dbc.Card(html.Div(
@@ -326,7 +329,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         dbc.Button("Download porfolio weights data", color="primary", id="btn_weights_csv",
                    style={"margin-bottom": "10px"}),
         dcc.Download(id="download-weights-csv"),
-        ]
+        ],className="d-grid gap-2"
     ))
 
     download_sl_tp_triggers = dbc.Card(html.Div(
@@ -334,7 +337,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         dbc.Button("Download SL/TP triggers data", color="primary", id="btn_sl_tp_csv",
                    disabled=disable_button, style={"margin-bottom": "10px"}),
         dcc.Download(id="download-sl-tp-csv")
-        ]
+        ],className="d-grid gap-2"
     ))
 
     tab1_content = dbc.Container(
@@ -344,8 +347,11 @@ def execution(asset, o_day, c_day, weights_factor=None,
             dbc.Row(
                 [
                     dbc.Col([dbc.Row([sidebar,
+                                    html.Hr(),      
                                       download_final_portfolio,
+                                      html.Hr(),
                                       download_portfolio_weights,
+                                      html.Hr(),
                                       download_sl_tp_triggers])], width=4),
                     dbc.Col(main_graphs, width=8),
                 ],
@@ -403,7 +409,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
                 ],
                 align="top",
             ),
-            dbc.Row(),
+            html.Hr(),
             dbc.Row(
                 [
                     dbc.Row(weights_graph),
@@ -419,20 +425,14 @@ def execution(asset, o_day, c_day, weights_factor=None,
                 ],
                 align="top",
             ),
-            dbc.Row(),
+            html.Hr(),
             dbc.Row(
                 [
-                    dbc.Row(weights_changes_graph),
+                    dbc.Col(weights_changes_graph),
+                    dbc.Col(weights_rebalance_graph)
                 ],
                 align="top",
-            ),
-            dbc.Row(),    
-            dbc.Row(
-                [
-                    dbc.Row(weights_rebalance_graph),
-                ],
-                align="top",
-            ),                  
+            ),                 
         ],
         fluid=True,
     )
@@ -481,27 +481,23 @@ def execution(asset, o_day, c_day, weights_factor=None,
 
     @app.callback(
         Output("cwd_graph_tab", "figure"),
-        Output("weights_changes_graph_tab", "figure"),
         Input("assets_dropdown", "value")
     )
     def assets_dropdown_cwd_tab(top_assets):
         cap_weights = _capitlised_weights_distribution(capitlised_weights_distribution=capitlised_weights_distribution,
                                                        major_assets=top_assets)
-        weights_changes = _bar_weights_changes(capitlised_weights_distribution,top_assets)
-                                    
-        return cap_weights, weights_changes
+                                            
+        return cap_weights
 
     @app.callback(
         Output("weights_graph", "figure"),
-        Output("weights_rebalance_graph_tab", "figure"),
         Input("assets_dropdown", "value")
     )
     def assets_dropdown_weights_tab(top_assets):
         weights = _weights_distribution(portfolio_weights=portfolio_weights,
                                         major_assets=top_assets)
-        weights_rebalance = _bar_weights_rebalance(portfolio_weights, top_assets)
-
-        return weights, weights_rebalance
+        
+        return weights
 
     @app.callback(
         Output("cwd_graph_main", "figure"),
