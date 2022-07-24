@@ -350,12 +350,12 @@ def _weights_distribution (portfolio_weights, major_assets):
         major = weights_df[ma]
         major['Minors'] = rest
         weights_df = major.copy()
-        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df["Total Weights"] = abs(weights_df).sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
         weights_df = abs(weights_df)
     else:
-        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df["Total Weights"] = abs(weights_df).sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
         weights_df = abs(weights_df)
@@ -453,12 +453,12 @@ def _bar_weights_rebalance(portfolio_weights, major_assets):
         major = weights_df[ma]
         major['Minors'] = rest
         weights_df = major.copy()
-        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df["Total Weights"] = abs(weights_df).sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
         weights_df = abs(weights_df)
     else:
-        weights_df["Total Weights"] = weights_df.sum(axis=1)
+        weights_df["Total Weights"] = abs(weights_df).sum(axis=1)
         weights_df = weights_df[weights_df["Total Weights"] != 0]
         weights_df = weights_df.drop("Total Weights", axis=1)
         weights_df = abs(weights_df)
