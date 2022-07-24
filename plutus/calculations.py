@@ -250,22 +250,42 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
                 weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
 
     port_performance = weights_df * detailed_return
-
-    aux_table_3 = weights_df.copy()
-    aux_table_3[aux_table_3 < 0] = -1
-    aux_table_3[aux_table_3 > 0] = 1
-    dc1 = (detailed_return * aux_table_3 + 1)
-    dc2 = dc1 * abs(weights_df)
-
     port_performance['Sum'] = port_performance.sum(axis=1)
     port_performance['Sum'] = port_performance['Sum'] + 1
     port_performance['Accumulation'] = (port_performance['Sum'].cumprod() - 1) * 100
 
-    aux_series = port_performance.Sum.cumprod()
-    aux_series_2 = aux_series.shift().fillna(value=1)
-    dc2 = (dc2.T * aux_series_2).T
-    dc2['Accu'] = aux_series
-    capitlised_weights_distribution = dc2.copy()
+    #Weights changes
+    #Creating table of rebalance of weights
+    a1 = (abs(weights_df.diff()).sum(axis=1) != 0)
+    a1.iloc[0] = True
+    a1 = a1.astype(int)
+    a2 = a1 * port_performance['Sum'].cumprod()
+    a2.iloc[0] = 1
+    a2 = a2.replace(to_replace=0, method='ffill')
+    if a1.iloc[-1]==0:
+        a1.iloc[-1]=1
+    rebalance_days = a1[a1!=0].index
+    # Adopting the weights to current return
+    b1 = (a2.values * weights_df.T).T
+    q1 = dist.copy()
+    q1[q1>0]=1
+    q1[q1<0]=-1
+    detailed_return_orinted= detailed_return * q1
+    ef = pd.DataFrame()
+    # Calculating separated cumprod according to rebalncing days
+    for x in range(len(rebalance_days)):
+        if x!=len(rebalance_days)-1:
+            m1 = (detailed_return_orinted.loc[rebalance_days[x]:rebalance_days[x +1]]+1).cumprod()
+        else:
+            m1 = (detailed_return_orinted.loc[rebalance_days[x]:]+1).cumprod()
+        ef = pd.concat([ef,m1])
+    ef = ef[~ef.index.duplicated(keep='first')]
+    fff = ef* abs(b1)
+    fff['Accumulation'] = port_performance['Accumulation'].values /100 +1
+    #Clearing results due to diff price realtions
+    df_deluted = (fff[fff.columns[:-1]].T * (fff['Accumulation']/ fff[fff.columns[:-1]].sum(axis=1)).replace(np.inf, 1).values).T
+    df_deluted['Accu'] = port_performance['Accumulation'].values /100 +1
+    capitlised_weights_distribution = df_deluted.copy()
 
     q1 = port_performance.index[0] - timedelta(days=1)  # starting from 0%
     port_performance.loc[q1] = [0] * len(port_performance.columns)
