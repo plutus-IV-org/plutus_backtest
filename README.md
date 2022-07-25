@@ -88,7 +88,8 @@ As a result a statistical table as well as graphical representation of the portf
 
 <br />
 
-![1](https://user-images.githubusercontent.com/83161286/175760999-bcdf3ebf-6544-4a5e-8a66-1b86f6a8ba59.png)
+![1](https://user-images.githubusercontent.com/83161286/180781862-55642708-02da-4d65-8d9d-2aa9743ed4cb.png)
+
 
 <br />
 
@@ -132,7 +133,7 @@ Above example will additionaly plot a S&P 500 index performance (accumulated ret
 
 <br />
 
-![3а](https://user-images.githubusercontent.com/83161286/175761187-ac99e1dd-b38f-41d0-9d7e-4ab054737491.png)
+![2](https://user-images.githubusercontent.com/83161286/180781931-4cc4db55-0932-4f34-9854-abf0ea3af8ab.png)
 
 <br />
 
@@ -163,8 +164,7 @@ By clicking it, and it will redirect to a new tab.
 
 <br />
 
-
-![127 0 0 1_8050_](https://user-images.githubusercontent.com/83161286/178342908-8df58628-7bed-4174-97e4-1b44f7e14364.png)
+![127 0 0 1_8050_ (6)](https://user-images.githubusercontent.com/83161286/180781981-ccd2e0ee-5a11-4e24-b871-35723b16a9ab.png)
 
 <br />
 
@@ -172,7 +172,7 @@ If the user didn't specify weights of particular assets in the portfolio (using 
 
 <br />
 
-![127 0 0 1_8050_ (1)](https://user-images.githubusercontent.com/83161286/178343049-228b9b2a-3959-4b5c-8bd5-8716483b0340.png)
+![127 0 0 1_8050_ (7)](https://user-images.githubusercontent.com/83161286/180782027-47f81c54-820f-40a7-8517-5369c421ed43.png)
 
 <br />
 
@@ -193,7 +193,7 @@ Example of Weights distribution plot:
 
 <br />
 
-![127 0 0 1_8050_ (2)](https://user-images.githubusercontent.com/83161286/178343137-cbfcb091-b964-4605-9ace-6749cb847fcc.png)
+![127 0 0 1_8050_ (8)](https://user-images.githubusercontent.com/83161286/180782082-dc5b9c44-2929-4485-a2b1-ab8774e5de5f.png)
 
 <br />
 
@@ -221,7 +221,7 @@ Keep in mind that weights factor with "-" sign will indicate short selling for a
 
 <br />
 
-![127 0 0 1_8050_ (4)](https://user-images.githubusercontent.com/83161286/178457568-5e53274e-10c5-4377-80b9-27e753032369.png)
+![127 0 0 1_8050_ (9)](https://user-images.githubusercontent.com/83161286/180782138-ac83e459-34dd-4919-bb99-fa0e30a6c3d4.png)
 
 <br />
 
@@ -253,8 +253,7 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![127 0 0 1_8050_ (3)](https://user-images.githubusercontent.com/83161286/178343248-bc032d8b-cedd-4d17-9f47-0bb49edad53e.png)
-
+![127 0 0 1_8050_ (10)](https://user-images.githubusercontent.com/83161286/180782181-02157e75-b9f2-4828-8724-0443066620e7.png)
 
 <br />
 
