@@ -10,7 +10,6 @@ import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, Input, Output
 from jupyter_dash import JupyterDash
 import re
-#pd.options.mode.chained_assignment = None
 
 def execution(asset, o_day, c_day, weights_factor=None,
                        take_profit=None,

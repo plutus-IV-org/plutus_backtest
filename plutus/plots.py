@@ -1,6 +1,3 @@
-import warnings
-warnings.simplefilter(action='ignore', category=Warning)
-
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -265,7 +262,7 @@ def _drawdown(final_portfolio):
     df_drawdown_fig2 = df_drawdown.astype(float)
     df_drawdown_fig2.iloc[:, :-2] = (df_drawdown_fig2.iloc[:, :-2] * 100)
     df_drawdown_fig2 = df_drawdown_fig2.round(2)
-    dff = df_drawdown_fig2[df_drawdown_fig2.columns[:-2]]
+    dff = df_drawdown_fig2[df_drawdown_fig2.columns[:-2]].copy()
     dff['Rounded total'] = df_drawdown_fig2["Sum"] * 100
     dff.index.name = 'Date'
     fig = px.line(dff,

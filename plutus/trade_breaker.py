@@ -1,5 +1,3 @@
-import warnings
-warnings.simplefilter(action='ignore', category=Warning)
 import re
 import pandas as pd
 
