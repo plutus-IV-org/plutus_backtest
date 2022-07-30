@@ -3,7 +3,8 @@ import yfinance as yf
 import numpy as np
 from datetime import timedelta, datetime
 import re
-
+import workingdays
+from plutus.commissions import commission
 
 def _date_plus_one(d):
     str_date = d
@@ -17,7 +18,7 @@ def _date_plus_one(d):
         back_to_str = datetime.strftime(modified_date, "%Y-%m-%d")
         return back_to_str
 
-def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
+def _security_list(asset, start, end, weights_factor, take_profit, stop_loss):
 
     """
     :return:
@@ -28,28 +29,28 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
         asset = asset.values
     if isinstance(weights_factor, pd.core.series.Series):
         weights_factor = weights_factor.values
-    if isinstance(o_day, pd.core.series.Series):
-        o_day = o_day.values
-    if isinstance(c_day, pd.core.series.Series):
-        c_day = c_day.values
+    if isinstance(start, pd.core.series.Series):
+        start = start.values
+    if isinstance(end, pd.core.series.Series):
+        end = end.values
     if isinstance(asset, pd.core.series.Series):
         asset = asset.values
     if isinstance(take_profit, pd.core.series.Series):
         take_profit = take_profit.values
     if isinstance(stop_loss, pd.core.series.Series):
         stop_loss = stop_loss.values
-    if isinstance(o_day, np.ndarray):
+    if isinstance(start, np.ndarray):
         ls = []
-        for x in range(len(o_day)):
-            ls.append(str(o_day[x])[:10])
-        o_day = ls
-    if isinstance(c_day, np.ndarray):
+        for x in range(len(start)):
+            ls.append(str(start[x])[:10])
+        start = ls
+    if isinstance(end, np.ndarray):
         ls = []
-        for x in range(len(c_day)):
-            ls.append(str(c_day[x])[:10])
-        c_day = ls
+        for x in range(len(end)):
+            ls.append(str(end[x])[:10])
+        end = ls
     df = pd.DataFrame(
-        {"company": asset, "start day": o_day, "end day": c_day, "weights factor": weights_factor,
+        {"company": asset, "start day": start, "end day": end, "weights factor": weights_factor,
          "take profit": take_profit, "stop loss": stop_loss})
     df = df.set_index(df['company'])
     for x in range(len(df.index)):
@@ -75,15 +76,16 @@ def _security_list(asset, o_day, c_day, weights_factor, take_profit, stop_loss):
     return security_list
 
 def _consolidated_table_detailed(security_list, asset,
-                                 o_day, c_day, weights_factor,
-                                 take_profit, stop_loss, p_p_n, p_p_p):
+                                 start, end, weights_factor,
+                                 take_profit, stop_loss, p_p_n, p_p_p,
+                                 only_working_days):
 
     if isinstance(weights_factor, pd.core.series.Series):
         weights_factor = weights_factor.values
 
     # check if companies are dublicatted in a list
     df_original = security_list
-    fq = pd.DataFrame(index=asset, data=o_day)
+    fq = pd.DataFrame(index=asset, data=start)
     v = fq.groupby(fq.index) \
         .cumcount()
 
@@ -104,6 +106,13 @@ def _consolidated_table_detailed(security_list, asset,
         data = list(data.values)
     ydata = yf.download(data, start=_date_plus_one(min_date),
                         end=_date_plus_one(max_date), progress=False)
+    # Removing non working days
+    work_days = []
+
+    for x in ydata.index:
+        work_day = workingdays.is_workingday(x)
+        if work_day == True:
+            work_days.append(x)
 
     if ydata.empty:
         raise ValueError('No trading days were provided, perhaps days off or holidays have been given or non existing tickers')
@@ -126,6 +135,12 @@ def _consolidated_table_detailed(security_list, asset,
             data = data.copy()
             data['Ticker'] = new_com
             initial_df = pd.concat([initial_df, data])
+    special_assets =  set(initial_df.loc[~initial_df.index.isin(work_days)].dropna()['Ticker'].values)
+    raw_ydata = initial_df.loc[work_days]
+    left_over = raw_ydata[raw_ydata.isna().any(axis=1)].index.tolist()
+    work_days = [item for item in work_days if item not in left_over]
+    if only_working_days == True:
+        initial_df = raw_ydata.dropna()
     df_close = initial_df[["Ticker", p_p_n]]
     df_close.columns = ['ticker', 'close_price']
     df_open = initial_df[["Ticker", p_p_p]]
@@ -154,8 +169,8 @@ def _consolidated_table_detailed(security_list, asset,
 
     # rerunning security_list again using dublicate adjusted tickers
     security_list = _security_list(asset=asset,
-                                   o_day=o_day,
-                                   c_day=c_day,
+                                   start=start,
+                                   end=end,
                                    weights_factor=weights_factor,
                                    take_profit=take_profit,
                                    stop_loss=stop_loss)
@@ -188,13 +203,27 @@ def _consolidated_table_detailed(security_list, asset,
     auxiliar_df = aux.copy()
     detailed_return = dc.copy()
 
-    return detailed_return, auxiliar_df, security_list, weights_factor, df_close
+    return detailed_return, auxiliar_df, security_list, weights_factor, df_close, work_days, special_assets
 
-def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights_factor, major_sample):
+def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights_factor,
+                            major_sample, weekdays,only_working_days,
+                            non_working_days_rebalance,broker_commission, special_assets):
     """
     :return:
         Full constructed portfolio, including position length, weights factor, stop loss & take profit.
     """
+    # Initial weights
+    if non_working_days_rebalance == False:
+        non_traded_day = []
+        for x in auxiliar_df.index.tolist():
+            if x not in weekdays:
+                non_traded_day.append(x)
+        #ranging active assets
+        proxy_dic = {}
+        for x in auxiliar_df.columns:
+            activity =auxiliar_df[x][auxiliar_df[x] > 0]
+            proxy_dic[x]= activity.index[0], activity.index[-1]
+            auxiliar_df[x].loc[proxy_dic[x][0]:proxy_dic[x][-1]] = 1
 
     binary_weights = auxiliar_df / auxiliar_df
     binary_weights.fillna(value=0, inplace=True)
@@ -202,7 +231,7 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
     dist = np.array(weights_factor) / fac_summing
     dist_df = pd.DataFrame(index=security_list['company'], data=weights_factor).T
     weights_df = binary_weights * dist
-
+    # Rebalancing over 100% wieghts
     for z in weights_df.index:
         if abs(weights_df.loc[z]).sum() != 1:
             act = weights_df.loc[z][weights_df.loc[z] != 0]
@@ -211,6 +240,7 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
             new_dist_frame = pd.DataFrame(columns=act.index, data=new_dist).T
             for i in new_dist_frame.index:
                 weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
+    #Weights as per sl/tp
     accu = (detailed_return + 1).cumprod()
     dic_longs = {}
     dic_shorts = {}
@@ -247,10 +277,18 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
                 weights_df.loc[z, i] = float(new_dist_frame.loc[i].values)
 
     port_performance = weights_df * detailed_return
+    deluted_port_performance= commission(port_performance,  special_assets, weekdays,
+                                 only_working_days, non_working_days_rebalance,broker_commission, weights_df)
+    px = port_performance - deluted_port_performance
+    times_commission_paid = px.replace(0, np.nan).count().sum()
     port_performance['Sum'] = port_performance.sum(axis=1)
     port_performance['Sum'] = port_performance['Sum'] + 1
     port_performance['Accumulation'] = (port_performance['Sum'].cumprod() - 1) * 100
-
+    deluted_port_performance['Sum'] = deluted_port_performance.sum(axis=1)
+    deluted_port_performance['Sum'] = deluted_port_performance['Sum'] + 1
+    deluted_port_performance['Accumulation'] = (deluted_port_performance['Sum'].cumprod() - 1) * 100
+    commission_loss = (deluted_port_performance- port_performance)['Accumulation'].iloc[-1]
+    port_performance = deluted_port_performance.copy()
     #Weights changes
     #Creating table of rebalance of weights
     a1 = (abs(weights_df.diff()).sum(axis=1) != 0)
@@ -301,9 +339,10 @@ def _portfolio_construction(detailed_return, security_list, auxiliar_df, weights
         top_assets = portfolio_weights.columns.tolist()
     else:
         top_assets= abs(portfolio_weights).sum(axis=0).nlargest(major_sample).index.tolist()
-    return final_portfolio, portfolio_weights, weights_changes, stop_loss_assets, take_profit_assets, top_assets
+    return final_portfolio, portfolio_weights, weights_changes, stop_loss_assets,\
+           take_profit_assets, top_assets ,times_commission_paid, commission_loss
 
-def _stats(final_portfolio):
+def _stats(final_portfolio, times_commission_paid, commission_loss):
     obj = final_portfolio
     pdr0 = obj['Sum']- 1
     pdr= pdr0.iloc[1:].copy()
@@ -327,9 +366,9 @@ def _stats(final_portfolio):
     VaR_99 = -2.33 * port_std * np.sqrt(trade_length)
     CVaR = LPM_1 / LPM_0
     list_1 = ['Mean', 'Std', 'Downside prob', 'Downside mean', 'Downside std', 'Investment period', 'VaR_95',
-              'VaR_99', 'CVaR']
+              'VaR_99', 'CVaR', 'Times commission paid', 'Commission loss']
     list_2 = [port_mean, port_std, LPM_0, LPM_1, LPM_2, trade_length, VaR_95, VaR_99,
-              CVaR]
+              CVaR, times_commission_paid,commission_loss]
     frame = pd.DataFrame({'Indicators': list_1, 'Values': list_2})
     #stat_frame = frame
     #frame = frame.to_string(index=False)

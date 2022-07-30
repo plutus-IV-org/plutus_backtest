@@ -11,20 +11,24 @@ from dash import Dash, html, dcc, Input, Output
 from jupyter_dash import JupyterDash
 import re
 
-def execution(asset, o_day, c_day, weights_factor=None,
+def execution(asset, start, end, weights_factor=None,
                        take_profit=None,
                        stop_loss=None,
                        benchmark=None,
                        price_period_relation=None,
                        full_report = False,
-                       major_sample = 10):
+                       major_sample = 10,
+                       only_working_days= False,
+                       non_working_days_rebalance =False,
+                       broker_commission = 0
+                        ):
 
     """ :Parameters:
                asset: str or list or series
                    Instruments taken into the consideration for the backtest.
-               o_day: list of str or timestamps or series
+               start: list of str or timestamps or series
                    Day/Days of the position opening.
-               c_day: list of str or timestamps or series
+               end: list of str or timestamps or series
                    Day/Days of the position closing.
                weights_factor: list of int or float or array-like or series default None
                    Optional list of factors which will be considered to define the weights for taken companies. By default
@@ -54,6 +58,16 @@ def execution(asset, o_day, c_day, weights_factor=None,
                    weights distribution, major sample is used which will focus to provide info regarding main provided
                    assets. Can be changed to any int. If value is None the backtest will consider all assets as major
                    ones.
+                only_working_days: bool, default False
+                    Based on asset specification, the asset may be traded during the weekends or holidays, in order to
+                    avoid such impact False parameter might be used.
+                non_working_days_rebalance: bool, default False
+                    If there are assets traded on weekends or holidays partial amount of portfolio weights is kept.
+                    If the parameter is True the weights from non-traded assets will be rebalanced as per active assets
+                    and its weights_factor.
+                broker_commission: float, default 0
+                    Setting brokerage commission per each trade.
+
 
     """
 
@@ -86,8 +100,8 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # Calling _security_list
 
     security_list = _security_list(asset=asset,
-                                   o_day=o_day,
-                                   c_day=c_day,
+                                   start=start,
+                                   end=end,
                                    weights_factor=weights_factor,
                                    take_profit=take_profit,
                                    stop_loss=stop_loss)
@@ -105,22 +119,29 @@ def execution(asset, o_day, c_day, weights_factor=None,
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _consolidated_table_detailed
 
-    consolidated_table_detailed, auxiliar_df, security_list, weights_factor, price_close= _consolidated_table_detailed(security_list = security_list,
+    consolidated_table_detailed, auxiliar_df, security_list, weights_factor, price_close, weekdays, special_assets= _consolidated_table_detailed(security_list = security_list,
                                                                                            asset = asset,
-                                                                                           o_day=o_day,
-                                                                                           c_day=c_day,
+                                                                                           start=start,
+                                                                                           end=end,
                                                                                            weights_factor=weights_factor,
                                                                                            take_profit=take_profit,
                                                                                            stop_loss=stop_loss,
                                                                                            p_p_n = p_p_n,
-                                                                                           p_p_p = p_p_p)
+                                                                                           p_p_p = p_p_p,
+                                                                                           only_working_days = only_working_days,
+                                                                                           )
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _portfolio_construction
-    final_portfolio, portfolio_weights, capitlised_weights_distribution, sl_dic, tp_dic, top_assets = _portfolio_construction(detailed_return = consolidated_table_detailed,
-                                                     security_list = security_list,
-                                                     auxiliar_df = auxiliar_df,
-                                                 weights_factor=weights_factor, major_sample = major_sample)
+    final_portfolio, portfolio_weights, capitlised_weights_distribution, sl_dic, tp_dic, top_assets,times_commission_paid,commission_loss= _portfolio_construction(detailed_return = consolidated_table_detailed,
+                                                    security_list = security_list,
+                                                    auxiliar_df = auxiliar_df,
+                                                    weights_factor=weights_factor,
+                                                    major_sample = major_sample, weekdays= weekdays,
+                                                    only_working_days= only_working_days,
+                                                    non_working_days_rebalance= non_working_days_rebalance,
+                                                    broker_commission= broker_commission,
+                                                    special_assets = special_assets)
     final_portfolio.index.name = None
     portfolio_weights.index.name = None
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -132,7 +153,7 @@ def execution(asset, o_day, c_day, weights_factor=None,
         disable_button = True
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calling _stats
-    stats = _stats(final_portfolio)
+    stats = _stats(final_portfolio, times_commission_paid,commission_loss)
     stats = stats.round(4)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
