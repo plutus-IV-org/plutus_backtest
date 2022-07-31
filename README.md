@@ -68,7 +68,7 @@ Function "execution" contains below parameters:<br />
        ones.
     only_working_days: bool, default False
         Based on asset specification, the asset may be traded during the weekends or holidays, in order to
-        avoid such impact False parameter might be used.
+        avoid such impact True parameter might be used.
     non_working_days_rebalance: bool, default False
         If there are assets traded on weekends or holidays partial amount of portfolio weights is kept.
         If the parameter is True the weights from non-traded assets will be rebalanced as per active assets
