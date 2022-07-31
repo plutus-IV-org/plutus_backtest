@@ -32,50 +32,50 @@ from plutus.backtest import execution
 
 Function "execution" contains below parameters:<br />
 ```
-             asset: str or list or series
-                 Instruments taken into the consideration for the backtest.
-             start: list of str or timestamps or series
-                 Day/Days of the position opening.
-             end: list of str or timestamps or series
-                 Day/Days of the position closing.
-             weights_factor: list of int or float or array-like or series default None
-                 Optional list of factors which will be considered to define the weights for taken companies. By default
-                 all weights are distributed equally, however if the list of factors provided the backtest will maximize
-                 the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
-             take_profit: list of float or int or series default None
-                 List of values determining the level till a particular stock shall be traded.
-             stop_loss: list of float or int or series default None
-                 List of values determining the level till a particular stock shall be traded.
-             benchmark: str default None
-                 A benchmark ticker for comparison with portfolio performance
-             price_period_relation: str default 'O-C'
-                 Instruct what part of the trading day a position shall be opened,
-                 and what part of trading day it shall be closed.
-                 Possible relations:
-                 O-C / Open to Close prices
-                 C-O / Close to Open prices
-                 C-C / Close to Close prices
-                 O-O / Open to Open prices
-                 "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
-                 "Close" - value of the last transacted price in a security before the market officially closes.
-             full_report: bool, optional, default False
-                 Generates full report as PDF.
-             major_sample: int or None, optional, default 10
-                 Based on duration of the trading period as well as weights factor of the asset.
-                 In order to make understandable visualisation in full report graphs such as weights changes and
-                 weights distribution, major sample is used which will focus to provide info regarding main provided
-                 assets. Can be changed to any int. If value is None the backtest will consider all assets as major
-                 ones.
-              only_working_days: bool, default False
-                  Based on asset specification, the asset may be traded during the weekends or holidays, in order to
-                  avoid such impact False parameter might be used.
-              non_working_days_rebalance: bool, default False
-                  If there are assets traded on weekends or holidays partial amount of portfolio weights is kept.
-                  If the parameter is True the weights from non-traded assets will be rebalanced as per active assets
-                  and its weights_factor.
-              broker_commission: float, default 0
-                  Setting brokerage commission per each trade.
-    ```
+   asset: str or list or series
+       Instruments taken into the consideration for the backtest.
+   start: list of str or timestamps or series
+       Day/Days of the position opening.
+   end: list of str or timestamps or series
+       Day/Days of the position closing.
+   weights_factor: list of int or float or array-like or series default None
+       Optional list of factors which will be considered to define the weights for taken companies. By default
+       all weights are distributed equally, however if the list of factors provided the backtest will maximize
+       the weights towards the one with max weight factor. Negative weight factor will be considered as short selling.
+   take_profit: list of float or int or series default None
+       List of values determining the level till a particular stock shall be traded.
+   stop_loss: list of float or int or series default None
+       List of values determining the level till a particular stock shall be traded.
+   benchmark: str default None
+       A benchmark ticker for comparison with portfolio performance
+   price_period_relation: str default 'O-C'
+       Instruct what part of the trading day a position shall be opened,
+       and what part of trading day it shall be closed.
+       Possible relations:
+       O-C / Open to Close prices
+       C-O / Close to Open prices
+       C-C / Close to Close prices
+       O-O / Open to Open prices
+       "Open" - the price at which a security first trades upon the opening of an exchange on a trading day.
+       "Close" - value of the last transacted price in a security before the market officially closes.
+   full_report: bool, optional, default False
+       Generates full report as PDF.
+   major_sample: int or None, optional, default 10
+       Based on duration of the trading period as well as weights factor of the asset.
+       In order to make understandable visualisation in full report graphs such as weights changes and
+       weights distribution, major sample is used which will focus to provide info regarding main provided
+       assets. Can be changed to any int. If value is None the backtest will consider all assets as major
+       ones.
+    only_working_days: bool, default False
+        Based on asset specification, the asset may be traded during the weekends or holidays, in order to
+        avoid such impact False parameter might be used.
+    non_working_days_rebalance: bool, default False
+        If there are assets traded on weekends or holidays partial amount of portfolio weights is kept.
+        If the parameter is True the weights from non-traded assets will be rebalanced as per active assets
+        and its weights_factor.
+    broker_commission: float, default 0
+        Setting brokerage commission per each trade.
+```
 
 <br />
 
