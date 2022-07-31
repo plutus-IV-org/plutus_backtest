@@ -145,8 +145,8 @@ Above example will additionaly plot a S&P 500 index performance (accumulated ret
 from plutus.backtest import execution
 
 bt = execution(asset=["AAPL", "F", "MS"], 
-              o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"], full_report = True)
+              start=["2020-08-01", "2020-07-15", "2020-08-20"],
+              end=["2021-09-01", "2021-09-01", "2021-09-15"], full_report = True)
 
 
 ```
@@ -164,7 +164,7 @@ By clicking it, and it will redirect to a new tab.
 
 <br />
 
-![127 0 0 1_8050_ (6)](https://user-images.githubusercontent.com/83161286/180781981-ccd2e0ee-5a11-4e24-b871-35723b16a9ab.png)
+![127 0 0 1_8050_](https://user-images.githubusercontent.com/83161286/182018150-9e659433-b23f-4c16-a6c3-90261a7dafdf.png)
 
 <br />
 
@@ -172,7 +172,7 @@ If the user didn't specify weights of particular assets in the portfolio (using 
 
 <br />
 
-![127 0 0 1_8050_ (7)](https://user-images.githubusercontent.com/83161286/180782027-47f81c54-820f-40a7-8517-5369c421ed43.png)
+![127 0 0 1_8050_ (1)](https://user-images.githubusercontent.com/83161286/182018166-69e22ebf-e7b2-43a2-b9c8-cb63e627e68a.png)
 
 <br />
 
@@ -180,8 +180,8 @@ If the user didn't specify weights of particular assets in the portfolio (using 
 from plutus.backtest import execution
 
 bt = execution(asset=["AAPL", "F", "MS"],
-              o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
+              start=["2020-08-01", "2020-07-15", "2020-08-20"],
+              end=["2021-09-01", "2021-09-01", "2021-09-15"],
               weights_factor = [50, 40, 10], full_report = True)
 
 ```
@@ -193,7 +193,7 @@ Example of Weights distribution plot:
 
 <br />
 
-![127 0 0 1_8050_ (8)](https://user-images.githubusercontent.com/83161286/180782082-dc5b9c44-2929-4485-a2b1-ab8774e5de5f.png)
+![127 0 0 1_8050_ (2)](https://user-images.githubusercontent.com/83161286/182018187-2d2956fb-04f8-4e54-9ef4-d1477bc4aa66.png)
 
 <br />
 
@@ -205,8 +205,8 @@ No need to include weights that will sum up to 100% (but it is recommended). Cod
 from plutus.backtest import execution
 
 bt = execution(asset=["AAPL", "F", "MS"],
-              o_day=["2020-08-01", "2020-07-15", "2020-08-20"],
-              c_day=["2021-09-01", "2021-09-01", "2021-09-15"],
+              start=["2020-08-01", "2020-07-15", "2020-08-20"],
+              end=["2021-09-01", "2021-09-01", "2021-09-15"],
               weights_factor = [35, 140, -21], full_report = True)
 ```
 
@@ -221,11 +221,11 @@ Keep in mind that weights factor with "-" sign will indicate short selling for a
 
 <br />
 
-![127 0 0 1_8050_ (9)](https://user-images.githubusercontent.com/83161286/180782138-ac83e459-34dd-4919-bb99-fa0e30a6c3d4.png)
+![127 0 0 1_8050_ (3)](https://user-images.githubusercontent.com/83161286/182018212-0459e3b7-675c-437a-b056-64880587c885.png)
 
 <br />
 
-More complex approach would be assigning weights factor/stop loss/ take profit indicators:
+More complex approach would be assigning weights factor/stop loss/ take profit indicators as well as adding brocker commission:
 
 <br />
 
@@ -233,11 +233,12 @@ More complex approach would be assigning weights factor/stop loss/ take profit i
 from plutus.backtest import execution
 
 bt = execution(asset = ["AAPL", "BTC-USD","GC=F"], 
-              o_day = ["2021-08-01", "2021-07-15", "2021-08-20"],
-              c_day = ["2021-09-01", "2021-09-01","2021-09-15"], 
+              start = ["2021-08-01", "2021-07-15", "2021-08-20"],
+              end = ["2021-09-01", "2021-09-01","2021-09-15"], 
               weights_factor = [10, -5, 35], 
               stop_loss = [0.8, 0.9, 0.95], 
-              take_profit = [1.1, 1.2, 1.05], full_report = True)
+              take_profit = [1.1, 1.2, 1.05], 
+              full_report = True,broker_commission=0.01)
 
 ```
 
@@ -253,7 +254,7 @@ Stop loss and take profit shall be interpreted as "AAPL" has 20% of stop loss an
 
 <br />
 
-![127 0 0 1_8050_ (10)](https://user-images.githubusercontent.com/83161286/180782181-02157e75-b9f2-4828-8724-0443066620e7.png)
+![127 0 0 1_8050_ (4)](https://user-images.githubusercontent.com/83161286/182018278-9128864b-ce51-4507-86b2-0863dbcb67dc.png)
 
 <br />
 
@@ -269,8 +270,8 @@ In case of users need to test one instrument but several times with different ti
 from plutus.backtest import execution
 
 bt, portfolio_daily_changes, pprtfolio_weights = execution(asset = ["AMZN", "AMZN","AMZN"], 
-              o_day = ["2021-08-01", "2021-09-01", "2021-10-01"],
-              c_day = ["2021-08-15", "2021-09-15","2021-10-15"])
+              start = ["2021-08-01", "2021-09-01", "2021-10-01"],
+              end = ["2021-08-15", "2021-09-15","2021-10-15"])
 
 
 ```
