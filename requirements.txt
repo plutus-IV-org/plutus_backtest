@@ -9,3 +9,4 @@ visdcc>=0.0.50
 yfinance>=0.1.63
 jupyter_dash
 werkzeug==2.0.0
+pyworkingdays

@@ -4,9 +4,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='plutus_backtest',
+    name='plutus-backtest',
 
-    version='0.3.2',
+    version='0.3.3.1',
 
     description="plutus is a python package \
     for backtesting investment decisions using Python 3.6 and above.",
@@ -49,7 +49,7 @@ setup(
 
     packages=find_packages(include=['plutus', 'plutus.*']),
 
-    url="https://github.com/witmul/plutus_backtest",
+    url="https://github.com/plutus-IV-org/plutus_backtest",
 
     python_requires=">=3.6.0",
 
@@ -64,6 +64,7 @@ setup(
         "visdcc >= 0.0.50",
         "yfinance >= 0.1.63",
         "werkzeug==2.0.0",
-        "jupyter_dash"
+        "jupyter_dash",
+        "pyworkingdays"
     ],
 )

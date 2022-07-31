@@ -165,7 +165,7 @@ def _accumulated_return(final_portfolio, benchmark_performance, benchmark_ticker
 def _accumulated_return_short(final_portfolio, benchmark_performance, benchmark_ticker = None):
 
     accumulated_return = final_portfolio.copy()
-    d1 = accumulated_return[['Accumulation']]
+    d1 = accumulated_return[['Accumulation']].copy()
 
     avg = 0
     dis_b = avg - d1.min()
@@ -222,7 +222,7 @@ def _accumulated_return_short(final_portfolio, benchmark_performance, benchmark_
             lst.append(c7)
         else:
             lst.append(c8)
-    d1['Palette'] = lst
+    d1['Palette'] = lst.copy()
 
     fig = px.scatter(d1, x=d1.index, y=d1["Accumulation"], title="Accumulated return",
                       color=d1["Accumulation"], color_continuous_scale='RdYlGn',
