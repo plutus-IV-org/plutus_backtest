@@ -101,8 +101,8 @@ In order to access dataframe with portfolio daily changes and weights distributi
 from plutus.backtest import execution
 
 bt, portfolio_daily_changes, portfolio_weights = execution(asset=["AAPL", "TWTR", "GC=F"], 
-                                                  o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
-                                                  c_day=["2021-09-01", "2021-10-04", "2022-03-12"])
+                                                  start=["2021-08-01", "2021-08-03", "2021-09-05"],
+                                                  end=["2021-09-01", "2021-10-04", "2022-03-12"])
 
 portfolio_daily_changes.head()
 ```
@@ -123,8 +123,8 @@ If the user would like to compare performance of of the portfolio with any other
 ```python
 from plutus.backtest import execution
 
-bt = execution(asset=["AAPL", "TWTR", "FB"], o_day=["2021-08-01", "2021-08-03", "2021-09-05"],
-               c_day=["2021-09-01", "2021-10-04", "2022-03-12"], benchmark= ['^GSPC'])
+bt = execution(asset=["AAPL", "TWTR", "FB"], start=["2021-08-01", "2021-08-03", "2021-09-05"],
+               end =["2021-09-01", "2021-10-04", "2022-03-12"], benchmark= ['^GSPC'])
 
 ```
 <br />
