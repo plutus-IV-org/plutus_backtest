@@ -97,7 +97,7 @@ As a result a statistical table as well as graphical representation of the portf
 
 <br />
 
-![1](https://user-images.githubusercontent.com/83161286/180781862-55642708-02da-4d65-8d9d-2aa9743ed4cb.png)
+![1](https://user-images.githubusercontent.com/83161286/182113924-1510d4ac-a45f-47b7-a0f1-73451e0b38c3.png)
 
 
 <br />
@@ -142,7 +142,7 @@ Above example will additionaly plot a S&P 500 index performance (accumulated ret
 
 <br />
 
-![2](https://user-images.githubusercontent.com/83161286/180781931-4cc4db55-0932-4f34-9854-abf0ea3af8ab.png)
+![2](https://user-images.githubusercontent.com/83161286/182114014-c26376d5-93b7-4fb3-92c3-7d6d576118d4.png)
 
 <br />
 
